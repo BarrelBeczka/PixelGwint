@@ -1,14 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.effect.DropShadow?> <VBox fx:id="rootLoginPane" alignment="CENTER" prefHeight="450.0" prefWidth="650.0" spacing="20.0"
+                                                style="-fx-background-color: #202020;"
+                                                xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+                                                fx:controller="pixelgwint.widok.KontrolerEkranuLogowania">
+    <padding>
+        <Insets bottom="40.0" left="50.0" right="50.0" top="40.0" />
+    </padding>
+    <children>
+        <Label text="PixelGwint - Logowanie" textAlignment="CENTER" textFill="white">
+            <font>
+                <Font name="System Bold" size="28.0" />
+            </font>
+            <effect>
+                <DropShadow color="#000000b3" radius="5" offsetX="1" offsetY="1" />
+            </effect>
+            <VBox.margin>
+                <Insets bottom="10.0"/>
+            </VBox.margin>
+        </Label>
+        <GridPane hgap="10.0" vgap="15.0" maxWidth="450.0">
+            <columnConstraints>
+                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="150.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="300.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="35.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="35.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="45.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            </rowConstraints>
+            <children>
+                <Label text="Nazwa użytkownika:" GridPane.rowIndex="0" textFill="lightgrey" style="-fx-font-size: 14px;"/>
+                <TextField fx:id="poleNazwaUzytkownika" promptText="Wpisz nick" GridPane.columnIndex="1" GridPane.rowIndex="0" style="-fx-font-size: 14px;"/>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="$CONTROLLER_NAME$"
-            prefHeight="400.0" prefWidth="600.0" >
+                <Label text="Hasło:" GridPane.rowIndex="1" textFill="lightgrey" style="-fx-font-size: 14px;"/>
+                <PasswordField fx:id="poleHaslo" promptText="Wpisz hasło" GridPane.columnIndex="1" GridPane.rowIndex="1" style="-fx-font-size: 14px;"/>
 
-</AnchorPane>
+                <Button fx:id="przyciskZaloguj" maxWidth="Infinity" onAction="#handleZalogujButtonAction" text="Zaloguj" GridPane.columnIndex="0" GridPane.rowIndex="2" prefHeight="40.0" style="-fx-font-size: 16px;"/>
+                <Button fx:id="przyciskRejestruj" maxWidth="Infinity" onAction="#handleRejestrujButtonAction" text="Rejestruj" GridPane.columnIndex="1" GridPane.rowIndex="2" prefHeight="40.0" style="-fx-font-size: 16px;"/>
+
+                <Label fx:id="etykietaStatusu" alignment="CENTER" contentDisplay="CENTER" maxWidth="Infinity" textAlignment="CENTER" GridPane.columnSpan="2" GridPane.rowIndex="3" textFill="white" style="-fx-font-size: 14px;"/>
+            </children>
+            <VBox.margin>
+                <Insets top="20.0"/>
+            </VBox.margin>
+        </GridPane>
+    </children>
+</VBox>

@@ -1,14 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="$CONTROLLER_NAME$"
-            prefHeight="400.0" prefWidth="600.0" >
-
-</AnchorPane>
+<VBox fx:id="rootRejestracjaPane" alignment="CENTER" spacing="15.0"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="pixelgwint.widok.KontrolerEkranuRejestracji">
+    <padding>
+        <Insets bottom="20.0" left="50.0" right="50.0" top="20.0" />
+    </padding>
+    <children>
+        <Label text="Rejestracja Nowego Gracza" textAlignment="CENTER" textFill="white">
+            <font>
+                <Font name="System Bold" size="24.0" />
+            </font>
+        </Label>
+        <GridPane hgap="10.0" vgap="10.0" maxWidth="400.0">
+            <columnConstraints>
+                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="150.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="200.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            </rowConstraints>
+            <children>
+                <Label text="Nazwa użytkownika:" GridPane.rowIndex="0" textFill="lightgrey"/>
+                <TextField fx:id="poleNazwaUzytkownikaRejestracja" promptText="Wpisz nick" GridPane.columnIndex="1" GridPane.rowIndex="0" maxWidth="200.0"/>
+                <Label text="Hasło:" GridPane.rowIndex="1" textFill="lightgrey"/>
+                <PasswordField fx:id="poleHasloRejestracja" promptText="Wpisz hasło" GridPane.columnIndex="1" GridPane.rowIndex="1" maxWidth="200.0"/>
+            </children>
+        </GridPane>
+        <Label text="Wybierz ikonę profilu:" textFill="lightgrey">
+            <VBox.margin>
+                <Insets top="10.0" />
+            </VBox.margin>
+        </Label>
+        <ImageView fx:id="obrazekIkonyRejestracja" fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
+            <VBox.margin>
+                <Insets top="5.0" bottom="5.0" />
+            </VBox.margin>
+        </ImageView>
+        <Button fx:id="przyciskZmienIkone" onAction="#handleZmienIkone" text="Zmień Ikonę" />
+        <Label fx:id="etykietaStatusuRejestracji" alignment="CENTER" contentDisplay="CENTER" maxWidth="Infinity" textAlignment="CENTER" textFill="white">
+            <VBox.margin>
+                <Insets top="10.0" />
+            </VBox.margin>
+        </Label>
+        <HBox alignment="CENTER" spacing="20.0">
+            <children>
+                <Button fx:id="przyciskPotwierdzRejestracje" onAction="#handlePotwierdzRejestracje" prefWidth="120.0" text="Zarejestruj" />
+                <Button fx:id="przyciskAnulujRejestracje" onAction="#handleAnulujRejestracje" prefWidth="120.0" text="Anuluj" />
+            </children>
+            <VBox.margin>
+                <Insets top="15.0" />
+            </VBox.margin>
+        </HBox>
+    </children>
+</VBox>

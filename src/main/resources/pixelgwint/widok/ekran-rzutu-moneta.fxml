@@ -1,14 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="$CONTROLLER_NAME$"
-            prefHeight="400.0" prefWidth="600.0" >
-
-</AnchorPane>
+<VBox alignment="CENTER" prefHeight="450.0" prefWidth="600.0" spacing="25.0" style="-fx-background-color: #2c3e50;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pixelgwint.widok.KontrolerRzutuMoneta">
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+    </padding>
+    <children>
+        <Label text="Rzut Monetą o Rozpoczęcie" textFill="white">
+            <font>
+                <Font name="System Bold" size="28.0" />
+            </font>
+        </Label>
+        <ImageView fx:id="monetaImageView" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" />
+        <Label fx:id="etykietaGraczyRzut" text="Gracz1 vs Gracz2" textFill="#bdc3c7" style="-fx-font-size: 16px;"/>
+        <Button fx:id="przyciskRzucMoneta" onAction="#handleRzucMonetaAction" prefHeight="45.0" prefWidth="200.0" text="Rzuć Monetą!" style="-fx-font-size: 18px;" />
+        <Label fx:id="etykietaWynikuRzutu" textFill="white" style="-fx-font-size: 20px; -fx-font-weight: bold;">
+            <font>
+                <Font size="18.0" />
+            </font>
+        </Label>
+        <Button fx:id="przyciskRozpocznijGrePoRzucie" onAction="#handleRozpocznijGrePoRzucieAction" prefHeight="45.0" prefWidth="200.0" text="Rozpocznij Grę" style="-fx-font-size: 18px;" visible="false" />
+    </children>
+</VBox>

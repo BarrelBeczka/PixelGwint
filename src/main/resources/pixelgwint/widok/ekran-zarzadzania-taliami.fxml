@@ -1,14 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.effect.DropShadow?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="$CONTROLLER_NAME$"
-            prefHeight="400.0" prefWidth="600.0" >
-
-</AnchorPane>
+<VBox fx:id="rootZarzadzanieTaliamiPane" alignment="TOP_CENTER" prefHeight="720.0" prefWidth="1280.0" spacing="25.0"
+      style="-fx-background-color: #1e1e1e;"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="pixelgwint.widok.KontrolerZarzadzaniaTaliami">
+    <padding>
+        <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+    </padding>
+    <children>
+        <Label text="Zarządzanie Twoimi Taliami" textFill="white">
+            <font>
+                <Font name="System Bold" size="36.0" />
+            </font>
+            <effect>
+                <DropShadow color="#000000b3" radius="5" offsetX="2" offsetY="2"/>
+            </effect>
+            <VBox.margin>
+                <Insets bottom="10.0"/>
+            </VBox.margin>
+        </Label>
+        <Label fx:id="etykietaInfo" text="Twoje zapisane talie pojawią się tutaj." textFill="#cccccc" style="-fx-font-size: 16px;">
+            <VBox.margin>
+                <Insets bottom="10.0"/>
+            </VBox.margin>
+        </Label>
+        <ListView fx:id="listaZapisanychTalii" prefHeight="400.0" maxWidth="700.0" VBox.vgrow="ALWAYS"
+                  style="-fx-font-size: 16px;
+                         -fx-control-inner-background: rgba(0, 0, 0, 0.7);
+                         -fx-control-inner-background-alt: rgba(15, 15, 15, 0.7);
+                         -fx-focus-color: transparent;
+                         -fx-faint-focus-color: transparent;
+                         -fx-background-insets: 0;
+                         -fx-padding: 1;"/>        <Button fx:id="przyciskStworzNowaTalie" onAction="#handleStworzNowaTalieAction" prefWidth="350.0" prefHeight="50.0" text="Stwórz Nową Talię"
+                style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-background-color: black; -fx-text-fill: #FFD700; -fx-border-color: #DAA520; -fx-border-width: 2px; -fx-background-radius: 5px; -fx-border-radius: 5px;">
+            <VBox.margin>
+                <Insets top="20.0"/>
+            </VBox.margin>
+        </Button>
+        <Button fx:id="przyciskPowrotDoMenu" onAction="#handlePowrotDoMenuAction" prefWidth="350.0" prefHeight="50.0" text="Powrót do Menu Głównego"
+                style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-background-color: black; -fx-text-fill: #FFD700; -fx-border-color: #DAA520; -fx-border-width: 2px; -fx-background-radius: 5px; -fx-border-radius: 5px;" />
+    </children>
+</VBox>

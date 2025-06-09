@@ -1,14 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?> <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.effect.DropShadow?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="$CONTROLLER_NAME$"
-            prefHeight="400.0" prefWidth="600.0" >
+<BorderPane fx:id="rootMenuPane" prefHeight="720.0" prefWidth="1280.0"
+            style="-fx-background-color: #1e1e1e;"
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="pixelgwint.widok.KontrolerMenuGlownego">
 
-</AnchorPane>
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="15.0" BorderPane.alignment="TOP_LEFT">
+            <BorderPane.margin>
+                <Insets top="20.0" left="20.0" right="20.0" bottom="20.0"/>
+            </BorderPane.margin>
+            <children>
+                <ImageView fx:id="obrazekProfilu" fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" />
+                <Label fx:id="etykietaPowitalna" text="Witaj, Użytkowniku!" textFill="white">
+                    <font>
+                        <Font name="System Bold" size="20.0" />
+                    </font>
+                    <effect>
+                        <DropShadow color="#000000b3" radius="3" offsetX="1" offsetY="1"/>
+                    </effect>
+                </Label>
+            </children>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox alignment="CENTER" spacing="30.0" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="30.0" left="30.0" right="30.0" top="0.0" /> </padding>
+            <children>
+                <Label text="Menu Główne" textFill="white">
+                    <font>
+                        <Font name="System Bold" size="42.0" /> </font>
+                    <VBox.margin>
+                        <Insets bottom="30.0" />
+                    </VBox.margin>
+                    <effect>
+                        <DropShadow color="#000000b3" radius="5" offsetX="2" offsetY="2"/>
+                    </effect>
+                </Label>
+
+                <Button fx:id="przyciskGraj" maxWidth="380.0" onAction="#handleGrajButtonAction" prefHeight="55.0" text="Graj (Hot Seat)"
+                        style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: black; -fx-text-fill: #FFD700; -fx-border-color: #DAA520; -fx-border-width: 2px; -fx-background-radius: 5px; -fx-border-radius: 5px;"/>
+
+                <Button fx:id="przyciskZarzadzajTaliami" maxWidth="380.0" onAction="#handleZarzadzajTaliamiButtonAction" prefHeight="55.0" text="Zarządzanie Taliami"
+                        style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: black; -fx-text-fill: #FFD700; -fx-border-color: #DAA520; -fx-border-width: 2px; -fx-background-radius: 5px; -fx-border-radius: 5px;"/>
+
+                <Button fx:id="przyciskStatystyki" maxWidth="380.0" onAction="#handleStatystykiButtonAction" prefHeight="55.0" text="Statystyki"
+                        style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: black; -fx-text-fill: #FFD700; -fx-border-color: #DAA520; -fx-border-width: 2px; -fx-background-radius: 5px; -fx-border-radius: 5px;"/>
+
+                <Button fx:id="przyciskWyloguj" maxWidth="380.0" onAction="#handleWylogujButtonAction" prefHeight="55.0" text="Wyloguj"
+                        style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: black; -fx-text-fill: #FFD700; -fx-border-color: #DAA520; -fx-border-width: 2px; -fx-background-radius: 5px; -fx-border-radius: 5px;">
+                    <VBox.margin>
+                        <Insets top="50.0" />
+                    </VBox.margin>
+                </Button>
+            </children>
+        </VBox>
+    </center>
+</BorderPane>
