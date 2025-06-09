@@ -1,0 +1,18 @@
+<component name="ArtifactManager">
+  <artifact name="PixelGwint:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/PixelGwint_jar</output-path>
+    <root id="root">
+      <element id="archive" name="PixelGwint.jar">
+        <element id="module-output" name="PixelGwint" />
+      </element>
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-fxml:win:17.0.6" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-fxml:17.0.6" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-base:win:17.0.6" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-graphics:win:17.0.6" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-controls:win:17.0.6" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-graphics:17.0.6" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-controls:17.0.6" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-base:17.0.6" />
+    </root>
+  </artifact>
+</component>
