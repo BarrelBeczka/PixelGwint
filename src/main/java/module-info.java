@@ -4,6 +4,8 @@
 module pixelgwint { // LUB np. module PixelGwint - sprawdź jak nazwał IntelliJ
     requires javafx.controls;
     requires javafx.fxml;
+    requires javafx.media;
+    requires javafx.graphics;
 
     // Otwieramy nasz pakiet widoków dla JavaFX
     opens pixelgwint.widok to javafx.fxml;

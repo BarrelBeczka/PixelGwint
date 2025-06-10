@@ -1,15 +1,21 @@
 package pixelgwint.widok;
 
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.effect.DropShadow; // Import dla DropShadow
+import javafx.scene.control.Slider;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent; // Import dla MouseEvent
-import javafx.scene.layout.BorderPane; // ZMIANA: Import dla BorderPane
-// import javafx.scene.layout.VBox; // Już niepotrzebny dla rootMenuPane
-import javafx.scene.paint.Color; // Import dla Color
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import pixelgwint.PixelGwintAplikacja;
 import pixelgwint.model.Uzytkownik;
 
@@ -25,7 +31,7 @@ public class KontrolerMenuGlownego {
     @FXML private Label etykietaPowitalna;
     @FXML private Button przyciskGraj;
     @FXML private Button przyciskZarzadzajTaliami;
-    @FXML private Button przyciskStatystyki;
+    @FXML private Button przyciskUstawienia;
     @FXML private Button przyciskWyloguj;
 
     private PixelGwintAplikacja pixelGwintAplikacja;
@@ -43,7 +49,7 @@ public class KontrolerMenuGlownego {
         ustawTloProgramistycznie(); // Ustawienie tła dla rootMenuPane
 
         // Dodanie efektu hover do przycisków
-        Button[] przyciskiMenu = {przyciskGraj, przyciskZarzadzajTaliami, przyciskStatystyki, przyciskWyloguj};
+        Button[] przyciskiMenu = {przyciskGraj, przyciskZarzadzajTaliami, przyciskUstawienia, przyciskWyloguj};
         for (Button przycisk : przyciskiMenu) {
             if (przycisk != null) {
                 przycisk.setOnMouseEntered(event -> przycisk.setEffect(goldGlowEffect));
@@ -135,9 +141,9 @@ public class KontrolerMenuGlownego {
     }
 
     @FXML
-    private void handleStatystykiButtonAction() {
-        System.out.println("Przycisk Statystyki wciśnięty");
-        // Tutaj będzie logika przejścia do ekranu statystyk
+    private void handleUstawieniaButtonAction() {
+        System.out.println("Przycisk Ustawienia wciśnięty, przechodzenie do ekranu ustawień.");
+        pixelGwintAplikacja.pokazEkranUstawien(aktualnyUzytkownik);
     }
 
     @FXML

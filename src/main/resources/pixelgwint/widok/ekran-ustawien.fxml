@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox fx:id="rootUstawieniaPane" alignment="CENTER" prefHeight="720.0" prefWidth="1280.0" spacing="30.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pixelgwint.widok.KontrolerUstawien">
+    <padding>
+        <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
+    </padding>
+    <children>
+        <Label text="Ustawienia Gry" textFill="white">
+            <font>
+                <Font name="System Bold" size="42.0" />
+            </font>
+            <VBox.margin>
+                <Insets bottom="40.0" />
+            </VBox.margin>
+        </Label>
+        <VBox alignment="CENTER" maxWidth="400.0" spacing="15.0">
+            <children>
+                <Label text="Głośność Muzyki" textFill="#FFD700">
+                    <font>
+                        <Font name="System Bold" size="20.0" />
+                    </font>
+                </Label>
+                <Slider fx:id="suwakGlosnosci" prefWidth="400.0" />
+            </children>
+        </VBox>
+        <Button fx:id="przyciskPowrot" onAction="#handlePowrotAction" prefHeight="50.0" prefWidth="300.0" text="Powrót do Menu Głównego" style="-fx-font-size: 18px; -fx-background-color: black; -fx-text-fill: #FFD700; -fx-border-color: #DAA520; -fx-border-width: 1px;">
+            <VBox.margin>
+                <Insets top="60.0" />
+            </VBox.margin>
+        </Button>
+    </children>
+</VBox>

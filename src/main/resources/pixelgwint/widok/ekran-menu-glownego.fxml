@@ -55,9 +55,8 @@
                 <Button fx:id="przyciskZarzadzajTaliami" maxWidth="380.0" onAction="#handleZarzadzajTaliamiButtonAction" prefHeight="55.0" text="Zarządzanie Taliami"
                         style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: black; -fx-text-fill: #FFD700; -fx-border-color: #DAA520; -fx-border-width: 2px; -fx-background-radius: 5px; -fx-border-radius: 5px;"/>
 
-                <Button fx:id="przyciskStatystyki" maxWidth="380.0" onAction="#handleStatystykiButtonAction" prefHeight="55.0" text="Statystyki"
+                <Button fx:id="przyciskUstawienia" maxWidth="380.0" onAction="#handleUstawieniaButtonAction" prefHeight="55.0" text="Ustawienia"
                         style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: black; -fx-text-fill: #FFD700; -fx-border-color: #DAA520; -fx-border-width: 2px; -fx-background-radius: 5px; -fx-border-radius: 5px;"/>
-
                 <Button fx:id="przyciskWyloguj" maxWidth="380.0" onAction="#handleWylogujButtonAction" prefHeight="55.0" text="Wyloguj"
                         style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: black; -fx-text-fill: #FFD700; -fx-border-color: #DAA520; -fx-border-width: 2px; -fx-background-radius: 5px; -fx-border-radius: 5px;">
                     <VBox.margin>

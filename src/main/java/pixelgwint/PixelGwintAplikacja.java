@@ -24,11 +24,16 @@ import javafx.scene.image.Image;
 import pixelgwint.model.Karta;
 import java.util.List;
 import java.util.Map;
+import pixelgwint.logika.MenedzerMuzyki;
+import pixelgwint.widok.KontrolerUstawien;
+import pixelgwint.widok.KontrolerEkranuIntro;
+import javafx.animation.FadeTransition; // NOWY IMPORT
+import javafx.util.Duration; // NOWY IMPORT
 
 public class PixelGwintAplikacja extends Application {
     private Stage primaryStage;
     private StackPane mainLayout; // Główny kontener dla widoków
-
+    private MenedzerMuzyki menedzerMuzyki;
     private List<Karta> wszystkieKartyWGrzeGlobalnie = null;
     private Map<String, Image> globalImageCache = null;
     private Uzytkownik profilGracza1 = null;
@@ -52,7 +57,7 @@ public class PixelGwintAplikacja extends Application {
     public void start(Stage glownaScena) throws IOException {
         this.primaryStage = glownaScena;
         this.primaryStage.setTitle("PixelGwint");
-
+        this.menedzerMuzyki = new MenedzerMuzyki();
         mainLayout = new StackPane();
 
         // Utwórz scenę raz. Rozmiar nie jest tu krytyczny, bo zaraz ustawimy pełny ekran.
@@ -113,42 +118,66 @@ public class PixelGwintAplikacja extends Application {
         mainLayout.getChildren().clear();
         mainLayout.getChildren().add(viewNode);
         primaryStage.setTitle("PixelGwint - " + title);
-        // primaryStage.setFullScreen(true); // Rozważ, czy każdy widok ma być pełnoekranowy
-        // Jeśli tak, zostaw. Jeśli nie, zarządzaj tym w poszczególnych pokazEkran...
-        // lub usuń, jeśli chcesz, aby okno miało standardowe ramki.
-        // Z twoich poprzednich plików wynikało, że większość ekranów jest pełna.
-
     }
+    private void setViewWithFadeIn(Node viewNode, String title, Duration transitionDuration) {
+        viewNode.setOpacity(0);
+        mainLayout.getChildren().add(viewNode);
 
-    public void pokazEkranLadowania() {
+        FadeTransition fadeIn = new FadeTransition(transitionDuration, viewNode);
+        fadeIn.setFromValue(0.0);
+        fadeIn.setToValue(1.0);
+
+        fadeIn.setOnFinished(event -> {
+            if (mainLayout.getChildren().size() > 1) {
+                mainLayout.getChildren().remove(0);
+            }
+        });
+
+        fadeIn.play();
+        primaryStage.setTitle("PixelGwint - " + title);
+    }
+    public void rozpocznijPrzejscieDoLogowania() {
+        // <<< DODAJ LINIE DIAGNOSTYCZNE >>>
+        System.out.println("[DIAGNOSTYKA APLIKACJI] Metoda 'rozpocznijPrzejscieDoLogowania' ZOSTAŁA WYWOŁANA.");
+
         try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(PixelGwintAplikacja.class.getResource("/pixelgwint/widok/ekran-ladowania.fxml"));
-            AnchorPane rootLayout = loader.load();
-
-            KontrolerEkranuLadowania controller = loader.getController();
+            FXMLLoader loader = new FXMLLoader(PixelGwintAplikacja.class.getResource("/pixelgwint/widok/ekran-logowania.fxml"));
+            VBox viewContent = loader.load();
+            KontrolerEkranuLogowania controller = loader.getController();
             controller.setApp(this);
 
-            setView(rootLayout, "Wczytywanie...");
+            Duration czasTrwania = Duration.seconds(2.12);
+            setViewWithFadeIn(viewContent, "Logowanie", czasTrwania);
+
         } catch (IOException e) {
-            System.err.println("Krytyczny błąd: Nie udało się załadować ekranu ładowania.");
             e.printStackTrace();
-            Platform.runLater(this::pokazEkranLogowania); // Awaryjne przejście
+            pokazEkranLogowania();
+        }
+    }
+    public void pokazEkranLadowania() {
+        try {
+            FXMLLoader loader = new FXMLLoader(PixelGwintAplikacja.class.getResource("/pixelgwint/widok/ekran-ladowania.fxml"));
+            AnchorPane rootLayout = loader.load();
+            KontrolerEkranuLadowania controller = loader.getController();
+            controller.setApp(this);
+            // Dla pierwszego ekranu nie używamy animacji, tylko czyścimy i dodajemy
+            mainLayout.getChildren().clear();
+            mainLayout.getChildren().add(rootLayout);
+            primaryStage.setTitle("PixelGwint - Wczytywanie...");
+        } catch (IOException e) {
+            e.printStackTrace();
+            Platform.runLater(this::pokazEkranLogowania);
         }
     }
 
     public void pokazEkranLogowania() {
         try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(PixelGwintAplikacja.class.getResource("/pixelgwint/widok/ekran-logowania.fxml"));
+            FXMLLoader loader = new FXMLLoader(PixelGwintAplikacja.class.getResource("/pixelgwint/widok/ekran-logowania.fxml"));
             VBox viewContent = loader.load();
-
             KontrolerEkranuLogowania controller = loader.getController();
             controller.setApp(this);
-
             setView(viewContent, "Logowanie");
         } catch (IOException e) {
-            System.err.println("Nie udało się załadować ekranu logowania:");
             e.printStackTrace();
         }
     }
@@ -390,5 +419,44 @@ public class PixelGwintAplikacja extends Application {
         }
         System.err.println("BŁĄD KRYTYCZNY APLIKACJI: Nie można zapewnić obrazka: " + pelnaSciezkaDoCache);
         return null;
+    }
+    public MenedzerMuzyki getMenedzerMuzyki() {
+        return menedzerMuzyki;
+    }
+    public void pokazEkranUstawien(Uzytkownik uzytkownik) {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(PixelGwintAplikacja.class.getResource("/pixelgwint/widok/ekran-ustawien.fxml"));
+            VBox viewContent = loader.load();
+
+            KontrolerUstawien controller = loader.getController();
+            controller.setApp(this);
+            controller.inicjalizuj(uzytkownik);
+
+            setView(viewContent, "Ustawienia");
+        } catch (IOException e) {
+            System.err.println("Nie udało się załadować ekranu ustawień:");
+            e.printStackTrace();
+        }
+    }
+    public void pokazEkranIntro() {
+        try {
+            FXMLLoader loader = new FXMLLoader(PixelGwintAplikacja.class.getResource("/pixelgwint/widok/ekran-intro.fxml"));
+            StackPane viewContent = loader.load();
+
+            KontrolerEkranuIntro controller = loader.getController();
+            controller.setApp(this);
+
+            // <<< KLUCZOWA ZMIANA: Wywołujemy animację dopiero teraz >>>
+            // Mamy teraz pewność, że kontroler jest w pełni gotowy i ma dostęp do aplikacji.
+            controller.uruchomIntro();
+
+            // Używamy setView z przejściem, aby ekran intro pojawił się płynnie
+            setView(viewContent, "PixelGwint");
+        } catch (IOException e) {
+            System.err.println("Nie udało się załadować ekranu intro, przechodzenie awaryjnie do logowania.");
+            e.printStackTrace();
+            pokazEkranLogowania();
+        }
     }
 }

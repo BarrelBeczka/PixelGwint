@@ -5,10 +5,11 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView; // Upewnij się, że ten import jest
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Duration;
 import pixelgwint.PixelGwintAplikacja;
+import pixelgwint.logika.MenedzerTaliiPredefiniowanych;
 import pixelgwint.logika.WczytywaczKart;
 import pixelgwint.model.Karta;
 import javafx.animation.PauseTransition;
@@ -22,8 +23,8 @@ import java.util.HashMap;
 public class KontrolerEkranuLadowania {
 
     @FXML private AnchorPane rootLoadingPane;
-    @FXML private ImageView loadingAnimationImageView; // To pole musi odpowiadać fx:id w FXML
-    @FXML private Label statusLadowaniaLabel;      // Dla napisu "Wczytywanie..."
+    @FXML private ImageView loadingAnimationImageView;
+    @FXML private Label statusLadowaniaLabel;
 
     private PixelGwintAplikacja pixelGwintAplikacja;
 
@@ -34,70 +35,33 @@ public class KontrolerEkranuLadowania {
     @FXML
     public void initialize() {
         System.out.println("KontrolerEkranuLadowania: Inicjalizacja.");
-        ustawTloProgramistycznie(); // Ustawia tło dla rootLoadingPane
+        // Usunęliśmy ustawianie tła, bo jest teraz w FXML
 
-        // Programistyczne ustawienie animacji GIF
         if (loadingAnimationImageView != null) {
-            final String gifPath = "/grafiki/elementy_ui/loading_anim.gif"; // Upewnij się, że to poprawna ścieżka i nazwa pliku
-            try {
-                InputStream gifStream = getClass().getResourceAsStream(gifPath);
+            final String gifPath = "/grafiki/elementy_ui/loading_anim.gif";
+            try (InputStream gifStream = getClass().getResourceAsStream(gifPath)) {
                 if (gifStream != null) {
-                    Image loadingGif = new Image(gifStream);
-                    if (loadingGif.isError()) {
-                        System.err.println("Błąd podczas tworzenia obiektu Image dla GIF-a: " + gifPath);
-                        if (loadingGif.getException() != null) {
-                            loadingGif.getException().printStackTrace();
-                        }
-                    } else {
-                        loadingAnimationImageView.setImage(loadingGif);
-                        System.out.println("INFO: Animacja GIF '" + gifPath + "' powinna być ustawiona na ImageView.");
-                    }
-                    gifStream.close(); // Zamknij strumień po użyciu
+                    loadingAnimationImageView.setImage(new Image(gifStream));
                 } else {
                     System.err.println("BŁĄD KRYTYCZNY: Nie można znaleźć zasobu GIF w classpath: " + gifPath);
-                    System.err.println("Upewnij się, że plik istnieje w src/main/resources" + gifPath + " i jest poprawnie skompilowany.");
                 }
             } catch (Exception e) {
                 System.err.println("Wyjątek podczas ładowania GIF-a '" + gifPath + "': " + e.getMessage());
-                e.printStackTrace();
             }
-        } else {
-            System.err.println("BŁĄD FXML: loadingAnimationImageView nie zostało wstrzyknięte! Sprawdź fx:id.");
         }
 
-        if (statusLadowaniaLabel != null) { // Ustawienie tekstu dla labelki, jeśli istnieje
+        if (statusLadowaniaLabel != null) {
             statusLadowaniaLabel.setText("Wczytywanie...");
         }
 
-        rozpocznijWczytywanieZasobow(); // Rozpocznij wczytywanie zasobów gry
-    }
-
-    private void ustawTloProgramistycznie() {
-        final String backgroundImageClasspathPath = "/grafiki/tla_gry/pixelgwintbackground.png";
-        if (rootLoadingPane == null) {
-            System.err.println("BŁĄD KRYTYCZNY (ustawTlo): rootLoadingPane nie zostało wstrzyknięte!");
-            return;
-        }
-        URL imageUrl = getClass().getResource(backgroundImageClasspathPath);
-        if (imageUrl == null) {
-            System.err.println("BŁĄD KRYTYCZNY (ustawTlo): Nie można znaleźć obrazka tła: " + backgroundImageClasspathPath);
-        } else {
-            System.out.println("Diagnostyka (ustawTlo): Obrazek tła '" + backgroundImageClasspathPath + "' znaleziony. URL: " + imageUrl.toExternalForm());
-            String cssExternalUrl = imageUrl.toExternalForm();
-            String newStyle = "-fx-background-image: url('" + cssExternalUrl + "'); " +
-                    "-fx-background-size: cover; " +
-                    "-fx-background-position: center center; " +
-                    "-fx-background-repeat: no-repeat;";
-            rootLoadingPane.setStyle(newStyle);
-            System.out.println("INFO (ustawTlo): Tło obrazkowe Ekranu Ładowania ustawione programistycznie.");
-        }
+        rozpocznijWczytywanieZasobow();
     }
 
     private void rozpocznijWczytywanieZasobow() {
         Task<Void> zadanieLadowania = new Task<>() {
-            // ... (treść metody call() bez zmian - wczytywanie kart i grafik do cache)
             @Override
             protected Void call() throws Exception {
+                // Ta metoda pozostaje bez zmian (wklejam ją dla kompletności)
                 try {
                     System.out.println("Task: Wczytywanie definicji kart...");
                     List<Karta> wszystkieKarty = WczytywaczKart.wczytajWszystkieKarty();
@@ -110,7 +74,6 @@ public class KontrolerEkranuLadowania {
                     if (wszystkieKarty != null && !wszystkieKarty.isEmpty() && pixelGwintAplikacja != null) {
                         Map<String, Image> imageCache = new HashMap<>();
                         long iloscGrafikDoZaladowania = wszystkieKarty.stream().map(Karta::getGrafika).filter(g -> g != null && !g.isEmpty()).distinct().count();
-                        long zaladowaneGrafiki = 0;
                         System.out.println("Task: Rozpoczynanie wczytywania " + iloscGrafikDoZaladowania + " unikalnych grafik kart...");
 
                         for (Karta karta : wszystkieKarty) {
@@ -120,12 +83,7 @@ public class KontrolerEkranuLadowania {
                                 if (!imageCache.containsKey(sciezkaKarty)) {
                                     try (InputStream stream = getClass().getResourceAsStream(sciezkaKarty)) {
                                         if (stream != null) {
-                                            Image img = new Image(stream);
-                                            imageCache.put(sciezkaKarty, img);
-                                            zaladowaneGrafiki++;
-                                            if (zaladowaneGrafiki % 50 == 0) {
-                                                System.out.println("Task: Załadowano " + zaladowaneGrafiki + "/" + iloscGrafikDoZaladowania + " grafik...");
-                                            }
+                                            imageCache.put(sciezkaKarty, new Image(stream));
                                         } else {
                                             System.err.println("PRELOAD (Task): Nie znaleziono grafiki: " + sciezkaKarty);
                                         }
@@ -138,6 +96,18 @@ public class KontrolerEkranuLadowania {
                         pixelGwintAplikacja.setImageCache(imageCache);
                         System.out.println("Task: Zakończono wczytywanie " + imageCache.size() + " unikalnych grafik kart do cache.");
                     }
+
+                    System.out.println("Task: Wczytywanie plików muzycznych do pamięci podręcznej...");
+                    if (pixelGwintAplikacja != null && pixelGwintAplikacja.getMenedzerMuzyki() != null) {
+                        pixelGwintAplikacja.getMenedzerMuzyki().wstepneLadowanie();
+                    }
+                    if (isCancelled()) return null;
+
+                    System.out.println("Task: Inicjalizacja talii predefiniowanych...");
+                    new MenedzerTaliiPredefiniowanych();
+                    System.out.println("Task: Talie predefiniowane gotowe.");
+                    if (isCancelled()) return null;
+
                     System.out.println("Task: Wszystkie zasoby wczytane!");
                     Thread.sleep(500);
 
@@ -150,22 +120,20 @@ public class KontrolerEkranuLadowania {
             }
         };
 
-        // Usunięto bindowanie ProgressIndicator, ponieważ ProgressIndicator został usunięty z FXML
-        // (lub jest tylko prostym kręciołkiem bez dynamicznego postępu)
-
         zadanieLadowania.setOnSucceeded(event -> {
             System.out.println("Wczytywanie zasobów (Task) zakończone pomyślnie.");
             PauseTransition delay = new PauseTransition(Duration.seconds(0.5));
             delay.setOnFinished(e -> {
                 if (pixelGwintAplikacja != null) {
-                    pixelGwintAplikacja.pokazEkranLogowania();
+                    // <<< ZMIANA TUTAJ >>>
+                    // Zamiast do logowania, przechodzimy do ekranu intro
+                    pixelGwintAplikacja.pokazEkranIntro();
                 }
             });
             delay.play();
         });
 
         zadanieLadowania.setOnFailed(event -> {
-            // ... (obsługa błędu, jak poprzednio, dostosowana do braku szczegółowego statusLabel/progressIndicator) ...
             Throwable throwable = zadanieLadowania.getException();
             System.err.println("Wczytywanie zasobów (Task) nie powiodło się: " + (throwable != null ? throwable.getMessage() : "Brak informacji"));
             if(statusLadowaniaLabel != null) statusLadowaniaLabel.setText("Błąd wczytywania!");
@@ -173,7 +141,8 @@ public class KontrolerEkranuLadowania {
             PauseTransition delay = new PauseTransition(Duration.seconds(2));
             delay.setOnFinished(e -> {
                 if (pixelGwintAplikacja != null) {
-                    pixelGwintAplikacja.pokazEkranLogowania();
+                    // W razie błędu też przejdź do intro, a potem do logowania
+                    pixelGwintAplikacja.pokazEkranIntro();
                 }
             });
             delay.play();

@@ -25,7 +25,12 @@ import pixelgwint.model.*;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
-
+import javafx.animation.Interpolator; // <<< DODAJ TEN IMPORT NA GÓRZE PLIKU
+import javafx.animation.ParallelTransition; // <<< DODAJ TEN IMPORT
+import javafx.animation.ScaleTransition; // <<< DODAJ TEN IMPORT
+import javafx.animation.TranslateTransition; // <<< DODAJ TEN IMPORT
+import javafx.geometry.Point2D; // <<< DODAJ TEN IMPORT
+import javafx.animation.SequentialTransition;
 public class KontrolerPlanszyGry {
 
     // --- Pola FXML ---
@@ -1026,6 +1031,11 @@ public class KontrolerPlanszyGry {
     }
 
     public void inicjalizujGre(Gracz gracz1, Gracz gracz2, Gracz graczRozpoczynajacyOtrzymany) { // graczRozpoczynajacyOtrzymany jest zawsze null z PixelGwintAplikacja
+        if (pixelGwintAplikacja != null && pixelGwintAplikacja.getMenedzerMuzyki() != null) {
+            System.out.println("[KontrolerPlanszyGry] Inicjalizacja gry, uruchamianie muzyki z gry.");
+            pixelGwintAplikacja.getMenedzerMuzyki().uruchomPlaylistGry(true); // true = przetasuj
+        }
+
         this.obiektGracz1 = gracz1;
         this.obiektGracz2 = gracz2;
         this.wylosowanyGraczRozpoczynajacy = null; // Reset przed podjęciem decyzji
@@ -1558,6 +1568,11 @@ public class KontrolerPlanszyGry {
     @FXML
     private void handleMenuGlowneZKoncaGryAction() {
         System.out.println("[KONTROLER PLANSZY] Wybrano POWRÓT DO MENU GŁÓWNEGO.");
+        if (pixelGwintAplikacja != null && pixelGwintAplikacja.getMenedzerMuzyki() != null) {
+            // Przełącz na losowy utwór z playlisty menu
+            pixelGwintAplikacja.getMenedzerMuzyki().uruchomPlaylistMenu(true);
+        }
+
         if (panelKoncaGry != null) panelKoncaGry.setVisible(false);
         if (pixelGwintAplikacja != null) {
             // Wróć do menu głównego, przekazując profil zalogowanego użytkownika.
@@ -1959,38 +1974,36 @@ public class KontrolerPlanszyGry {
             return;
         }
 
-        // --- POCZĄTEK BLOKU Z DEBUGAMI DLA KART POGODY ---
         if (source == pogodaHBox && aktualnieZaznaczonaKartaDoZagrnia != null &&
                 aktualnieZaznaczonaKartaDoZagrnia.getTyp() == TypKartyEnum.SPECJALNA) {
 
-            System.out.println("[DEBUG handleCelKlikniety] Kliknięto pogodaHBox.");
-            System.out.println("[DEBUG handleCelKlikniety] Zaznaczona karta: " + aktualnieZaznaczonaKartaDoZagrnia.getNazwa() + ", Typ: " + aktualnieZaznaczonaKartaDoZagrnia.getTyp());
-
             String nazwaKarty = aktualnieZaznaczonaKartaDoZagrnia.getNazwa().toLowerCase();
-            System.out.println("[DEBUG handleCelKlikniety] Nazwa karty (lowercase): '" + nazwaKarty + "'");
-
             boolean czyToKartaPogody = nazwaKarty.contains("mróz") || nazwaKarty.contains("mgła") || nazwaKarty.contains("deszcz");
-            System.out.println("[DEBUG handleCelKlikniety] Czy rozpoznano jako kartę pogody (mróz/mgła/deszcz)? " + czyToKartaPogody);
 
             if (czyToKartaPogody) {
-                if (silnikGry != null && aktywnyGracz != null) { // aktywnyGracz powinien być już sprawdzony, ale dla pewności
-                    System.out.println("[KONTROLER] Wybrano slot pogody dla karty: " + aktualnieZaznaczonaKartaDoZagrnia.getNazwa() + ". Wywołuję silnikGry.zagrajKarte...");
-                    silnikGry.zagrajKarte(aktywnyGracz, aktualnieZaznaczonaKartaDoZagrnia, null);
-                    System.out.println("[KONTROLER] silnikGry.zagrajKarte wywołane.");
-                } else {
-                    System.err.println("[KONTROLER BŁĄD DEBUG] silnikGry lub aktywnyGracz jest null przy próbie zagrania pogody!");
+                // Znajdź ImageView karty w ręce gracza, aby je zanimować
+                HBox rekaGraczaHBox = (aktywnyGracz == obiektGracz1) ? rekaGracza1HBox : rekaGracza2HBox;
+                ImageView kartaViewDoAnimacji = null;
+                for (Node node : rekaGraczaHBox.getChildren()) {
+                    if (node.getUserData() == aktualnieZaznaczonaKartaDoZagrnia) {
+                        kartaViewDoAnimacji = (ImageView) node;
+                        break;
+                    }
                 }
+
+                if (kartaViewDoAnimacji != null) {
+                    // Uruchom animację zamiast bezpośrednio zagrywać kartę
+                    animujZagranieKartyPogody(aktualnieZaznaczonaKartaDoZagrnia, kartaViewDoAnimacji, aktywnyGracz);
+                } else {
+                    // Awaryjne zagranie bez animacji
+                    System.err.println("Błąd: Nie znaleziono ImageView dla karty pogody. Zagrywam bez animacji.");
+                    silnikGry.zagrajKarte(aktywnyGracz, aktualnieZaznaczonaKartaDoZagrnia, null);
+                }
+
                 resetujStanZaznaczonejKarty();
-                return; // Akcja obsłużona
-            } else {
-                System.out.println("[KONTROLER DEBUG] Kliknięto pogodaHBox z kartą specjalną, ale NIE rozpoznano jej jako 'mróz', 'mgła' ani 'deszcz'. Karta: " + aktualnieZaznaczonaKartaDoZagrnia.getNazwa());
-                // Jeśli to nie była karta pogody, a pogodaHBox został kliknięty,
-                // pozwalamy kodowi kontynuować, aby sprawdzić, czy to nie jest np. błąd w podświetlaniu.
-                // Jednak poprawnie działająca `podswietlMozliweCeleDlaKarty` powinna podświetlić `pogodaHBox`
-                // tylko dla kart pogody.
+                return; // Zakończ obsługę zdarzenia
             }
         }
-        // --- KONIEC BLOKU Z DEBUGAMI DLA KART POGODY ---
 
         if (source instanceof HBox) {
             HBox kliknietyRzadHBox = (HBox) source;
@@ -2023,17 +2036,51 @@ public class KontrolerPlanszyGry {
         }
 
         if (wybranyRzadEnum != null && aktualnieZaznaczonaKartaDoZagrnia != null && aktywnyGracz != null) {
+            // Sprawdzamy, czy to wskrzeszenie - ono na razie pozostaje bez animacji, bo karta nie leci z ręki.
             if (aktualnieWybieranyRzadPoWskrzeszeniu) {
                 Gracz graczWskrzeszajacy = silnikGry.getGraczKladacyKartePoWskrzeszeniu();
                 if (graczWskrzeszajacy == null) graczWskrzeszajacy = aktywnyGracz;
-
-                System.out.println("[KONTROLER] Wybrano rząd " + wybranyRzadEnum + " dla wskrzeszanej karty " + aktualnieZaznaczonaKartaDoZagrnia.getNazwa());
                 silnikGry.polozWskrzeszonaKarteNaRzedzie(graczWskrzeszajacy, aktualnieZaznaczonaKartaDoZagrnia, wybranyRzadEnum);
             } else {
-                System.out.println("[KONTROLER] Wybrano rząd " + wybranyRzadEnum + " dla karty z ręki " + aktualnieZaznaczonaKartaDoZagrnia.getNazwa());
-                silnikGry.zagrajKarte(aktywnyGracz, aktualnieZaznaczonaKartaDoZagrnia, wybranyRzadEnum);
+                // To jest główna logika dla zagrywania karty z ręki Z ANIMACJĄ.
+                HBox rekaGraczaHBox = (aktywnyGracz == obiektGracz1) ? rekaGracza1HBox : rekaGracza2HBox;
+                ImageView kartaViewDoAnimacji = null;
+
+                // 1. Znajdź konkretny ImageView karty w HBoxie ręki, aby go animować.
+                for (Node node : rekaGraczaHBox.getChildren()) {
+                    if (node.getUserData() == aktualnieZaznaczonaKartaDoZagrnia) {
+                        kartaViewDoAnimacji = (ImageView) node;
+                        break;
+                    }
+                }
+
+                // 2. Znajdź docelowy HBox dla rzędu na planszy.
+                HBox rzadDocelowyHBox = null;
+                Object kliknieteZrodlo = event.getSource();
+
+                if (kliknieteZrodlo instanceof HBox) {
+                    rzadDocelowyHBox = (HBox) kliknieteZrodlo;
+                } else if (kliknieteZrodlo instanceof StackPane) {
+                    // Mapowanie klikniętego slotu rogu na odpowiadający mu HBox rzędu
+                    if (kliknieteZrodlo == rogPiechotyG1Slot) rzadDocelowyHBox = rzadPiechotyG1HBox;
+                    else if (kliknieteZrodlo == rogStrzeleckiG1Slot) rzadDocelowyHBox = rzadStrzeleckiG1HBox;
+                    else if (kliknieteZrodlo == rogOblezeniaG1Slot) rzadDocelowyHBox = rzadOblezeniaG1HBox;
+                    else if (kliknieteZrodlo == rogPiechotyG2Slot) rzadDocelowyHBox = rzadPiechotyG2HBox;
+                    else if (kliknieteZrodlo == rogStrzeleckiG2Slot) rzadDocelowyHBox = rzadStrzeleckiG2HBox;
+                    else if (kliknieteZrodlo == rogOblezeniaG2Slot) rzadDocelowyHBox = rzadOblezeniaG2HBox;
+                }
+
+                // 3. Jeśli mamy wszystkie potrzebne elementy, uruchom animację.
+                if (kartaViewDoAnimacji != null && rzadDocelowyHBox != null) {
+                    animujZagranieKarty(aktualnieZaznaczonaKartaDoZagrnia, kartaViewDoAnimacji, rzadDocelowyHBox, wybranyRzadEnum, aktywnyGracz);
+                } else {
+                    // Awaryjne zagranie bez animacji, jeśli coś pójdzie nie tak.
+                    System.err.println("Błąd: Nie znaleziono ImageView lub HBoxu docelowego dla animacji. Zagrywam kartę natychmiast.");
+                    silnikGry.zagrajKarte(aktywnyGracz, aktualnieZaznaczonaKartaDoZagrnia, wybranyRzadEnum);
+                }
             }
-        } else if (trybWyboruCeluDlaManekina) {
+        }
+        else if (trybWyboruCeluDlaManekina) {
             System.out.println("[KONTROLER] Kliknięto na rząd w trybie Manekina, ale nie wybrano jednostki. Anulowanie.");
             if (silnikGry != null && silnikGry.getGraczAktualnejTury() != null) {
                 silnikGry.anulujZagranieManekina(silnikGry.getGraczAktualnejTury(), false);
@@ -2684,6 +2731,10 @@ public class KontrolerPlanszyGry {
     @FXML
     private void handleOpcjePowrotDoMenuAction() {
         System.out.println("[KONTROLER PLANSZY] Wybrano 'Powrót do Menu' z panelu opcji.");
+        if (pixelGwintAplikacja != null && pixelGwintAplikacja.getMenedzerMuzyki() != null) {
+            // Przełącz na losowy utwór z playlisty menu
+            pixelGwintAplikacja.getMenedzerMuzyki().uruchomPlaylistMenu(true);
+        }
         if (panelOpcjiGry != null) {
             panelOpcjiGry.setVisible(false);
         }
@@ -2873,5 +2924,142 @@ public class KontrolerPlanszyGry {
             }
         }
     }
+    private void animujZagranieKarty(Karta kartaDoZagrnia, ImageView kartaView, HBox rzadDocelowyHBox, TypRzeduEnum rzadDocelowyEnum, Gracz aktywnyGracz) {
+        // 1. Zablokuj dalsze interakcje na czas animacji
+        zablokujInterakcjePlanszy();
 
+        // 2. Pobierz pozycję startową (środek karty w ręce)
+        Point2D startPointScene = kartaView.localToScene(kartaView.getBoundsInLocal().getWidth() / 2, kartaView.getBoundsInLocal().getHeight() / 2);
+        Point2D startPointInPane = glownyKontenerPlanszy.sceneToLocal(startPointScene);
+
+        // 3. Usuń kartę z ręki i dodaj ją do głównego kontenera, aby mogła "latać" ponad wszystkim
+        HBox rekaHBox = (HBox) kartaView.getParent();
+        if (rekaHBox != null) {
+            rekaHBox.getChildren().remove(kartaView);
+        }
+        kartaView.setManaged(false);
+        glownyKontenerPlanszy.getChildren().add(kartaView);
+        kartaView.setLayoutX(startPointInPane.getX() - kartaView.getBoundsInLocal().getWidth() / 2);
+        kartaView.setLayoutY(startPointInPane.getY() - kartaView.getBoundsInLocal().getHeight() / 2);
+
+        // 4. Oblicz pozycję końcową
+        int iloscKartJuzWRzedzie = rzadDocelowyHBox.getChildren().size();
+        double szerokoscKartyWRzedzie = STANDARDOWA_SZEROKOSC_KARTY;
+        double odstep = rzadDocelowyHBox.getSpacing();
+        double przyszlaSzerokoscZawartosci = (iloscKartJuzWRzedzie + 1) * szerokoscKartyWRzedzie + (iloscKartJuzWRzedzie) * odstep;
+        double startBlokuKartX = (rzadDocelowyHBox.getWidth() - przyszlaSzerokoscZawartosci) / 2.0;
+        double doceloweXwewnatrzHBox = startBlokuKartX + iloscKartJuzWRzedzie * (szerokoscKartyWRzedzie + odstep) + (szerokoscKartyWRzedzie / 2.0);
+        double doceloweYwewnatrzHBox = rzadDocelowyHBox.getHeight() / 2.0;
+        Point2D endPointScene = rzadDocelowyHBox.localToScene(doceloweXwewnatrzHBox, doceloweYwewnatrzHBox);
+        Point2D endPointInPane = glownyKontenerPlanszy.sceneToLocal(endPointScene);
+
+        // 5. <<< UPROSZCZONA ANIMACJA >>>
+        // Używamy już tylko TranslateTransition, bez ScaleTransition i ParallelTransition.
+        TranslateTransition tt = new TranslateTransition(Duration.seconds(0.7), kartaView);
+        tt.setToX(endPointInPane.getX() - startPointInPane.getX());
+        tt.setToY(endPointInPane.getY() - startPointInPane.getY());
+        // 6. Po zakończeniu animacji, zaktualizuj model gry i odśwież planszę
+        tt.setOnFinished(event -> {
+            glownyKontenerPlanszy.getChildren().remove(kartaView);
+            silnikGry.zagrajKarte(aktywnyGracz, kartaDoZagrnia, rzadDocelowyEnum);
+        });
+
+        // 7. Uruchom animację
+        tt.play();
+    }
+    public void rozpocznijAnimacjeDobierania(Gracz gracz, List<Karta> kartyDoAnimacji) {
+        if (kartyDoAnimacji.isEmpty()) {
+            // Jeśli nie ma kart do dobrania, od razu finalizuj turę
+            silnikGry.finalizujTurePoDobieraniu(gracz, kartyDoAnimacji);
+            return;
+        }
+
+        ImageView taliaView = (gracz == obiektGracz1) ? taliaGracza1ImageView : taliaGracza2ImageView;
+        HBox rekaView = (gracz == obiektGracz1) ? rekaGracza1HBox : rekaGracza2HBox;
+
+        Point2D startPoint = taliaView.localToScene(taliaView.getBoundsInLocal().getWidth() / 2, taliaView.getBoundsInLocal().getHeight() / 2);
+        Point2D endPoint = rekaView.localToScene(rekaView.getWidth() / 2, rekaView.getHeight() / 2);
+
+        Point2D startPointInPane = glownyKontenerPlanszy.sceneToLocal(startPoint);
+        Point2D endPointInPane = glownyKontenerPlanszy.sceneToLocal(endPoint);
+
+        SequentialTransition sekwencjaAnimacji = new SequentialTransition();
+
+        for (Karta karta : kartyDoAnimacji) {
+            // Stwórz tymczasowy obrazek karty (teraz AWERS) do animacji
+            Image awers = ladujObrazekKarty(karta); // Używamy istniejącej metody do ładowania awersu
+            ImageView animowanaKartaView = new ImageView(awers);
+            animowanaKartaView.setFitWidth(STANDARDOWA_SZEROKOSC_KARTY);
+            animowanaKartaView.setFitHeight(STANDARDOWA_WYSOKOSC_KARTY);
+            animowanaKartaView.setManaged(false);
+
+            // Dodaj kartę do głównego kontenera w miejscu talii
+            glownyKontenerPlanszy.getChildren().add(animowanaKartaView);
+            animowanaKartaView.setLayoutX(startPointInPane.getX() - STANDARDOWA_SZEROKOSC_KARTY / 2);
+            animowanaKartaView.setLayoutY(startPointInPane.getY() - STANDARDOWA_WYSOKOSC_KARTY / 2);
+
+            // Stwórz animację przelotu dla tej jednej karty
+            TranslateTransition tt = new TranslateTransition(Duration.seconds(0.6), animowanaKartaView);
+            tt.setToX(endPointInPane.getX() - startPointInPane.getX());
+            tt.setToY(endPointInPane.getY() - startPointInPane.getY());
+            // Po zakończeniu animacji jednej karty, usuń jej tymczasowy obrazek
+            tt.setOnFinished(e -> glownyKontenerPlanszy.getChildren().remove(animowanaKartaView));
+
+            sekwencjaAnimacji.getChildren().add(tt);
+            // Można dodać pauzę między kartami
+            sekwencjaAnimacji.getChildren().add(new PauseTransition(Duration.millis(200)));
+        }
+
+        // Po zakończeniu całej sekwencji animacji, poinformuj silnik gry
+        sekwencjaAnimacji.setOnFinished(event -> {
+            silnikGry.finalizujTurePoDobieraniu(gracz, kartyDoAnimacji);
+        });
+
+        sekwencjaAnimacji.play();
+
+    }
+    private void animujZagranieKartyPogody(Karta kartaPogody, ImageView kartaView, Gracz aktywnyGracz) {
+        // 1. Zablokuj interakcje na czas animacji
+        zablokujInterakcjePlanszy();
+
+        // 2. Pobierz pozycję startową (środek karty w ręce)
+        Point2D startPointScene = kartaView.localToScene(kartaView.getBoundsInLocal().getWidth() / 2, kartaView.getBoundsInLocal().getHeight() / 2);
+        Point2D startPointInPane = glownyKontenerPlanszy.sceneToLocal(startPointScene);
+
+        // 3. Przenieś kartę do głównego kontenera, aby mogła "latać"
+        HBox rekaHBox = (HBox) kartaView.getParent();
+        if (rekaHBox != null) {
+            rekaHBox.getChildren().remove(kartaView);
+        }
+        kartaView.setManaged(false);
+        glownyKontenerPlanszy.getChildren().add(kartaView);
+        kartaView.setLayoutX(startPointInPane.getX() - kartaView.getBoundsInLocal().getWidth() / 2);
+        kartaView.setLayoutY(startPointInPane.getY() - kartaView.getBoundsInLocal().getHeight() / 2);
+
+        // 4. Oblicz pozycję końcową w rzędzie pogody (pogodaHBox)
+        int iloscKartJuzWRzedzie = pogodaHBox.getChildren().size();
+        double szerokoscKarty = STANDARDOWA_SZEROKOSC_KARTY;
+        double odstep = pogodaHBox.getSpacing();
+
+        // Rząd pogody jest wyrównany do lewej, więc obliczenia są prostsze
+        double doceloweXwewnatrzHBox = iloscKartJuzWRzedzie * (szerokoscKarty + odstep) + (szerokoscKarty / 2.0);
+        double doceloweYwewnatrzHBox = pogodaHBox.getHeight() / 2.0;
+
+        Point2D endPointScene = pogodaHBox.localToScene(doceloweXwewnatrzHBox, doceloweYwewnatrzHBox);
+        Point2D endPointInPane = glownyKontenerPlanszy.sceneToLocal(endPointScene);
+
+        // 5. Stwórz animację przelotu
+        TranslateTransition tt = new TranslateTransition(Duration.seconds(0.7), kartaView);
+        tt.setToX(endPointInPane.getX() - startPointInPane.getX());
+        tt.setToY(endPointInPane.getY() - startPointInPane.getY());
+        tt.setInterpolator(Interpolator.EASE_OUT);
+
+        // 6. Po zakończeniu animacji, zaktualizuj model gry
+        tt.setOnFinished(event -> {
+            glownyKontenerPlanszy.getChildren().remove(kartaView); // Usuń tymczasowy obrazek
+            silnikGry.zagrajKarte(aktywnyGracz, kartaPogody, null);
+        });
+
+        tt.play();
+    }
 }

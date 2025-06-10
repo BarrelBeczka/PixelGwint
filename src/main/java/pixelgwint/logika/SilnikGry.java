@@ -590,8 +590,27 @@ public class SilnikGry {
                 System.out.println(" > Karta " + karta.getNazwa() + " dodana do rzędu " + rzadDoUmieszczeniaKarty + " na planszy gracza " + graczNaPlanszyKtoregoLadujeJednostka.getProfilUzytkownika().getNazwaUzytkownika());
 
                 if (czyZagrywanaKartaToSzpieg) {
-                    System.out.println(" > Gracz " + graczZagrywajacy.getProfilUzytkownika().getNazwaUzytkownika() + " dociąga 2 karty za Szpiegostwo.");
-                    dociagnijKartyDoRekiPoZagrywce(graczZagrywajacy, 2);
+                    // Najpierw aktywuj inne umiejętności (np. Braterstwo), jeśli szpieg je ma
+                    aktywujUmiejetnosciPoZagrywce(graczNaPlanszyKtoregoLadujeJednostka, karta, rzadNaKtoryTrafiaPierwotnaKarta, false);
+                    przeliczWszystkiePunktyNaPlanszy(); // Przelicz punkty po dodaniu szpiega
+                    if(kontrolerPlanszy != null) kontrolerPlanszy.odswiezCalakolwiekPlansze(); // Odśwież widok
+
+                    // Teraz poproś kontroler o animację dobierania kart
+                    System.out.println(" > Szpieg zagrany. Inicjowanie animacji dobierania kart.");
+                    List<Karta> talia = graczZagrywajacy.getTaliaDoGry();
+                    List<Karta> kartyDoDobrania = new ArrayList<>();
+                    if (!talia.isEmpty()) kartyDoDobrania.add(talia.get(0));
+                    if (talia.size() > 1) kartyDoDobrania.add(talia.get(1));
+
+                    if (!kartyDoDobrania.isEmpty() && kontrolerPlanszy != null) {
+                        kontrolerPlanszy.rozpocznijAnimacjeDobierania(graczZagrywajacy, kartyDoDobrania);
+                    } else {
+                        // Awaryjnie, jeśli nie ma kart do dobrania, od razu finalizuj turę
+                        finalizujTurePoDobieraniu(graczZagrywajacy, new ArrayList<>());
+                    }
+                    // WAŻNE: Tura nie kończy się tutaj. Zostanie zakończona po animacji.
+                    // Zwracamy true, bo zagranie karty się powiodło.
+                    return true;
                 }
 
                 // Umiejętności Pożoga_K i Zmartwychwstanie mają specjalne timingi i nie są aktywowane przez aktywujUmiejetnosciPoZagrywce.
@@ -3009,5 +3028,40 @@ public class SilnikGry {
         if (oczekiwanieNaMulliganGracza2) return gracz2;
         return null;
     }
+    public void finalizujTurePoDobieraniu(Gracz gracz, List<Karta> kartyDobierane) {
+        System.out.println("[SILNIK] Finalizowanie tury po animacji dobrania " + kartyDobierane.size() + " kart.");
 
+        // Teraz faktycznie przenieś karty w modelu
+        for (Karta karta : kartyDobierane) {
+            if (gracz.getTaliaDoGry().remove(karta)) {
+                gracz.getReka().add(karta);
+            }
+        }
+
+        przeliczWszystkiePunktyNaPlanszy();
+        if (kontrolerPlanszy != null) {
+            kontrolerPlanszy.odswiezCalakolwiekPlansze();
+        }
+
+        // Standardowa logika zakończenia tury (skopiowana z końca metody zagrajKarte)
+        if (checkAndPerformAutoPassIfHandEmpty(gracz)) {
+            return;
+        }
+
+        Gracz przeciwnik = (gracz == this.gracz1) ? this.gracz2 : this.gracz1;
+        if (przeciwnik.isCzySpasowalWRundzie()) {
+            graczAktualnejTury = gracz;
+            oczekiwanieNaPotwierdzenieTury = false;
+            setGraczOczekujacyNaPotwierdzenie(null);
+            if (kontrolerPlanszy != null) {
+                kontrolerPlanszy.uaktywnijInterfejsDlaTury(graczAktualnejTury == this.gracz1);
+            }
+        } else {
+            oczekiwanieNaPotwierdzenieTury = true;
+            setGraczOczekujacyNaPotwierdzenie(przeciwnik);
+            if (kontrolerPlanszy != null) {
+                kontrolerPlanszy.rozpocznijSekwencjeZmianyTury();
+            }
+        }
+    }
 }
