@@ -260,4 +260,80 @@ public class RzadPlanszy {
         this.wzmocnieniePrzezDowodceAktywne = aktywne;
         przeliczSumePunktow();
     }
+    public int obliczSileEfektywnaKarty(Karta kartaDoObliczenia) {
+        // Ta kalkulacja jest dla POJEDYNCZEJ karty w kontekście TEGO rzędu.
+
+        // 1. Bohaterowie - ich siła jest generalnie stała (z wyjątkiem Szpiegów z Eredinem 413)
+        if (kartaDoObliczenia.getTyp() == TypKartyEnum.BOHATER) {
+            int silaBohatera = kartaDoObliczenia.getPunktySily();
+            boolean czySzpiegBohater = kartaDoObliczenia.getUmiejetnosc() != null && kartaDoObliczenia.getUmiejetnosc().equalsIgnoreCase("Szpiegostwo");
+            if (czySzpiegBohater && stanRundyRef != null && stanRundyRef.isEredin413Active()) {
+                silaBohatera *= 2;
+            }
+            return silaBohatera;
+        }
+
+        // 2. Dla jednostek nie-bohaterów:
+        int silaObliczeniowa = kartaDoObliczenia.getPunktySily();
+
+        // a. Eredin dla Szpiegów
+        boolean czyEredin413AktywnyGlobalnie = (stanRundyRef != null && stanRundyRef.isEredin413Active());
+        boolean czySzpiegJednostka = kartaDoObliczenia.getUmiejetnosc() != null && kartaDoObliczenia.getUmiejetnosc().equalsIgnoreCase("Szpiegostwo");
+        if (czySzpiegJednostka && czyEredin413AktywnyGlobalnie) {
+            silaObliczeniowa *= 2;
+        }
+
+        // b. Więź
+        if (kartaDoObliczenia.getUmiejetnosc() != null && kartaDoObliczenia.getUmiejetnosc().equalsIgnoreCase("Więź")) {
+            long liczbaKartWGrupie = kartyJednostekWRzedzie.stream()
+                    .filter(k -> k.getTyp() != TypKartyEnum.BOHATER && k.getNazwa().equals(kartaDoObliczenia.getNazwa()))
+                    .count();
+            if (liczbaKartWGrupie > 1) {
+                silaObliczeniowa *= liczbaKartWGrupie;
+            }
+        }
+
+        // c. Morale (od innych kart)
+        int bonusMorale = (int) kartyJednostekWRzedzie.stream()
+                .filter(k -> k != kartaDoObliczenia &&
+                        k.getTyp() != TypKartyEnum.BOHATER &&
+                        k.getUmiejetnosc() != null &&
+                        k.getUmiejetnosc().equalsIgnoreCase("Wysokie morale"))
+                .count();
+
+        if (kartaDoObliczenia.getUmiejetnosc() == null || !kartaDoObliczenia.getUmiejetnosc().equalsIgnoreCase("Wysokie morale")) {
+            silaObliczeniowa += bonusMorale;
+        }
+
+        // d. Pogoda
+        boolean pogodaAktywnaDlaTegoRzedu = false;
+        if (stanRundyRef != null) {
+            for (Karta kartaPogody : stanRundyRef.getAktywneKartyWRzedziePogody()) {
+                String nazwaPogody = kartaPogody.getNazwa().toLowerCase();
+                if ((this.typRzedu == TypRzeduEnum.PIECHOTA && nazwaPogody.contains("mróz")) ||
+                        (this.typRzedu == TypRzeduEnum.STRZELECKIE && nazwaPogody.contains("mgła")) ||
+                        (this.typRzedu == TypRzeduEnum.OBLEZENIE && nazwaPogody.contains("deszcz"))) {
+                    pogodaAktywnaDlaTegoRzedu = true;
+                    break;
+                }
+            }
+        }
+        if (pogodaAktywnaDlaTegoRzedu) {
+            silaObliczeniowa = 1;
+        }
+
+        // e. Róg Dowódcy / Jaskier
+        boolean hornAktywnyZeSlotaLubZdolnosciDowodcy = (this.kartaRoguDowodcy != null || this.wzmocnieniePrzezDowodceAktywne);
+        List<Integer> idKartyJaskra = Arrays.asList(44, 328, 466, 542);
+        boolean jaskierObecny = kartyJednostekWRzedzie.stream().anyMatch(k -> idKartyJaskra.contains(k.getId()));
+
+        if (hornAktywnyZeSlotaLubZdolnosciDowodcy || jaskierObecny) {
+            // Róg nie podwaja samego Jaskra, ale podwaja inne jednostki
+            if (!idKartyJaskra.contains(kartaDoObliczenia.getId())) {
+                silaObliczeniowa *= 2;
+            }
+        }
+
+        return silaObliczeniowa;
+    }
 }

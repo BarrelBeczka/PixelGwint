@@ -288,15 +288,15 @@ public class SilnikGry {
     }
 
     public void wykonajZamianeManekinem(Gracz graczZagrywajacyManekina, Karta wybranaJednostka, RzadPlanszy rzadPochodzenia, int indeksWRzedzie) {
+        // Używamy graczZagrywajacyManekina (z parametru) dla pewności, że operujemy na poprawnym graczu
         if (!oczekiwanieNaWyborCeluDlaManekina || graczZagrywajacyManekina != this.graczUzywajacyManekina || this.kartaManekinaDoPolozenia == null) {
             System.err.println("SILNIK: Niepoprawny stan do wykonania zamiany manekinem.");
-            // Zwróć oryginalny manekin do ręki, jeśli coś poszło nie tak
             if (this.graczUzywajacyManekina != null && this.kartaManekinaDoPolozenia != null &&
                     this.graczUzywajacyManekina.getReka() != null && !this.graczUzywajacyManekina.getReka().contains(this.kartaManekinaDoPolozenia)) {
                 this.graczUzywajacyManekina.getReka().add(this.kartaManekinaDoPolozenia);
             }
             resetStanuManekina();
-            finalizujTurePoNieudanymZagraniaKarty(graczZagrywajacyManekina); // Przekaż turę, jakby nic się nie stało
+            finalizujTurePoNieudanymZagraniaKarty(graczZagrywajacyManekina);
             return;
         }
 
@@ -304,48 +304,60 @@ public class SilnikGry {
 
         // 1. Usuń wybraną jednostkę z rzędu
         Karta usunietaKarta = rzadPochodzenia.usunKarteJednostkiZIndeksu(indeksWRzedzie);
-        if (usunietaKarta != wybranaJednostka) { // Sanity check
-            System.err.println("SILNIK: Błąd! Usunięto inną kartę (" + (usunietaKarta != null ? usunietaKarta.getNazwa() : "null") + ") niż oczekiwano (" + wybranaJednostka.getNazwa() + ") podczas zamiany manekinem.");
-            // Spróbuj przywrócić usuniętą kartę (jeśli to możliwe) i zwróć manekina do ręki
+        if (usunietaKarta != wybranaJednostka) {
+            System.err.println("SILNIK: Błąd! Usunięto inną kartę niż oczekiwano podczas zamiany manekinem.");
             if (usunietaKarta != null) rzadPochodzenia.getKartyJednostekWRzedzie().add(indeksWRzedzie, usunietaKarta);
-            if (graczUzywajacyManekina.getReka() != null && !graczUzywajacyManekina.getReka().contains(kartaManekinaDoPolozenia)) {
-                graczUzywajacyManekina.getReka().add(kartaManekinaDoPolozenia);
+            if (graczZagrywajacyManekina.getReka() != null && !graczZagrywajacyManekina.getReka().contains(kartaManekinaDoPolozenia)) {
+                graczZagrywajacyManekina.getReka().add(kartaManekinaDoPolozenia);
             }
             resetStanuManekina();
-            finalizujTurePoNieudanymZagraniaKarty(graczUzywajacyManekina);
+            finalizujTurePoNieudanymZagraniaKarty(graczZagrywajacyManekina);
             return;
         }
 
         // 2. Dodaj wybraną jednostkę do ręki gracza
-        graczUzywajacyManekina.getReka().add(wybranaJednostka);
-        System.out.println(" > Jednostka " + wybranaJednostka.getNazwa() + " wróciła do ręki gracza " + graczUzywajacyManekina.getProfilUzytkownika().getNazwaUzytkownika());
+        graczZagrywajacyManekina.getReka().add(wybranaJednostka);
+        System.out.println(" > Jednostka " + wybranaJednostka.getNazwa() + " wróciła do ręki gracza " + graczZagrywajacyManekina.getProfilUzytkownika().getNazwaUzytkownika());
 
         // 3. Umieść kartę Manekina na planszy w miejscu usuniętej jednostki
-        // Karta manekina z CSV ma typ SPECJALNA, ale dodajemy ją do listy jednostek w rzędzie.
-        // RzadPlanszy.kartyJednostekWRzedzie jest ObservableList<Karta>, więc może przyjąć kartę specjalną.
-        // Jej siła (0) będzie poprawnie uwzględniana przez przeliczSumePunktow.
         rzadPochodzenia.getKartyJednostekWRzedzie().add(indeksWRzedzie, kartaManekinaDoPolozenia);
         System.out.println(" > Manekin " + kartaManekinaDoPolozenia.getNazwa() + " umieszczony w rzędzie " + rzadPochodzenia.getTypRzedu() + " na pozycji " + indeksWRzedzie);
 
-        // 4. Zresetuj stan manekina i sfinalizuj turę
+        // 4. Zresetuj stan manekina i odśwież planszę
         resetStanuManekina();
         przeliczWszystkiePunktyNaPlanszy();
         if (kontrolerPlanszy != null) kontrolerPlanszy.odswiezCalakolwiekPlansze();
 
-        // Finalizuj turę - przekaż ruch przeciwnikowi
-        Gracz przeciwnik = (graczUzywajacyManekina == this.gracz1) ? this.gracz2 : this.gracz1;
+        // --- NOWA, BARDZIEJ ROZBUDOWANA LOGIKA FINALIZACJI TURY Z DEBUGOWANIEM ---
+        System.out.println("[SILNIK Manekin] Finalizowanie tury dla gracza: " + graczZagrywajacyManekina.getProfilUzytkownika().getNazwaUzytkownika());
+
+        // Sprawdź auto-pass (choć po wzięciu karty na rękę ręka nie powinna być pusta, to dobra praktyka)
+        if (checkAndPerformAutoPassIfHandEmpty(graczZagrywajacyManekina)) {
+            System.out.println("[SILNIK Manekin] Gracz automatycznie spasował po zagraniu Manekina.");
+            return;
+        }
+
+        Gracz przeciwnik = (graczZagrywajacyManekina == this.gracz1) ? this.gracz2 : this.gracz1;
+        System.out.println("[SILNIK Manekin] Przeciwnik to: " + przeciwnik.getProfilUzytkownika().getNazwaUzytkownika());
+        System.out.println("[SILNIK Manekin] Sprawdzanie czy przeciwnik spasował: " + przeciwnik.isCzySpasowalWRundzie());
+
         if (przeciwnik.isCzySpasowalWRundzie()) {
-            graczAktualnejTury = graczUzywajacyManekina;
+            System.out.println("[SILNIK Manekin] Przeciwnik już spasował. Tura pozostaje u obecnego gracza.");
+            graczAktualnejTury = graczZagrywajacyManekina;
             oczekiwanieNaPotwierdzenieTury = false;
             setGraczOczekujacyNaPotwierdzenie(null);
-            if (kontrolerPlanszy != null) kontrolerPlanszy.uaktywnijInterfejsDlaTury(graczAktualnejTury == this.gracz1);
+            if (kontrolerPlanszy != null) {
+                kontrolerPlanszy.uaktywnijInterfejsDlaTury(graczAktualnejTury == this.gracz1);
+            }
         } else {
+            System.out.println("[SILNIK Manekin] Przeciwnik nie spasował. Rozpoczynanie sekwencji zmiany tury.");
             oczekiwanieNaPotwierdzenieTury = true;
             setGraczOczekujacyNaPotwierdzenie(przeciwnik);
-            if (kontrolerPlanszy != null) kontrolerPlanszy.rozpocznijSekwencjeZmianyTury();
+            if (kontrolerPlanszy != null) {
+                kontrolerPlanszy.rozpocznijSekwencjeZmianyTury();
+            }
         }
     }
-
     public void anulujZagranieManekina(Gracz graczAnulujacy, boolean czyBladSystemowy) { // Dodajmy parametr, czy to błąd
         if (!oczekiwanieNaWyborCeluDlaManekina || graczAnulujacy != this.graczUzywajacyManekina || this.kartaManekinaDoPolozenia == null) {
             System.err.println("SILNIK: Niepoprawny stan do anulowania zagrania manekinem lub brak danych.");
@@ -714,64 +726,62 @@ public class SilnikGry {
 
 
 
+// W klasie SilnikGry.java
+
     private void aktywujPozogaGlobalna(Gracz graczZagrywajacy) {
         System.out.println("SILNIK: Aktywacja Pożogi Globalnej (Pożoga_S) przez gracza: " + graczZagrywajacy.getProfilUzytkownika().getNazwaUzytkownika());
-        List<Karta> wszystkieJednostkiNieBohaterowieNaPlanszy = new ArrayList<>();
-        Map<Karta, Gracz> wlascicieleKart = new HashMap<>(); // Do śledzenia, na czyj cmentarz ma trafić karta
-        Map<Karta, RzadPlanszy> rzedyKart = new HashMap<>(); // Do śledzenia, z którego rzędu usunąć
 
-        // Zbierz jednostki od gracza 1
-        if (aktualnyStanRundy.getPlanszaGracza1() != null) {
+        Map<Karta, Integer> sileEfektywneWszystkichKart = new HashMap<>();
+        Map<Karta, RzadPlanszy> rzedyKart = new HashMap<>();
+        Map<Karta, Gracz> wlascicieleKart = new HashMap<>();
+
+        // Przetwarzanie planszy Gracza 1
+        PlanszaGracza planszaG1 = aktualnyStanRundy.getPlanszaGracza1();
+        if (planszaG1 != null) {
             for (TypRzeduEnum typRzedu : TypRzeduEnum.values()) {
-                RzadPlanszy rzad = aktualnyStanRundy.getPlanszaGracza1().getRzad(typRzedu);
+                RzadPlanszy rzad = planszaG1.getRzad(typRzedu);
                 if (rzad != null) {
                     for (Karta k : rzad.getKartyJednostekWRzedzie()) {
-                        if (k.getTyp() != TypKartyEnum.BOHATER) {
-                            wszystkieJednostkiNieBohaterowieNaPlanszy.add(k);
-                            wlascicieleKart.put(k, gracz1);
+                        if (k.getTyp() != TypKartyEnum.BOHATER) { // Pożoga nie wpływa na Bohaterów
+                            int efektywnaSila = rzad.obliczSileEfektywnaKarty(k);
+                            sileEfektywneWszystkichKart.put(k, efektywnaSila);
                             rzedyKart.put(k, rzad);
-                        }
-                    }
-                }
-            }
-        }
-        // Zbierz jednostki od gracza 2
-        if (aktualnyStanRundy.getPlanszaGracza2() != null) {
-            for (TypRzeduEnum typRzedu : TypRzeduEnum.values()) {
-                RzadPlanszy rzad = aktualnyStanRundy.getPlanszaGracza2().getRzad(typRzedu);
-                if (rzad != null) {
-                    for (Karta k : rzad.getKartyJednostekWRzedzie()) {
-                        if (k.getTyp() != TypKartyEnum.BOHATER) {
-                            wszystkieJednostkiNieBohaterowieNaPlanszy.add(k);
-                            wlascicieleKart.put(k, gracz2);
-                            rzedyKart.put(k, rzad);
+                            wlascicieleKart.put(k, gracz1); // Bezpośrednie użycie gracz1
                         }
                     }
                 }
             }
         }
 
-        if (wszystkieJednostkiNieBohaterowieNaPlanszy.isEmpty()) {
+        // Przetwarzanie planszy Gracza 2
+        PlanszaGracza planszaG2 = aktualnyStanRundy.getPlanszaGracza2();
+        if (planszaG2 != null) {
+            for (TypRzeduEnum typRzedu : TypRzeduEnum.values()) {
+                RzadPlanszy rzad = planszaG2.getRzad(typRzedu);
+                if (rzad != null) {
+                    for (Karta k : rzad.getKartyJednostekWRzedzie()) {
+                        if (k.getTyp() != TypKartyEnum.BOHATER) {
+                            int efektywnaSila = rzad.obliczSileEfektywnaKarty(k);
+                            sileEfektywneWszystkichKart.put(k, efektywnaSila);
+                            rzedyKart.put(k, rzad);
+                            wlascicieleKart.put(k, gracz2); // Bezpośrednie użycie gracz2
+                        }
+                    }
+                }
+            }
+        }
+
+        if (sileEfektywneWszystkichKart.isEmpty()) {
             System.out.println("SILNIK: Pożoga Globalna - brak jednostek nie-bohaterów na planszy.");
             return;
         }
 
-        // Znajdź maksymalną siłę (uwzględniając aktualne modyfikatory jak Więź, Morale, Róg)
-        // Musimy uzyskać aktualną siłę każdej jednostki z jej rzędu, po przeliczeniu punktów rzędu.
-        // To jest skomplikowane, bo siła jednostki nie jest bezpośrednio przechowywana jako 'efektywnaSiła'.
-        // Prostsze podejście: Pożoga patrzy na bazową siłę karty LUB na siłę wyświetlaną (po wszystkich buffach).
-        // Standardowo Pożoga patrzy na aktualną siłę WIDOCZNĄ na planszy.
-        // Aby to zrobić poprawnie, musielibyśmy mieć sposób na odpytanie o efektywną siłę KAŻDEJ karty.
-        // Na razie, dla uproszczenia, załóżmy, że Pożoga działa na PUNKTY SIŁY karty (bazowe).
-        // Jeśli chcesz, aby działała na EFEKTYWNĄ siłę, logika musi być bardziej złożona.
-        // W tej implementacji użyję `k.getPunktySily()`, co oznacza bazową siłę.
-        // Dla bardziej zaawansowanej wersji, trzeba by iterować po rzędach, tymczasowo obliczać siłę każdej karty w kontekście jej rzędu.
-
-        // Wersja uproszczona - działa na `k.getPunktySily()`
+        // Znajdź maksymalną efektywną siłę na całej planszy
         int maxSila = 0;
-        for (Karta k : wszystkieJednostkiNieBohaterowieNaPlanszy) {
-            if (k.getPunktySily() > maxSila) {
-                maxSila = k.getPunktySily();
+        // Używamy .values(), aby iterować tylko po wartościach (siłach)
+        for (Integer sila : sileEfektywneWszystkichKart.values()) {
+            if (sila > maxSila) {
+                maxSila = sila;
             }
         }
 
@@ -780,10 +790,11 @@ public class SilnikGry {
             return;
         }
 
+        // Zbierz wszystkie karty o maksymalnej sile
         List<Karta> kartyDoZniszczenia = new ArrayList<>();
-        for (Karta k : wszystkieJednostkiNieBohaterowieNaPlanszy) {
-            if (k.getPunktySily() == maxSila) {
-                kartyDoZniszczenia.add(k);
+        for (Map.Entry<Karta, Integer> entry : sileEfektywneWszystkichKart.entrySet()) {
+            if (entry.getValue() == maxSila) {
+                kartyDoZniszczenia.add(entry.getKey());
             }
         }
 
@@ -793,94 +804,59 @@ public class SilnikGry {
                 Gracz wlasciciel = wlascicieleKart.get(k);
                 RzadPlanszy rzad = rzedyKart.get(k);
                 if (wlasciciel != null && rzad != null) {
-                    rzad.usunKarteJednostki(k); // Usuwa z rzędu i wywołuje przeliczSumePunktow dla tego rzędu
+                    rzad.usunKarteJednostki(k); // usuniecie karty z rzędu wywoła w nim przeliczSumePunktow
                     wlasciciel.getOdrzucone().add(k);
                     System.out.print(k.getNazwa() + " (gracza " + wlasciciel.getProfilUzytkownika().getNazwaUzytkownika() + "), ");
                 }
             }
             System.out.println();
-        } else {
-            System.out.println("SILNIK: Pożoga Globalna - nie znaleziono kart do zniszczenia.");
         }
-        // Punkty zostaną przeliczone globalnie na końcu tury lub przez odswiezCalakolwiekPlansze
     }
-
     private void aktywujPozogaNaRzedzie(Gracz graczAktywujacy, Karta kartaPozogi, RzadPlanszy rzadGdzieKartaPozogiLandowala) {
         if (rzadGdzieKartaPozogiLandowala == null) {
             System.err.println("SILNIK: Pożoga_K - karta Pozogi nie została umieszczona w żadnym rzędzie.");
             return;
         }
-        System.out.println("SILNIK: Aktywacja Pożogi Na Rzędzie (Pożoga_K) przez kartę: " + kartaPozogi.getNazwa() + " (gracza " + graczAktywujacy.getProfilUzytkownika().getNazwaUzytkownika() + ")");
+        System.out.println("SILNIK: Aktywacja Pożogi Na Rzędzie (Pożoga_K) przez kartę: " + kartaPozogi.getNazwa());
 
         Gracz przeciwnik = (graczAktywujacy == gracz1) ? gracz2 : gracz1;
-        TypRzeduEnum typRzeduDocelowego = rzadGdzieKartaPozogiLandowala.getTypRzedu(); // Typ rzędu, w którym leży karta z Pożogą_K
+        RzadPlanszy rzadPrzeciwnika = przeciwnik.getPlanszaGry().getRzad(rzadGdzieKartaPozogiLandowala.getTypRzedu());
 
-        PlanszaGracza planszaPrzeciwnika = (przeciwnik == gracz1) ? aktualnyStanRundy.getPlanszaGracza1() : aktualnyStanRundy.getPlanszaGracza2();
-        if (planszaPrzeciwnika == null) {
-            System.err.println("SILNIK: Pożoga_K - brak planszy przeciwnika.");
-            return;
-        }
-        RzadPlanszy rzadPrzeciwnikaDoSprawdzenia = planszaPrzeciwnika.getRzad(typRzeduDocelowego);
-
-        if (rzadPrzeciwnikaDoSprawdzenia == null) {
-            System.out.println("SILNIK: Pożoga_K - przeciwnik nie ma odpowiadającego rzędu (" + typRzeduDocelowego + ").");
+        if (rzadPrzeciwnika == null) {
+            System.out.println("SILNIK: Pożoga_K - przeciwnik nie ma odpowiadającego rzędu.");
             return;
         }
 
         // Warunek: suma punktów w rzędzie przeciwnika >= 10
-        // getSumaPunktowWRzedzie() powinno być aktualne
-        int sumaPunktowRzeduPrzeciwnika = rzadPrzeciwnikaDoSprawdzenia.getSumaPunktowWRzedzie();
-        System.out.println("SILNIK: Pożoga_K - suma punktów w rzędzie (" + typRzeduDocelowego + ") przeciwnika: " + sumaPunktowRzeduPrzeciwnika);
-
-        if (sumaPunktowRzeduPrzeciwnika >= 10) {
-            List<Karta> jednostkiNieBohaterowieWRzedziePrzeciwnika = new ArrayList<>();
-            for (Karta k : rzadPrzeciwnikaDoSprawdzenia.getKartyJednostekWRzedzie()) {
+        if (rzadPrzeciwnika.getSumaPunktowWRzedzie() >= 10) {
+            Map<Karta, Integer> sileEfektywneWRzedzie = new HashMap<>();
+            for (Karta k : rzadPrzeciwnika.getKartyJednostekWRzedzie()) {
                 if (k.getTyp() != TypKartyEnum.BOHATER) {
-                    jednostkiNieBohaterowieWRzedziePrzeciwnika.add(k);
+                    sileEfektywneWRzedzie.put(k, rzadPrzeciwnika.obliczSileEfektywnaKarty(k));
                 }
             }
 
-            if (jednostkiNieBohaterowieWRzedziePrzeciwnika.isEmpty()) {
-                System.out.println("SILNIK: Pożoga_K - brak jednostek nie-bohaterów w docelowym rzędzie przeciwnika.");
-                return;
-            }
+            if (sileEfektywneWRzedzie.isEmpty()) return;
 
-            // Podobnie jak w Pożoga_S, tutaj też użyjemy bazowej siły k.getPunktySily() dla uproszczenia.
-            // Dla działania na efektywnej sile, potrzebna byłaby bardziej złożona logika.
-            int maxSilaNaRzedziePrzeciwnika = 0;
-            for (Karta k : jednostkiNieBohaterowieWRzedziePrzeciwnika) {
-                if (k.getPunktySily() > maxSilaNaRzedziePrzeciwnika) {
-                    maxSilaNaRzedziePrzeciwnika = k.getPunktySily();
-                }
-            }
+            int maxSila = sileEfektywneWRzedzie.values().stream().max(Integer::compare).orElse(0);
 
-            if (maxSilaNaRzedziePrzeciwnika == 0) {
-                System.out.println("SILNIK: Pożoga_K - brak jednostek z siłą > 0 w docelowym rzędzie przeciwnika.");
-                return;
-            }
+            if (maxSila > 0) {
+                List<Karta> kartyDoZniszczenia = sileEfektywneWRzedzie.entrySet().stream()
+                        .filter(entry -> entry.getValue() == maxSila)
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toList());
 
-            List<Karta> kartyDoZniszczenia = new ArrayList<>();
-            for (Karta k : jednostkiNieBohaterowieWRzedziePrzeciwnika) {
-                if (k.getPunktySily() == maxSilaNaRzedziePrzeciwnika) {
-                    kartyDoZniszczenia.add(k);
-                }
-            }
-
-            if (!kartyDoZniszczenia.isEmpty()) {
-                System.out.print("SILNIK: Pożoga_K niszczy w rzędzie " + typRzeduDocelowego + " przeciwnika (" + maxSilaNaRzedziePrzeciwnika + " pkt): ");
+                System.out.print("SILNIK: Pożoga_K niszczy w rzędzie " + rzadPrzeciwnika.getTypRzedu() + " przeciwnika (" + maxSila + " pkt): ");
                 for (Karta k : kartyDoZniszczenia) {
-                    rzadPrzeciwnikaDoSprawdzenia.usunKarteJednostki(k); // Usuwa z rzędu i wywołuje przeliczSumePunktow
+                    rzadPrzeciwnika.usunKarteJednostki(k);
                     przeciwnik.getOdrzucone().add(k);
                     System.out.print(k.getNazwa() + ", ");
                 }
                 System.out.println();
-            } else {
-                System.out.println("SILNIK: Pożoga_K - nie znaleziono kart do zniszczenia w rzędzie przeciwnika.");
             }
         } else {
-            System.out.println("SILNIK: Pożoga_K - warunek sumy punktów (>=10) w rzędzie przeciwnika nie został spełniony.");
+            System.out.println("SILNIK: Pożoga_K - warunek siły rzędu przeciwnika (>=10) nie został spełniony.");
         }
-        // Punkty zostaną przeliczone globalnie na końcu tury lub przez odswiezCalakolwiekPlansze
     }
 
     public void rozpocznijProcesWskrzeszaniaKarty(Gracz graczWskrzeszajacy, Karta kartaDoWskrzeszenia) {
