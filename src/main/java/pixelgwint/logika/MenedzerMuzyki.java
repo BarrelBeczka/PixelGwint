@@ -40,7 +40,6 @@ public class MenedzerMuzyki {
     }
 
     public void wstepneLadowanie() {
-        // ... (ta metoda pozostaje bez zmian)
         System.out.println("[MenedzerMuzyki] Rozpoczynanie wstępnego ładowania muzyki...");
         List<String> wszystkieUtwory = new ArrayList<>();
         wszystkieUtwory.add("/muzyka/intro.mp3");
@@ -66,7 +65,6 @@ public class MenedzerMuzyki {
 
     public void odtwarzajIntro() {
         System.out.println("[MenedzerMuzyki] Odtwarzanie utworu intro.");
-        // <<< ZMIANA: Wywołujemy metodę z flagą zFadeIn = false >>>
         uruchomNowyUtwor("/muzyka/intro.mp3", () -> uruchomPlaylistMenu(true), false);
     }
 
@@ -113,11 +111,9 @@ public class MenedzerMuzyki {
         String sciezkaNastepnegoUtworu = aktualnaPlaylista.get(aktualnyIndeks);
         aktualnyIndeks++;
 
-        // <<< ZMIANA: Przejścia między utworami na playliście ZAWSZE mają fade-in >>>
         uruchomNowyUtwor(sciezkaNastepnegoUtworu, null, true);
     }
 
-    // <<< ZMIANA: Dodano parametr 'zFadeIn' >>>
     private void uruchomNowyUtwor(String sciezka, Runnable akcjaPoZakonczeniu, boolean zFadeIn) {
         Media media = mediaCache.get(sciezka);
         if (media == null) {
@@ -129,9 +125,7 @@ public class MenedzerMuzyki {
         MediaPlayer nowyOdtwarzacz = new MediaPlayer(media);
         this.aktualnyOdtwarzacz = nowyOdtwarzacz;
 
-        // <<< ZMIANA: Logika warunkowego fade-in >>>
         if (zFadeIn) {
-            // Startuje cicho i jest podgłaśniany
             nowyOdtwarzacz.setVolume(0);
             Timeline animacjaPodglasniania = new Timeline(
                     new KeyFrame(Duration.seconds(CZAS_PRZEJSCIA),
@@ -139,7 +133,6 @@ public class MenedzerMuzyki {
             );
             animacjaPodglasniania.play();
         } else {
-            // Startuje od razu z docelową głośnością
             nowyOdtwarzacz.setVolume(aktualnaGlosnosc);
         }
 

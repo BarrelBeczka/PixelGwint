@@ -33,7 +33,6 @@ public class WczytywaczKart {
 
                 String[] daneKarty = linia.split(";", -1);
 
-                // Oczekujemy teraz 11 kolumn (indeksy 0-10)
                 if (daneKarty.length >= 11) {
                     try {
                         int id = Integer.parseInt(daneKarty[0].trim());
@@ -59,11 +58,11 @@ public class WczytywaczKart {
                         // Wczytanie nowej kolumny grupaBraterstwa (indeks 10)
                         String grupaBraterstwa = (daneKarty.length > 10 && daneKarty[10] != null) ? daneKarty[10].trim() : null;
                         if (grupaBraterstwa != null && grupaBraterstwa.isEmpty()) {
-                            grupaBraterstwa = null; // Traktuj pusty string jako null (brak grupy)
+                            grupaBraterstwa = null;
                         }
 
                         Karta karta = new Karta(id, nazwa, typ, punktySily, pozycja, umiejetnosc,
-                                frakcja, grafika, umiejetnosc2, pozycja2, grupaBraterstwa); // <<< PRZEKAZANIE NOWEGO POLA
+                                frakcja, grafika, umiejetnosc2, pozycja2, grupaBraterstwa);
                         listaKart.add(karta);
 
                     } catch (NumberFormatException e) {
@@ -83,7 +82,7 @@ public class WczytywaczKart {
         return listaKart;
     }
 
-    // Prosta metoda main do przetestowania wczytywania (możesz ją później usunąć)
+    // Prosta metoda main do przetestowania wczytywania
     public static void main(String[] args) {
         List<Karta> wczytaneKarty = wczytajWszystkieKarty();
         if (wczytaneKarty.isEmpty()) {
@@ -91,7 +90,7 @@ public class WczytywaczKart {
         } else {
             System.out.println("Wczytano " + wczytaneKarty.size() + " kart:");
             for (Karta karta : wczytaneKarty) {
-                System.out.println(karta.toString()); // Upewnij się, że masz metodę toString() w klasie Karta
+                System.out.println(karta.toString());
             }
         }
     }
