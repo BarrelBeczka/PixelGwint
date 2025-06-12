@@ -25,15 +25,14 @@ import pixelgwint.model.*;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
-import javafx.animation.Interpolator; // <<< DODAJ TEN IMPORT NA GÓRZE PLIKU
-import javafx.animation.ParallelTransition; // <<< DODAJ TEN IMPORT
-import javafx.animation.ScaleTransition; // <<< DODAJ TEN IMPORT
-import javafx.animation.TranslateTransition; // <<< DODAJ TEN IMPORT
-import javafx.geometry.Point2D; // <<< DODAJ TEN IMPORT
+import javafx.animation.Interpolator;
+import javafx.animation.ParallelTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
+import javafx.geometry.Point2D;
 import javafx.animation.SequentialTransition;
 public class KontrolerPlanszyGry {
 
-    // --- Pola FXML ---
     @FXML private AnchorPane glownyKontenerPlanszy;
     @FXML private HBox pogodaHBox;
     @FXML private ImageView dowodcaGracza1ImageView;
@@ -101,7 +100,6 @@ public class KontrolerPlanszyGry {
     @FXML private Label napisTuryLabel;
     @FXML private Button przyciskPotwierdzTure;
 
-    // NOWE Pola FXML dla panelu rzutu monetą na planszy
     @FXML private StackPane panelRzutuMonetaOverlay;
     @FXML private ImageView monetaDoRzutuImageView;
     @FXML private Label infoRzutuLabel;
@@ -114,7 +112,7 @@ public class KontrolerPlanszyGry {
     @FXML private StackPane panelKoncaGry;
     @FXML private ImageView grafikaKoncaGryImageView;
     @FXML private Label napisKoncowyLabel;
-    @FXML private VBox wynikiRundKontener; // Kontener na labele z wynikami rund
+    @FXML private VBox wynikiRundKontener;
     @FXML private Button przyciskRewanz;
     @FXML private Button przyciskMenuGlowneZKoncaGry;
 
@@ -123,7 +121,7 @@ public class KontrolerPlanszyGry {
     @FXML private ScrollPane cmentarzScrollPaneListyKart;
     @FXML private FlowPane cmentarzListaKartFlowPane;
     @FXML private ImageView cmentarzPowiekszonaKartaImageView;
-    @FXML private Label cmentarzOpisPowiekszonejKartyLabel; // Opcjonalnie, dla opisu dużej karty
+    @FXML private Label cmentarzOpisPowiekszonejKartyLabel;
     @FXML private Button przyciskZamknijCmentarz;
     @FXML private Button przyciskWskrzesKarteZCmentarza;
 
@@ -135,7 +133,6 @@ public class KontrolerPlanszyGry {
     @FXML private Label tytulPaneluWyboruKartyEredina;
     @FXML private FlowPane flowPaneKartDoWyboruEredina;
     @FXML private ImageView powiekszonaKartaWyboruEredina;
-    // @FXML private Label opisPowiekszonejKartyWyboruEredina; // Opcjonalnie
     @FXML private Button przyciskPotwierdzWyborEredina;
     @FXML private Button przyciskAnulujWyborEredina;
 
@@ -173,7 +170,7 @@ public class KontrolerPlanszyGry {
     private Gracz graczDecydujacyScoiatael = null;
     private List<Karta> kartyWybraneDoWymiany = new ArrayList<>();
     private List<Karta> aktualnieWybraneDoOdrzuceniaEredin414 = new ArrayList<>();
-    private Karta aktualnieWybranaDoPowiekszeniaEredin414 = null; // Dla obu paneli (podgląd)
+    private Karta aktualnieWybranaDoPowiekszeniaEredin414 = null;
     private Karta wybranaKartaZTaliiDlaEredina414 = null;
     private Karta wybranaKartaPrzezEredinaDoPodgladu = null;
     private boolean trybWyboruKartyDlaEmhyra = false;
@@ -185,14 +182,13 @@ public class KontrolerPlanszyGry {
     private Image obrazekWygranaRundyPng;
     private Image obrazekRemisRundyPng;
     private Image obrazekKoniecWygranaPng;
-    private Image obrazekKoniecPrzegranaPng; // Na wypadek, gdybyś chciał różne dla P1 i P2
+    private Image obrazekKoniecPrzegranaPng;
     private Image obrazekKoniecRemisPng;
-    // Pola do logiki rzutu monetą (przeniesione i dostosowane)
-    private Image coin1ImageRzut; // Użyj innych nazw, aby uniknąć konfliktu, jeśli masz globalne coin1Image
+    private Image coin1ImageRzut;
     private Image coin2ImageRzut;
     private final Random randomDoRzutu = new Random();
     private Timeline animacjaMonetyNaPlanszy;
-    private Gracz wylosowanyGraczRozpoczynajacy = null; // Kto faktycznie zaczął po rzucie na planszy
+    private Gracz wylosowanyGraczRozpoczynajacy = null;
     private Image obrazekPowiadPotwoPng;
     private PixelGwintAplikacja pixelGwintAplikacja;
     private Gracz obiektGracz1;
@@ -201,15 +197,16 @@ public class KontrolerPlanszyGry {
     private List<Karta> wszystkieKartyWGrzeCache;
     private Karta aktualnieZaznaczonaKartaDoZagrnia = null;
     private List<Node> podswietloneCele = new ArrayList<>();
-    private static final double SZEROKOSC_KARTY_W_PANELU_CESARZA = 100.0; // Dostosuj wg potrzeb
-    private static final double WYSOKOSC_KARTY_W_PANELU_CESARZA = 145.0;  // Dostosuj wg potrzeb
+    private static final double SZEROKOSC_KARTY_W_PANELU_CESARZA = 100.0;
+    private static final double WYSOKOSC_KARTY_W_PANELU_CESARZA = 145.0;
     private final DropShadow efektObramowkiHover = new DropShadow(10, Color.rgb(255, 255, 100, 0.9));
-    private final DropShadow decoyTargetGlowEffect = new DropShadow(25, Color.rgb(173, 216, 230, 0.95)); // Jasnoniebieska poświata (promień, kolor, intensywność)
+    private final DropShadow decoyTargetGlowEffect = new DropShadow(25, Color.rgb(173, 216, 230, 0.95));
+
     private final String SCIEZKA_ZETON_CZERWONY = "/grafiki/elementy_ui/zetonczerw.png";
     private final String SCIEZKA_ZETON_CZARNY = "/grafiki/elementy_ui/zetonczarn.png";
-    private final String SCIEZKA_INFO_TURA_G1 = "infoturag1.png"; // Upewnij się, że plik jest w /grafiki/elementy_ui/
-    private final String SCIEZKA_INFO_TURA_G2 = "infoturag2.png"; // Upewnij się, że plik jest w /grafiki/elementy_ui/
-    private final String SCIEZKA_REWERSU_DOWODCY = "/grafiki/karty/rewers_ogolny.png"; // Upewnij się, że ten plik istnieje!
+    private final String SCIEZKA_INFO_TURA_G1 = "infoturag1.png";
+    private final String SCIEZKA_INFO_TURA_G2 = "infoturag2.png";
+    private final String SCIEZKA_REWERSU_DOWODCY = "/grafiki/karty/rewers_ogolny.png";
 
     private boolean trybWyboruCeluDlaManekina = false;
 
@@ -219,6 +216,9 @@ public class KontrolerPlanszyGry {
     public Image getObrazekWygranaRundyPng() { return obrazekWygranaRundyPng; }
     public Image getObrazekRemisRundyPng() { return obrazekRemisRundyPng; }
 
+    //Metoda wywoływana automatycznie przez JavaFX po załadowaniu pliku FXML.
+    //Inicjalizuje domyślne ustawienia kontrolek, ustawia wyrównanie dla kontenerów
+    //kart oraz dodaje handlery zdarzeń do klikalnych regionów na planszy.
     @FXML
     public void initialize() {
         System.out.println("KontrolerPlanszyGry zainicjalizowany.");
@@ -272,8 +272,6 @@ public class KontrolerPlanszyGry {
         if (pasInfoLabel == null) System.err.println("FATAL FXML: pasInfoLabel jest null w initialize()!");
 
         if (pasGrafikaImageView != null && obrazekPassPng != null) {
-            // Możesz tu ustawić obrazek od razu, albo dopiero w metodzie pokazującej panel
-            // pasGrafikaImageView.setImage(obrazekPassPng);
         } else if (pasGrafikaImageView != null) {
             System.err.println("Nie udało się załadować grafiki pass.png dla pasGrafikaImageView");
         }
@@ -285,7 +283,7 @@ public class KontrolerPlanszyGry {
         if (przyciskDalejPoWynikuRundy == null) System.err.println("INFO FXML: przyciskDalejPoWynikuRundy jest null (może być opcjonalny).");
 
         obrazekKoniecWygranaPng = ladujObrazekZElementowUI("koniecwygr.png");
-        obrazekKoniecPrzegranaPng = ladujObrazekZElementowUI("koniecprzeg.png"); // Jeśli masz osobną
+        obrazekKoniecPrzegranaPng = ladujObrazekZElementowUI("koniecprzeg.png");
         obrazekKoniecRemisPng = ladujObrazekZElementowUI("koniecremis.png");
 
         if (panelKoncaGry == null) System.err.println("FATAL FXML: panelKoncaGry jest null!");
@@ -311,7 +309,6 @@ public class KontrolerPlanszyGry {
         if (cmentarzPowiekszonaKartaImageView == null) System.err.println("FATAL FXML: cmentarzPowiekszonaKartaImageView jest null!");
         if (cmentarzOpisPowiekszonejKartyLabel == null) System.err.println("INFO FXML: cmentarzOpisPowiekszonejKartyLabel jest null (opcjonalne).");
         if (przyciskZamknijCmentarz == null) System.err.println("FATAL FXML: przyciskZamknijCmentarz jest null!");
-        // USUNIĘTE: Sprawdzenie dla przyciskWskrzesKarteZCmentarza
         if (panelPodgladuKartCesarza != null) {
             panelPodgladuKartCesarza.setVisible(false);
         }
@@ -350,33 +347,31 @@ public class KontrolerPlanszyGry {
         }
         if (pogodaHBox != null) {
             pogodaHBox.setOnMouseClicked(this::handleCelKlikniety);
-            System.out.println("[KONTROLER INIT] Ustawiono handleCelKlikniety dla pogodaHBox."); // Log dla potwierdzenia
+            System.out.println("[KONTROLER INIT] Ustawiono handleCelKlikniety dla pogodaHBox.");
         } else {
             System.err.println("[KONTROLER INIT BŁĄD] pogodaHBox jest null! Nie można ustawić handlera kliknięcia.");
         }
         panelMulligan.setVisible(false);
     }
 
+    //Handler dla kliknięcia na stos kart odrzuconych (cmentarz) gracza 1. Otwiera panel podglądu cmentarza.
     @FXML
     private void handleCmentarzG1Clicked(MouseEvent event) {
         if (!trybWskrzeszaniaAktywnyGlobalnie && obiektGracz1 != null && obiektGracz1.getProfilUzytkownika() != null) {
-            // STARE WYWOŁANIE:
-            // pokazPanelCmentarza(obiektGracz1, "Cmentarz: " + obiektGracz1.getProfilUzytkownika().getNazwaUzytkownika(), false);
-            // NOWE WYWOŁANIE:
             pokazPanelCmentarza(obiektGracz1, "Cmentarz: " + obiektGracz1.getProfilUzytkownika().getNazwaUzytkownika(), TrybPaneluCmentarzaKontekst.PODGLAD);
         }
     }
 
+    //Handler dla kliknięcia na stos kart odrzuconych (cmentarz) gracza 2. Otwiera panel podglądu cmentarza.
     @FXML
     private void handleCmentarzG2Clicked(MouseEvent event) {
         if (!trybWskrzeszaniaAktywnyGlobalnie && obiektGracz2 != null && obiektGracz2.getProfilUzytkownika() != null) {
-            // STARE WYWOŁANIE:
-            // pokazPanelCmentarza(obiektGracz2, "Cmentarz: " + obiektGracz2.getProfilUzytkownika().getNazwaUzytkownika(), false);
-            // NOWE WYWOŁANIE:
             pokazPanelCmentarza(obiektGracz2, "Cmentarz: " + obiektGracz2.getProfilUzytkownika().getNazwaUzytkownika(), TrybPaneluCmentarzaKontekst.PODGLAD);
         }
     }
 
+    //Wyświetla tymczasowy panel z listą kart (np. przy użyciu zdolności Cesarza Nilfgaardu).
+    //Panel automatycznie znika po określonym czasie.
     public void pokazTymczasowyPanelZKartami(List<Karta> kartyDoPokazania, Duration czasPokazu, String tytul) {
         if (kartyDoPokazania == null || kartyDoPokazania.isEmpty() || panelPodgladuKartCesarza == null || kontenerKartPodgladuCesarza == null || tytulPaneluPodgladuCesarza == null) {
             System.err.println("[KONTROLER] Nie można pokazać panelu podglądu kart Cesarza - brak kart lub elementów UI.");
@@ -384,55 +379,46 @@ public class KontrolerPlanszyGry {
         }
 
         tytulPaneluPodgladuCesarza.setText(tytul);
-        kontenerKartPodgladuCesarza.getChildren().clear(); // Wyczyść poprzednie karty
+        kontenerKartPodgladuCesarza.getChildren().clear();
 
         System.out.println("[KONTROLER] Pokazuję na panelu Cesarza karty: " + kartyDoPokazania.stream().map(Karta::getNazwa).collect(Collectors.joining(", ")));
 
         for (Karta karta : kartyDoPokazania) {
             ImageView widokKarty = stworzWidokKarty(karta, SZEROKOSC_KARTY_W_PANELU_CESARZA, WYSOKOSC_KARTY_W_PANELU_CESARZA);
-            // Możesz dodać prosty podgląd przy najechaniu, jeśli chcesz, ale panel jest tymczasowy
-            final Karta finalKarta = karta; // Dla lambdy
+            final Karta finalKarta = karta;
             widokKarty.setOnMouseEntered(event -> {
-                // Można by pokazać duży podgląd w głównym slocie podglądu, jeśli jest wolny
-                // if (podgladKartyImageView != null) podgladKartyImageView.setImage(ladujObrazekKarty(finalKarta));
             });
             widokKarty.setOnMouseExited(event -> {
-                // if (podgladKartyImageView != null) podgladKartyImageView.setImage(null);
             });
             kontenerKartPodgladuCesarza.getChildren().add(widokKarty);
         }
 
-        ukryjWszystkiePaneleOverlayOprocz(panelPodgladuKartCesarza); // Schowaj inne panele
+        ukryjWszystkiePaneleOverlayOprocz(panelPodgladuKartCesarza);
         panelPodgladuKartCesarza.setVisible(true);
         panelPodgladuKartCesarza.toFront();
 
         PauseTransition pauza = new PauseTransition(czasPokazu);
         pauza.setOnFinished(event -> {
             panelPodgladuKartCesarza.setVisible(false);
-            kontenerKartPodgladuCesarza.getChildren().clear(); // Wyczyść karty po zniknięciu
+            kontenerKartPodgladuCesarza.getChildren().clear();
             System.out.println("[KONTROLER] Panel podglądu kart Cesarza zniknął.");
-            // Nie ma potrzeby specjalnego odświeżania całej planszy tutaj,
-            // bo ta akcja nie zmieniała stanu gry na planszy.
-            // Ewentualne ogólne odświeżenie na koniec tury w Silniku Gry wystarczy.
         });
         pauza.play();
     }
 
+    //Uruchamia tryb wyboru rzędu dla zagrywanej karty, która ma kilka możliwych miejsc do umieszczenia (karty ze zdolnością "Zręczność").
     public void poprosOWyborRzeduDlaKarty(Karta karta, Gracz aktywnyGracz, boolean forResurrectionPlacement) {
         if (karta == null || aktywnyGracz == null) {
             System.err.println("[KONTROLER] poprosOWyborRzeduDlaKarty: karta lub aktywnyGracz jest null.");
             return;
         }
         this.aktualnieZaznaczonaKartaDoZagrnia = karta;
-        this.aktualnieWybieranyRzadPoWskrzeszeniu = forResurrectionPlacement; // Kluczowe dla handleCelKlikniety
+        this.aktualnieWybieranyRzadPoWskrzeszeniu = forResurrectionPlacement;
 
         System.out.println("[KONTROLER] Prośba o wybór rzędu dla karty: " + karta.getNazwa() +
                 (forResurrectionPlacement ? " (PO WSKRZESZENIU)" : " (Z RĘKI)"));
 
         usunPodswietlenieRzedowISlotow();
-
-        // Dla wskrzeszania, karta zawsze trafia na planszę gracza wskrzeszającego (chyba że to szpieg - obsłużone w silniku)
-        // Dla kart z ręki - Szpieg idzie na planszę przeciwnika, reszta na własną.
         PlanszaGracza planszaDocelowaModel;
         HBox[] rzedyPlanszyDocelowejUI;
 
@@ -442,7 +428,7 @@ public class KontrolerPlanszyGry {
             rzedyPlanszyDocelowejUI = (aktywnyGracz == obiektGracz1) ?
                     new HBox[]{rzadPiechotyG2HBox, rzadStrzeleckiG2HBox, rzadOblezeniaG2HBox} :
                     new HBox[]{rzadPiechotyG1HBox, rzadStrzeleckiG1HBox, rzadOblezeniaG1HBox};
-        } else { // Karta na własną planszę (z ręki nie-szpieg LUB wskrzeszana nie-szpieg)
+        } else {
             rzedyPlanszyDocelowejUI = (aktywnyGracz == obiektGracz1) ?
                     new HBox[]{rzadPiechotyG1HBox, rzadStrzeleckiG1HBox, rzadOblezeniaG1HBox} :
                     new HBox[]{rzadPiechotyG2HBox, rzadStrzeleckiG2HBox, rzadOblezeniaG2HBox};
@@ -473,7 +459,7 @@ public class KontrolerPlanszyGry {
         if (mozliweTypyRzedow.isEmpty()) {
             wyswietlKomunikatNaPlanszy("Karta " + karta.getNazwa() + " nie ma określonej prawidłowej pozycji do zagrania.", true);
             if (forResurrectionPlacement && silnikGry != null) {
-                silnikGry.anulujWskrzeszanie(aktywnyGracz); // Anuluj, jeśli wskrzeszana karta nie ma gdzie pójść
+                silnikGry.anulujWskrzeszanie(aktywnyGracz);
             }
             this.aktualnieZaznaczonaKartaDoZagrnia = null;
             this.aktualnieWybieranyRzadPoWskrzeszeniu = false;
@@ -491,7 +477,7 @@ public class KontrolerPlanszyGry {
         }
         System.out.println();
     }
-
+    //Wyświetla panel cmentarza dla określonego gracza. Panel może działać w różnych trybach, np. tylko do podglądu lub do wyboru karty w celu jej wskrzeszenia.
     public void pokazPanelCmentarza(Gracz graczWlascicielCmentarza, String tytul, TrybPaneluCmentarzaKontekst tryb) {
         if (graczWlascicielCmentarza == null || panelCmentarza == null || tytulPaneluCmentarza == null ||
                 cmentarzListaKartFlowPane == null || cmentarzPowiekszonaKartaImageView == null ||
@@ -501,16 +487,15 @@ public class KontrolerPlanszyGry {
                 Gracz graczDoAnulowaniaAkcji = null;
                 switch (tryb) {
                     case WSKRZESZANIE_MEDYK:
-                        graczDoAnulowaniaAkcji = graczWlascicielCmentarza; // Ten, kto użył medyka
+                        graczDoAnulowaniaAkcji = graczWlascicielCmentarza;
                         if (graczDoAnulowaniaAkcji != null) silnikGry.anulujWskrzeszanie(graczDoAnulowaniaAkcji);
                         break;
                     case EMHYR_PAN_POLUDNIA:
-                        // graczWlascicielCmentarza to przeciwnik. Anulowanie dotyczy gracza aktywującego Emhyra.
                         if(silnikGry.getGraczAktywujacyEmhyra() != null) silnikGry.anulujWyborDlaEmhyra();
                         else silnikGry.anulujWyborDlaEmhyra();
                         break;
                     case EREDIN_ZABOJCA_AUBERONA_415:
-                        graczDoAnulowaniaAkcji = graczWlascicielCmentarza; // Ten, kto użył Eredina
+                        graczDoAnulowaniaAkcji = graczWlascicielCmentarza;
                         if(graczDoAnulowaniaAkcji != null) silnikGry.anulujZdolnoscEredina415(true);
                         break;
                     default: break;
@@ -608,6 +593,8 @@ public class KontrolerPlanszyGry {
         panelCmentarza.setVisible(true);
         panelCmentarza.toFront();
     }
+
+    //Handler dla kliknięcia na miniaturę karty wewnątrz otwartego panelu cmentarza. Wyświetla powiększenie klikniętej karty i aktywuje przycisk akcji (np. "Wskrześ"), jeśli jest to dozwolone.
     private void handleCmentarzMiniaturaKartyKliknieta(Karta karta) {
         if (karta == null || cmentarzPowiekszonaKartaImageView == null) return;
 
@@ -630,7 +617,6 @@ public class KontrolerPlanszyGry {
         }
 
 
-        // Aktywuj przycisk akcji w zależności od trybu i wybranej karty
         if (przyciskWskrzesKarteZCmentarza != null) {
             boolean czyWaznyCel = false;
             if (kartaPodgladanaZCmentarza != null) {
@@ -639,10 +625,9 @@ public class KontrolerPlanszyGry {
                     case WSKRZESZANIE_MEDYK:
                         czyWaznyCel = (kartaPodgladanaZCmentarza.getTyp() == TypKartyEnum.JEDNOSTKA);
                         break;
-                    case EMHYR_PAN_POLUDNIA: // <-- TEN PRZYPADEK TERAZ ZADZIAŁA
+                    case EMHYR_PAN_POLUDNIA:
                     case EREDIN_ZABOJCA_AUBERONA_415:
-                        // Emhyr 69 i Eredin 415 mogą wybrać dowolną kartę
-                        czyWaznyCel = true; // <-- Poprawnie ustawia na true
+                        czyWaznyCel = true;
                         break;
                     case PODGLAD:
                     default:
@@ -653,8 +638,10 @@ public class KontrolerPlanszyGry {
             przyciskWskrzesKarteZCmentarza.setDisable(!czyWaznyCel);
         }
     }
+
+    //Handler dla głównego przycisku akcji w panelu cmentarza. W zależności od trybu,w jakim panel został otwarty, wykonuje odpowiednią akcję w SilnikuGry (np. wskrzeszenie, użycie zdolności Emhyra).
     @FXML
-    private void handleWskrzesKarteZCmentarzaAction() { // Nazwa przycisku może pozostać, ale jego tekst się zmienia
+    private void handleWskrzesKarteZCmentarzaAction() {
         if (kartaPodgladanaZCmentarza == null || silnikGry == null) {
             System.err.println("Błąd: Brak wybranej karty lub silnika gry do wykonania akcji z cmentarza.");
             panelCmentarza.setVisible(false);
@@ -662,29 +649,27 @@ public class KontrolerPlanszyGry {
             return;
         }
 
-        Gracz graczDocelowyDlaAkcji = null; // Gracz, którego dotyczy akcja (kto użył medyka, Emhyra, Eredina)
+        Gracz graczDocelowyDlaAkcji = null;
 
         switch (aktualnyTrybPaneluCmentarza) {
             case WSKRZESZANIE_MEDYK:
-                graczDocelowyDlaAkcji = graczDokonujacyWskrzeszeniaGlobalnie; // Ustawiane w pokazPanelCmentarza
+                graczDocelowyDlaAkcji = graczDokonujacyWskrzeszeniaGlobalnie;
                 if (graczDocelowyDlaAkcji == null) { /* obsługa błędu */ return; }
                 if (kartaPodgladanaZCmentarza.getTyp() != TypKartyEnum.JEDNOSTKA) {
                     wyswietlKomunikatNaPlanszy("Można wskrzeszać tylko jednostki (nie Bohaterów ani Specjalne).", true);
-                    return; // Nie zamykaj panelu, pozwól wybrać inną kartę
+                    return;
                 }
                 panelCmentarza.setVisible(false);
                 silnikGry.rozpocznijProcesWskrzeszaniaKarty(graczDocelowyDlaAkcji, kartaPodgladanaZCmentarza);
                 break;
 
             case EMHYR_PAN_POLUDNIA:
-                // Silnik gry przechowuje graczAktywujacyEmhyra
-                // Karta jest z cmentarza przeciwnika (przekazana do pokazPanelCmentarza)
                 panelCmentarza.setVisible(false);
                 silnikGry.wykonajWyborEmhyraPanaPoludnia(kartaPodgladanaZCmentarza);
                 break;
 
             case EREDIN_ZABOJCA_AUBERONA_415:
-                graczDocelowyDlaAkcji = silnikGry.getGraczAktywujacyEredina415(); // Potrzebny getter w SilnikGry
+                graczDocelowyDlaAkcji = silnikGry.getGraczAktywujacyEredina415();
                 if (graczDocelowyDlaAkcji == null) { /* obsługa błędu */ return; }
                 panelCmentarza.setVisible(false);
                 silnikGry.wykonajWyborKartyZCmentarzaEredin415(kartaPodgladanaZCmentarza);
@@ -693,24 +678,23 @@ public class KontrolerPlanszyGry {
             case PODGLAD:
             default:
                 System.out.println("Panel cmentarza w trybie podglądu, przycisk akcji nie powinien być aktywny.");
-                panelCmentarza.setVisible(false); // Po prostu zamknij
+                panelCmentarza.setVisible(false);
                 break;
         }
-        resetStatePoOperacjiNaCmentarzu(); // Zawsze resetuj stan kontrolera po akcji
+        resetStatePoOperacjiNaCmentarzu();
     }
 
+    //Metoda pomocnicza, która czyści i resetuje stan kontrolera związany z panelem cmentarza po jego zamknięciu lub wykonaniu akcji.
     private void resetStatePoOperacjiNaCmentarzu() {
         this.trybWskrzeszaniaAktywnyGlobalnie = false;
         this.graczDokonujacyWskrzeszeniaGlobalnie = null;
-        // Usunęliśmy trybWyboruKartyDlaEmhyra z kontrolera, silnik tym zarządza
         this.kartaPodgladanaZCmentarza = null;
-        this.aktualnyTrybPaneluCmentarza = TrybPaneluCmentarzaKontekst.PODGLAD; // Reset do domyślnego trybu
+        this.aktualnyTrybPaneluCmentarza = TrybPaneluCmentarzaKontekst.PODGLAD;
 
         if (przyciskWskrzesKarteZCmentarza != null) {
             przyciskWskrzesKarteZCmentarza.setVisible(false);
             przyciskWskrzesKarteZCmentarza.setManaged(false);
             przyciskWskrzesKarteZCmentarza.setDisable(true);
-            // Domyślny tekst można ustawić w pokazPanelCmentarza zależnie od trybu
         }
         if(cmentarzListaKartFlowPane != null) {
             for(Node node : cmentarzListaKartFlowPane.getChildren()){
@@ -723,23 +707,10 @@ public class KontrolerPlanszyGry {
         if (cmentarzOpisPowiekszonejKartyLabel != null) cmentarzOpisPowiekszonejKartyLabel.setText("Wybierz kartę z listy...");
     }
 
-    @FXML
-    private void handleZamknijPanelCmentarzaAction() {
-        if (panelCmentarza != null) {
-            panelCmentarza.setVisible(false);
-        }
-        if(cmentarzListaKartFlowPane != null) cmentarzListaKartFlowPane.getChildren().clear();
-        if(cmentarzPowiekszonaKartaImageView != null) cmentarzPowiekszonaKartaImageView.setImage(null);
-        if(cmentarzOpisPowiekszonejKartyLabel != null) cmentarzOpisPowiekszonejKartyLabel.setText("");
-
-        this.kartaPodgladanaZCmentarza = null;
-        // USUNIĘTO: Logika związana z trybem wskrzeszania (trybWskrzeszaniaAktywny, itp.)
-    }
-
+    //Handler dla przycisku "Zamknij" w panelu cmentarza. Anuluje ewentualną aktywną operację (np. wskrzeszanie) i chowa panel.
     @FXML
     private void handleZamknijCmentarzAction() {
         panelCmentarza.setVisible(false);
-        // Poinformuj silnik o anulowaniu, jeśli panel był w trybie interakcji
         if (silnikGry != null) {
             switch (aktualnyTrybPaneluCmentarza) {
                 case WSKRZESZANIE_MEDYK:
@@ -751,34 +722,32 @@ public class KontrolerPlanszyGry {
                     silnikGry.anulujWyborDlaEmhyra();
                     break;
                 case EREDIN_ZABOJCA_AUBERONA_415:
-                    if (silnikGry.getGraczAktywujacyEredina415() != null) { // Użyj gettera
-                        silnikGry.anulujZdolnoscEredina415(false); // false = anulowanie przez gracza
+                    if (silnikGry.getGraczAktywujacyEredina415() != null) {
+                        silnikGry.anulujZdolnoscEredina415(false);
                     }
                     break;
                 default:
-                    // Brak specjalnej akcji anulowania dla trybu PODGLAD
                     break;
             }
         }
-        resetStatePoOperacjiNaCmentarzu(); // Zawsze resetuj stan kontrolera
+        resetStatePoOperacjiNaCmentarzu();
     }
 
+    //Uruchamia tryb wyboru celu dla karty "Manekin do ćwiczeń". Podświetla na planszy wszystkie dozwolone cele (karty jednostek, które nie są bohaterami).
     public void rozpocznijWyborCeluDlaManekina(Gracz graczCelujacy, List<Karta> poprawneCele) {
         if (silnikGry == null || silnikGry.isCzyGraZakonczona() || graczCelujacy == null || poprawneCele == null || poprawneCele.isEmpty()) {
             wyswietlKomunikatNaPlanszy("Brak celów dla Manekina lub błąd stanu.", true);
-            if (silnikGry != null && graczCelujacy != null) { // Dodatkowe sprawdzenie graczCelujacy
+            if (silnikGry != null && graczCelujacy != null) {
                 silnikGry.anulujZagranieManekina(graczCelujacy, true);
             } else if (silnikGry != null && silnikGry.getGraczUzywajacyManekina() != null) { // Fallback
                 silnikGry.anulujZagranieManekina(silnikGry.getGraczUzywajacyManekina(), true);
             }
-            resetujStanZaznaczonejKarty(); // To powinno wywołać resetujTrybWyboruCeluManekina
+            resetujStanZaznaczonejKarty();
             return;
         }
 
         this.trybWyboruCeluDlaManekina = true;
-        usunPodswietlenieRzedowISlotow(); // Czyści poprzednie style, ale niekoniecznie efekty na kartach
-        // jeśli resetujTrybWyboruCeluManekina nie był wywołany poprawnie wcześniej.
-        // Dla pewności, wyczyśćmy efekty przed nowym podświetleniem.
+        usunPodswietlenieRzedowISlotow();
         wyczyscEfektyKartNaPlanszyGracza(graczCelujacy);
 
 
@@ -797,16 +766,13 @@ public class KontrolerPlanszyGry {
                         Karta kartaNaPlanszy = (Karta) obrazekKarty.getUserData();
 
                         if (kartaNaPlanszy != null && poprawneCele.contains(kartaNaPlanszy)) {
-                            // Zamiast podswietlElement(obrazekKarty), użyj nowego efektu:
                             obrazekKarty.setEffect(decoyTargetGlowEffect);
-                            // Nie dodajemy już do podswietloneCele, bo reset efektów będzie globalny
-                            // dla kart na planszy gracza lub przez odswiezCalakolwiekPlansze.
 
                             obrazekKarty.setCursor(Cursor.HAND);
                             obrazekKarty.setOnMouseClicked(this::handleKartaNaPlanszyKliknietaDlaManekina);
                             znalezionoCoPodswietlic = true;
                         } else {
-                            obrazekKarty.setEffect(null); // Upewnij się, że inne karty nie mają efektu
+                            obrazekKarty.setEffect(null);
                             obrazekKarty.setCursor(Cursor.DEFAULT);
                             obrazekKarty.setOnMouseClicked(null);
                         }
@@ -816,15 +782,13 @@ public class KontrolerPlanszyGry {
         }
         if (!znalezionoCoPodswietlic) {
             wyswietlKomunikatNaPlanszy("Brak jednostek do zamiany z Manekinem!", true);
-            if (silnikGry != null && graczCelujacy != null) { // Dodatkowe sprawdzenie
+            if (silnikGry != null && graczCelujacy != null) {
                 silnikGry.anulujZagranieManekina(graczCelujacy, true);
             }
-            // resetujTrybWyboruCeluManekina() jest częścią resetujStanZaznaczonejKarty(),
-            // a anulujZagranieManekina powinno prowadzić do resetu stanu.
         }
     }
 
-    // Dodaj tę metodę pomocniczą do czyszczenia efektów z kart na planszy danego gracza
+    //Metoda pomocnicza, która usuwa wszystkie efekty wizualne (np. podświetlenie)
     private void wyczyscEfektyKartNaPlanszyGracza(Gracz gracz) {
         if (gracz == null) return;
 
@@ -842,6 +806,8 @@ public class KontrolerPlanszyGry {
             }
         }
     }
+
+    //Handler dla kliknięcia na kartę-jednostkę na planszy w trybie wyboru celu dla Manekina. Przekazuje wybraną jednostkę do SilnikaGry w celu dokonania zamiany.
     private void handleKartaNaPlanszyKliknietaDlaManekina(MouseEvent event) {
         if (!trybWyboruCeluDlaManekina || silnikGry == null) return;
 
@@ -849,13 +815,12 @@ public class KontrolerPlanszyGry {
         if (source instanceof ImageView) {
             ImageView kliknietyObrazek = (ImageView) source;
             Karta wybranaJednostka = (Karta) kliknietyObrazek.getUserData();
-            Node rodzicObrazka = kliknietyObrazek.getParent(); // To powinien być HBox rzędu
+            Node rodzicObrazka = kliknietyObrazek.getParent();
 
             if (wybranaJednostka != null && wybranaJednostka.getTyp() != TypKartyEnum.BOHATER && rodzicObrazka instanceof HBox) {
                 HBox rzadHBox = (HBox) rodzicObrazka;
-                int indeksWRzedzie = rzadHBox.getChildren().indexOf(kliknietyObrazek); // Indeks w HBoxie
+                int indeksWRzedzie = rzadHBox.getChildren().indexOf(kliknietyObrazek);
 
-                // Znajdź odpowiedni obiekt RzadPlanszy na podstawie HBoxu
                 RzadPlanszy rzadPochodzenia = null;
                 Gracz wlascicielRzedu = null;
 
@@ -866,46 +831,27 @@ public class KontrolerPlanszyGry {
                 else if (rzadHBox == rzadStrzeleckiG2HBox) { rzadPochodzenia = silnikGry.getGracz2().getPlanszaGry().getRzadStrzelecki(); wlascicielRzedu = silnikGry.getGracz2(); }
                 else if (rzadHBox == rzadOblezeniaG2HBox) { rzadPochodzenia = silnikGry.getGracz2().getPlanszaGry().getRzadOblezenia(); wlascicielRzedu = silnikGry.getGracz2(); }
 
-                if (rzadPochodzenia != null && indeksWRzedzie != -1 && silnikGry.getGraczAktualnejTury() == wlascicielRzedu) { // Upewnij się, że gracz klika na swoją kartę
+                if (rzadPochodzenia != null && indeksWRzedzie != -1 && silnikGry.getGraczAktualnejTury() == wlascicielRzedu) {
                     System.out.println("[KONTROLER] Wybrano jednostkę '" + wybranaJednostka.getNazwa() + "' dla Manekina w rzędzie " + rzadPochodzenia.getTypRzedu() + " na indeksie " + indeksWRzedzie);
 
-                    // Przekaż informację do silnika gry
-                    // Gracz aktualnej tury to ten, kto używa manekina
                     silnikGry.wykonajZamianeManekinem(silnikGry.getGraczAktualnejTury(), wybranaJednostka, rzadPochodzenia, indeksWRzedzie);
                 } else {
                     System.err.println("[KONTROLER] Błąd przy wyborze celu dla Manekina - nie znaleziono rzędu lub indeksu, lub próba wyboru karty przeciwnika.");
                 }
             } else {
-                // Kliknięto na Bohatera lub nieprawidłowy element
                 wyswietlKomunikatNaPlanszy("Manekinem można zamienić tylko zwykłą jednostkę (nie Bohatera).", true);
             }
-            // Zawsze resetuj tryb wyboru i podświetlenie po kliknięciu
             resetujTrybWyboruCeluManekina();
         }
     }
 
+    //Metoda pomocnicza, która wyłącza tryb wyboru celu dla Manekina i czyści podświetlenie z kart na planszy.
     private void resetujTrybWyboruCeluManekina() {
         this.trybWyboruCeluDlaManekina = false;
-        usunPodswietlenieRzedowISlotow(); // To czyści style (tło, ramki) z listy podswietloneCele
+        usunPodswietlenieRzedowISlotow();
 
-        // Dodatkowe czyszczenie efektów poświaty z kart na planszy gracza,
-        // który używał manekina.
         Gracz graczUzywajacyManekina = null;
         if (silnikGry != null) {
-            // Spróbuj uzyskać gracza, który faktycznie używał manekina (z silnika)
-            // Wcześniej mieliśmy pole this.graczUzywajacyManekina w SilnikGry
-            // Jeśli taka referencja jest dostępna przez getter:
-            // graczUzywajacyManekina = silnikGry.getGraczUzywajacyManekinaAktualnie(); // Załóżmy, że jest taki getter
-            // Jeśli nie, użyjemy gracza aktualnej tury jako przybliżenie,
-            // chociaż może to nie być idealne, jeśli tura zdążyła się zmienić.
-            // Jednak Manekin operuje na kartach gracza, który go zagrał.
-            // Gracz, który używał manekina jest przechowywany w SilnikGry jako this.graczUzywajacyManekina
-            // ale potrzebujemy do niego dostępu.
-            // Załóżmy na razie, że odswiezCalakolwiekPlansze() na końcu sobie z tym poradzi,
-            // lub musimy mieć pewność, który gracz był aktywny.
-            // Silnik gry po udanej zamianie manekinem (lub anulowaniu) powinien wywołać odswiezCalakolwiekPlansze,
-            // co przebuduje ImageView i efekty znikną.
-            // Dla pewności, dodajmy jednak czyszczenie.
 
             Gracz graczKtoregoKartyCzyscic = silnikGry.getGraczUzywajacyManekina(); // Jeśli masz taki getter w SilnikGry
             if (graczKtoregoKartyCzyscic == null) { // Fallback, jeśli getter nie istnieje lub zwrócił null
@@ -916,21 +862,17 @@ public class KontrolerPlanszyGry {
             if (graczKtoregoKartyCzyscic != null) {
                 wyczyscEfektyKartNaPlanszyGracza(graczKtoregoKartyCzyscic);
             } else {
-                // Jeśli nie możemy ustalić gracza, wyczyśćmy dla obu na wszelki wypadek (choć to mniej optymalne)
                 if(obiektGracz1 != null) wyczyscEfektyKartNaPlanszyGracza(obiektGracz1);
                 if(obiektGracz2 != null) wyczyscEfektyKartNaPlanszyGracza(obiektGracz2);
             }
         }
 
-
-        // Przywróć domyślne handlery kliknięć dla kart na planszy (ważne!)
-        // Najprościej jest odświeżyć całą planszę, co przywróci standardowe interakcje.
         odswiezCalakolwiekPlansze();
         System.out.println("[KONTROLER] Zresetowano tryb wyboru celu dla Manekina.");
     }
 
+    //Wyświetla na ekranie panel informacyjny o tym, że jeden z graczy spasował. Panel znika automatycznie po kilku sekundach.
     public void pokazPanelInfoPas(Gracz ktoSpasowal) {
-        // Sprawdzamy tylko te elementy, które pozostały (bez przycisku)
         if (panelInfoPas == null || pasGrafikaImageView == null || pasInfoLabel == null || ktoSpasowal == null || ktoSpasowal.getProfilUzytkownika() == null) {
             System.err.println("Błąd: Nie można pokazać panelu informacji o pasie - brak elementów UI lub danych gracza.");
             if (silnikGry != null) {
@@ -947,7 +889,6 @@ public class KontrolerPlanszyGry {
         }
         pasInfoLabel.setText(ktoSpasowal.getProfilUzytkownika().getNazwaUzytkownika() + " spasował!");
 
-        // Ukryj inne potencjalnie aktywne panele overlay
         if (panelRzutuMonetaOverlay != null) panelRzutuMonetaOverlay.setVisible(false);
         if (panelZmianyTury != null) panelZmianyTury.setVisible(false);
         if (panelAktywacjiDowodcy != null) panelAktywacjiDowodcy.setVisible(false);
@@ -955,26 +896,25 @@ public class KontrolerPlanszyGry {
         panelInfoPas.setVisible(true);
         panelInfoPas.toFront();
 
-        // Automatyczne znikanie panelu po określonym czasie
-        PauseTransition pauzaInfoPas = new PauseTransition(Duration.seconds(3.0)); // Panel będzie widoczny przez 3 sekundy
+        PauseTransition pauzaInfoPas = new PauseTransition(Duration.seconds(0));
         pauzaInfoPas.setOnFinished(event -> {
             if (panelInfoPas != null) {
                 panelInfoPas.setVisible(false);
             }
             if (silnikGry != null) {
-                silnikGry.kontynuujPoWyswietleniuInfoOPasie(); // Sygnalizuj silnikowi, aby kontynuował
+                silnikGry.kontynuujPoWyswietleniuInfoOPasie();
             }
         });
         pauzaInfoPas.play();
     }
 
+    //Wyświetla panel podsumowujący całą grę, informując o zwycięzcy lub remisie. Pokazuje również historię wyników poszczególnych rund.
     public void pokazPanelKoncaGry(Gracz zwyciezcaGry, boolean czyRemisGry, List<String> historiaRund) {
         if (panelKoncaGry == null || grafikaKoncaGryImageView == null || napisKoncowyLabel == null || wynikiRundKontener == null) {
             System.err.println("Błąd krytyczny: Elementy panelu końca gry nie są zainicjalizowane!");
             return;
         }
 
-        // Ukryj inne aktywne panele overlay
         if (panelRzutuMonetaOverlay != null) panelRzutuMonetaOverlay.setVisible(false);
         if (panelZmianyTury != null) panelZmianyTury.setVisible(false);
         if (panelInfoPas != null) panelInfoPas.setVisible(false);
@@ -989,12 +929,11 @@ public class KontrolerPlanszyGry {
             obrazekDoWyswietlenia = obrazekKoniecRemisPng;
         } else if (zwyciezcaGry != null && zwyciezcaGry.getProfilUzytkownika() != null) {
             komunikatGlowny = "WYGRYWA: " + zwyciezcaGry.getProfilUzytkownika().getNazwaUzytkownika() + "!";
-            // Załóżmy, że obiektGracz1 to "główny" gracz z perspektywy UI
             if (zwyciezcaGry == obiektGracz1) {
                 obrazekDoWyswietlenia = obrazekKoniecWygranaPng;
-            } else { // Wygrał obiektGracz2
-                obrazekDoWyswietlenia = obrazekKoniecPrzegranaPng; // Użyj grafiki przegranej, jeśli ją masz
-                if (obrazekDoWyswietlenia == null) obrazekDoWyswietlenia = obrazekKoniecWygranaPng; // Fallback na wygraną (np. dla AI)
+            } else {
+                obrazekDoWyswietlenia = obrazekKoniecPrzegranaPng;
+                if (obrazekDoWyswietlenia == null) obrazekDoWyswietlenia = obrazekKoniecWygranaPng;
             }
         } else {
             komunikatGlowny = "GRA ZAKOŃCZONA"; // Sytuacja awaryjna
@@ -1009,12 +948,11 @@ public class KontrolerPlanszyGry {
             grafikaKoncaGryImageView.setVisible(false);
         }
 
-        // Wyświetlanie historii rund
-        wynikiRundKontener.getChildren().clear(); // Wyczyść poprzednie wyniki, jeśli były
+        wynikiRundKontener.getChildren().clear();
         if (historiaRund != null) {
             for (String wynikRundy : historiaRund) {
                 Label labelRundy = new Label(wynikRundy);
-                labelRundy.setTextFill(Color.LIGHTSTEELBLUE); // Kolor tekstu dla wyników rund
+                labelRundy.setTextFill(Color.LIGHTSTEELBLUE);
                 labelRundy.setStyle("-fx-font-size: 16px; -fx-font-style: italic;");
                 wynikiRundKontener.getChildren().add(labelRundy);
             }
@@ -1026,32 +964,29 @@ public class KontrolerPlanszyGry {
         panelKoncaGry.toFront();
     }
 
+    //Wstrzykuje referencję do głównej klasy aplikacji, umożliwiając kontrolerowi komunikację z innymi częściami programu (np. zmianę ekranów, dostęp do menedżera muzyki).
     public void setApp(PixelGwintAplikacja app) {
         this.pixelGwintAplikacja = app;
     }
 
-    public void inicjalizujGre(Gracz gracz1, Gracz gracz2, Gracz graczRozpoczynajacyOtrzymany) { // graczRozpoczynajacyOtrzymany jest zawsze null z PixelGwintAplikacja
+    //Główna metoda konfigurująca nową grę. Otrzymuje obiekty graczy z poprzednich ekranów, inicjalizuje interfejs planszy danymi graczy i rozpoczyna sekwencję
+    //wyboru gracza rozpoczynającego (zdolność Scoia'tael lub rzut monetą).
+    public void inicjalizujGre(Gracz gracz1, Gracz gracz2, Gracz graczRozpoczynajacyOtrzymany) {
         if (pixelGwintAplikacja != null && pixelGwintAplikacja.getMenedzerMuzyki() != null) {
             System.out.println("[KontrolerPlanszyGry] Inicjalizacja gry, uruchamianie muzyki z gry.");
-            pixelGwintAplikacja.getMenedzerMuzyki().uruchomPlaylistGry(true); // true = przetasuj
+            pixelGwintAplikacja.getMenedzerMuzyki().uruchomPlaylistGry(true);
         }
 
         this.obiektGracz1 = gracz1;
         this.obiektGracz2 = gracz2;
-        this.wylosowanyGraczRozpoczynajacy = null; // Reset przed podjęciem decyzji
+        this.wylosowanyGraczRozpoczynajacy = null;
 
-        // Logowanie otrzymanych parametrów
         System.out.println("[KONTROLER PLANSZY (inicjalizujGre)] Otrzymano gracz1: " +
                 (gracz1 != null && gracz1.getProfilUzytkownika() != null ? gracz1.getProfilUzytkownika().getNazwaUzytkownika() : (gracz1 == null ? "gracz1 jest NULL" : "profil gracza1 jest NULL")) +
                 " (Obiekt ID: " + System.identityHashCode(gracz1) + ")");
         System.out.println("[KONTROLER PLANSZY (inicjalizujGre)] Otrzymano gracz2: " +
                 (gracz2 != null && gracz2.getProfilUzytkownika() != null ? gracz2.getProfilUzytkownika().getNazwaUzytkownika() : (gracz2 == null ? "gracz2 jest NULL" : "profil gracza2 jest NULL")) +
                 " (Obiekt ID: " + System.identityHashCode(gracz2) + ")");
-        // graczRozpoczynajacyOtrzymany jest zawsze null, więc ten log nie jest już tak istotny:
-        // System.out.println("[KONTROLER PLANSZY (inicjalizujGre)] Otrzymano graczRozpoczynajacyOtrzymany: " +
-        //        (graczRozpoczynajacyOtrzymany != null && graczRozpoczynajacyOtrzymany.getProfilUzytkownika() != null ? graczRozpoczynajacyOtrzymany.getProfilUzytkownika().getNazwaUzytkownika() : "NULL lub jego profil jest NULL") +
-        //        " (Obiekt ID: " + System.identityHashCode(graczRozpoczynajacyOtrzymany) + ")");
-
         if (this.obiektGracz1 == null || this.obiektGracz1.getProfilUzytkownika() == null) {
             System.err.println("[KONTROLER PLANSZY (inicjalizujGre)] BŁĄD KRYTYCZNY: obiektGracz1 lub jego profil jest null!");
             wyswietlKomunikatNaPlanszy("Błąd inicjalizacji gracza 1!", true);
@@ -1065,26 +1000,22 @@ public class KontrolerPlanszyGry {
 
         System.out.println("Inicjalizowanie gry dla: " + this.obiektGracz1.getProfilUzytkownika().getNazwaUzytkownika() + " vs " + this.obiektGracz2.getProfilUzytkownika().getNazwaUzytkownika());
 
-        // Ustawianie elementów UI związanych z graczami
         nickGracza1Label.setText(this.obiektGracz1.getProfilUzytkownika().getNazwaUzytkownika());
         logoGracza1ImageView.setImage(ladujObrazekProfiluLubRewersuFrakcji(this.obiektGracz1.getProfilUzytkownika().getNazwaPlikuIkonyProfilu(), this.obiektGracz1.getWybranaFrakcja()));
         if (this.obiektGracz1.getKartaDowodcy() != null) {
-            // Przy starcie gry zdolność nie jest użyta, więc pokazujemy awers
             dowodcaGracza1ImageView.setImage(ladujObrazekKarty(this.obiektGracz1.getKartaDowodcy()));
         } else {
-            dowodcaGracza1ImageView.setImage(null); // Brak karty dowódcy
+            dowodcaGracza1ImageView.setImage(null);
         }
 
         nickGracza2Label.setText(this.obiektGracz2.getProfilUzytkownika().getNazwaUzytkownika());
         logoGracza2ImageView.setImage(ladujObrazekProfiluLubRewersuFrakcji(this.obiektGracz2.getProfilUzytkownika().getNazwaPlikuIkonyProfilu(), this.obiektGracz2.getWybranaFrakcja()));
         if (this.obiektGracz2.getKartaDowodcy() != null) {
-            // Przy starcie gry zdolność nie jest użyta
             dowodcaGracza2ImageView.setImage(ladujObrazekKarty(this.obiektGracz2.getKartaDowodcy()));
         } else {
             dowodcaGracza2ImageView.setImage(null);
         }
 
-        // Ustawianie tła planszy (kod bez zmian)
         if (glownyKontenerPlanszy != null) {
             glownyKontenerPlanszy.setStyle(null);
             boolean tloUstawione = false;
@@ -1115,7 +1046,6 @@ public class KontrolerPlanszyGry {
             System.err.println("[KONTROLER PLANSZY (inicjalizujGre)] glownyKontenerPlanszy jest null!");
         }
 
-        // Wczytywanie kart, jeśli jeszcze nie wczytane (kod bez zmian)
         if (this.wszystkieKartyWGrzeCache == null) {
             this.wszystkieKartyWGrzeCache = WczytywaczKart.wczytajWszystkieKarty();
             if (this.wszystkieKartyWGrzeCache.isEmpty()) {
@@ -1123,17 +1053,12 @@ public class KontrolerPlanszyGry {
                 return;
             }
         }
-
-        // --- POCZĄTEK LOGIKI DLA SCOIA'TAEL ---
         boolean g1JestScoiatael = (this.obiektGracz1.getWybranaFrakcja() == FrakcjaEnum.SCOIATAEL);
         boolean g2JestScoiatael = (this.obiektGracz2.getWybranaFrakcja() == FrakcjaEnum.SCOIATAEL);
         Gracz graczMajacyPrawoWyboru = null;
 
         if (g1JestScoiatael && g2JestScoiatael) {
-            // Obaj gracze to Scoia'tael. Rozstrzygnij losowo lub daj wybór Graczowi 1.
-            // Dla uproszczenia, zróbmy standardowy rzut monetą.
             System.out.println("[KONTROLER PLANSZY] Obaj gracze to Scoia'tael. Nastąpi standardowy rzut monetą.");
-            // graczMajacyPrawoWyboru pozostaje null, co spowoduje rzut monetą.
         } else if (g1JestScoiatael) {
             graczMajacyPrawoWyboru = this.obiektGracz1;
             System.out.println("[KONTROLER PLANSZY] Gracz 1 (" + this.obiektGracz1.getProfilUzytkownika().getNazwaUzytkownika() + " - Scoia'tael) decyduje, kto rozpoczyna.");
@@ -1143,24 +1068,20 @@ public class KontrolerPlanszyGry {
         }
 
         if (graczMajacyPrawoWyboru != null) {
-            // Jeden z graczy jest Scoia'tael i ma prawo wyboru
             pokazPanelWyboruRozpoczynajacegoScoiatael(graczMajacyPrawoWyboru);
         } else {
-            // Żaden z graczy nie jest Scoia'tael LUB obaj są i zdecydowaliśmy o rzucie monetą
             System.out.println("[KONTROLER PLANSZY] Brak decydującego gracza Scoia'tael lub obaj są Scoia'tael. Przechodzenie do standardowego rzutu monetą.");
             rozpocznijSekwencjeRzutuMonetaNaPlanszy();
         }
-        // --- KONIEC LOGIKI DLA SCOIA'TAEL ---
 
-        // Usunięto bezpośrednie wywołanie rozpocznijSekwencjeRzutuMonetaNaPlanszy() stąd,
-        // ponieważ jest ono teraz częścią powyższej logiki warunkowej.
     }
+
+    //Wyświetla specjalny panel, gdy jeden z graczy gra frakcją Scoia'tael, dając mu prawo do zdecydowania, kto rozpocznie pierwszą rundę.
     private void pokazPanelWyboruRozpoczynajacegoScoiatael(Gracz graczDecydujacy) {
         if (panelWyboruRozpoczynajacegoScoiatael == null || tytulPaneluScoiatael == null ||
                 przyciskScoiataelJaZaczynam == null || przyciskScoiataelPrzeciwnikZaczyna == null ||
                 graczDecydujacy == null || graczDecydujacy.getProfilUzytkownika() == null) {
             System.err.println("Błąd UI: Nie można pokazać panelu wyboru Scoia'tael - brak elementów lub danych gracza.");
-            // Awaryjnie, jeśli panel nie działa, przejdź do standardowego rzutu monetą
             rozpocznijSekwencjeRzutuMonetaNaPlanszy();
             return;
         }
@@ -1174,7 +1095,7 @@ public class KontrolerPlanszyGry {
 
         if (przeciwnik != null && przeciwnik.getProfilUzytkownika() != null) {
             przyciskScoiataelPrzeciwnikZaczyna.setText(przeciwnik.getProfilUzytkownika().getNazwaUzytkownika() + " Zaczyna");
-        } else { // Powinno się nie zdarzyć przy poprawnej inicjalizacji
+        } else {
             przyciskScoiataelPrzeciwnikZaczyna.setText("Przeciwnik Zaczyna");
         }
 
@@ -1183,17 +1104,19 @@ public class KontrolerPlanszyGry {
         panelWyboruRozpoczynajacegoScoiatael.toFront();
     }
 
+    //Handler dla przycisku "Ja Zaczynam" na panelu wyboru Scoia'tael. Ustawia gracza decydującego jako rozpoczynającego grę.
     @FXML
     private void handleScoiataelJaZaczynamAction() {
         if (graczDecydujacyScoiatael != null && panelWyboruRozpoczynajacegoScoiatael != null) {
             this.wylosowanyGraczRozpoczynajacy = graczDecydujacyScoiatael;
             System.out.println("[KONTROLER PLANSZY] Scoia'tael wybrał: " + this.wylosowanyGraczRozpoczynajacy.getProfilUzytkownika().getNazwaUzytkownika() + " zaczyna.");
             panelWyboruRozpoczynajacegoScoiatael.setVisible(false);
-            graczDecydujacyScoiatael = null; // Zresetuj po użyciu
+            graczDecydujacyScoiatael = null;
             kontynuujGrePoUstaleniuRozpoczynajacego();
         }
     }
 
+    //Handler dla przycisku "Przeciwnik Zaczyna" na panelu wyboru Scoia'tael. Ustawia przeciwnika gracza decydującego jako rozpoczynającego grę.
     @FXML
     private void handleScoiataelPrzeciwnikZaczynaAction() {
         if (graczDecydujacyScoiatael != null && panelWyboruRozpoczynajacegoScoiatael != null) {
@@ -1202,19 +1125,17 @@ public class KontrolerPlanszyGry {
             if (this.wylosowanyGraczRozpoczynajacy != null && this.wylosowanyGraczRozpoczynajacy.getProfilUzytkownika() != null) {
                 System.out.println("[KONTROLER PLANSZY] Scoia'tael wybrał: " + this.wylosowanyGraczRozpoczynajacy.getProfilUzytkownika().getNazwaUzytkownika() + " zaczyna.");
             } else {
-                // Awaryjne, jeśli przeciwnik jest null - nie powinno się zdarzyć
                 System.err.println("[KONTROLER PLANSZY] Błąd krytyczny przy wyborze przeciwnika przez Scoia'tael.");
                 this.wylosowanyGraczRozpoczynajacy = randomDoRzutu.nextBoolean() ? obiektGracz1 : obiektGracz2; // Awaryjny rzut
             }
             panelWyboruRozpoczynajacegoScoiatael.setVisible(false);
-            graczDecydujacyScoiatael = null; // Zresetuj po użyciu
+            graczDecydujacyScoiatael = null;
             kontynuujGrePoUstaleniuRozpoczynajacego();
         }
     }
 
-
+    //Wyświetla panel rzutu monetą i uruchamia animację losującą gracza, który rozpocznie pierwszą rundę.
     private void rozpocznijSekwencjeRzutuMonetaNaPlanszy() {
-        // Sprawdzamy tylko te elementy, które pozostały
         if (panelRzutuMonetaOverlay == null || infoRzutuLabel == null || monetaDoRzutuImageView == null) {
             System.err.println("Błąd krytyczny: Elementy UI panelu rzutu monetą nie są zainicjalizowane! Awaryjne losowanie.");
             this.wylosowanyGraczRozpoczynajacy = randomDoRzutu.nextBoolean() ? obiektGracz1 : obiektGracz2;
@@ -1229,22 +1150,23 @@ public class KontrolerPlanszyGry {
         panelRzutuMonetaOverlay.setVisible(true);
         panelRzutuMonetaOverlay.toFront();
 
-        uruchomAnimacjeRzutuMoneta(); // Od razu uruchom animację
+        uruchomAnimacjeRzutuMoneta();
     }
+
+    //Przeprowadza animację monety, a po jej zakończeniu losuje wynik i wyświetla go na ekranie.
     private void uruchomAnimacjeRzutuMoneta() {
         if (coin1ImageRzut == null || coin2ImageRzut == null || monetaDoRzutuImageView == null || infoRzutuLabel == null) {
             System.err.println("Błąd: Nie można uruchomić animacji rzutu monetą - brak zasobów.");
-            // Awaryjnie zakończ rzut i kontynuuj
             this.wylosowanyGraczRozpoczynajacy = randomDoRzutu.nextBoolean() ? obiektGracz1 : obiektGracz2;
             panelRzutuMonetaOverlay.setVisible(false);
             kontynuujGrePoUstaleniuRozpoczynajacego();
             return;
         }
 
-        infoRzutuLabel.setText("Losowanie..."); // Napis podczas animacji
+        infoRzutuLabel.setText("Losowanie...");
 
-        final int liczbaZmian = 15; // Około 3 sekundy (15 * 200ms = 3000ms)
-        final double czasTrwaniaJednejZmiany = 200; // ms
+        final int liczbaZmian = 15;
+        final double czasTrwaniaJednejZmiany = 200;
 
         if (animacjaMonetyNaPlanszy != null) {
             animacjaMonetyNaPlanszy.stop();
@@ -1270,7 +1192,7 @@ public class KontrolerPlanszyGry {
 
             System.out.println("[KONTROLER PLANSZY] Rzut monetą zakończony. Rozpoczyna: " + this.wylosowanyGraczRozpoczynajacy.getProfilUzytkownika().getNazwaUzytkownika());
 
-            PauseTransition pauzaPoRzucie = new PauseTransition(Duration.seconds(2)); // Pauza 2s na wynik
+            PauseTransition pauzaPoRzucie = new PauseTransition(Duration.seconds(2));
             pauzaPoRzucie.setOnFinished(e -> {
                 if (panelRzutuMonetaOverlay != null) panelRzutuMonetaOverlay.setVisible(false);
                 kontynuujGrePoUstaleniuRozpoczynajacego();
@@ -1279,20 +1201,21 @@ public class KontrolerPlanszyGry {
         });
         animacjaMonetyNaPlanszy.play();
     }
+
+    //Metoda wywoływana po zakończeniu rzutu monetą lub wyboru przez Scoia'tael. Tworzy nową instancję SilnikaGry i rozpoczyna faktyczną rozgrywkę.
     private void kontynuujGrePoUstaleniuRozpoczynajacego() {
         if (this.wylosowanyGraczRozpoczynajacy == null) {
             System.err.println("Błąd krytyczny: Nie ustalono gracza rozpoczynającego przed utworzeniem silnika gry!");
-            // Awaryjne przypisanie, jeśli coś poszło nie tak
             this.wylosowanyGraczRozpoczynajacy = (obiektGracz1 != null) ? obiektGracz1 : obiektGracz2;
-            if (this.wylosowanyGraczRozpoczynajacy == null) { // Ostateczna awaria
+            if (this.wylosowanyGraczRozpoczynajacy == null) {
                 wyswietlKomunikatNaPlanszy("Błąd krytyczny inicjalizacji gry!", true); return;
             }
         }
         System.out.println("[KONTROLER PLANSZY] Tworzenie silnika gry. Faktycznie rozpoczyna: " + wylosowanyGraczRozpoczynajacy.getProfilUzytkownika().getNazwaUzytkownika());
-        // Teraz tworzymy silnik gry, przekazując ustalonego gracza rozpoczynającego
         this.silnikGry = new SilnikGry(this.obiektGracz1, this.obiektGracz2, this.wylosowanyGraczRozpoczynajacy, this, this.wszystkieKartyWGrzeCache);
-        this.silnikGry.rozpocznijGre(); // To zainicjuje pierwszą rundę i pokaże panel "Tura gracza..."
+        this.silnikGry.rozpocznijGre();
     }
+
 
     private Image ladujObrazekKarty(Karta karta) {
         if (karta == null || karta.getGrafika() == null || karta.getGrafika().isEmpty()) return null;
@@ -1353,13 +1276,11 @@ public class KontrolerPlanszyGry {
     private Image ladujRewersDowodcy(FrakcjaEnum frakcja) {
         if (frakcja == null) {
             System.err.println("Nie można załadować rewersu dowódcy - frakcja jest null.");
-            // Możesz zwrócić domyślny rewers ogólny, jeśli taki masz, lub null
-            try (InputStream stream = getClass().getResourceAsStream("/grafiki/karty/rewers_ogolny.png")) { // Awaryjny rewers
+            try (InputStream stream = getClass().getResourceAsStream("/grafiki/karty/rewers_ogolny.png")) {
                 if (stream != null) return new Image(stream);
             } catch (Exception e) { /* ignoruj */ }
             return null;
         }
-        // Użyj istniejącej metody do ładowania rewersu frakcji
         Image rewersFrakcji = ladujObrazekRewersuFrakcji(frakcja);
         if (rewersFrakcji == null) {
             System.err.println("Nie udało się załadować rewersu frakcji dla " + frakcja.getNazwaWyswietlana() + " jako rewersu dowódcy.");
@@ -1367,6 +1288,7 @@ public class KontrolerPlanszyGry {
         return rewersFrakcji;
     }
 
+    //Metoda pomocnicza, która tworzy i konfiguruje obiekt ImageView dla podanej karty.
     private ImageView stworzWidokKarty(Karta karta, double szerokosc, double wysokosc) {
         ImageView obrazekKarty = new ImageView();
         obrazekKarty.setFitWidth(szerokosc);
@@ -1381,6 +1303,7 @@ public class KontrolerPlanszyGry {
         return obrazekKarty;
     }
 
+    //Metoda pomocnicza, która dynamicznie rysuje listę kart w podanym kontenerze HBox.
     private void wyswietlKartyWHBox(List<Karta> listaKart, HBox kontenerHBox,
                                     double szerokoscKarty, double wysokoscKarty,
                                     boolean czyPokazacRewersy) {
@@ -1389,8 +1312,6 @@ public class KontrolerPlanszyGry {
         if (listaKart == null || listaKart.isEmpty()) {
             kontenerHBox.setSpacing(0); return;
         }
-        // Alignment jest już ustawiony w FXML lub initialize()
-        // kontenerHBox.setAlignment(Pos.CENTER);
 
         double dostepnaSzerokosc = kontenerHBox.getPrefWidth() - (kontenerHBox.getPadding().getLeft() + kontenerHBox.getPadding().getRight());
         int liczbaKart = listaKart.size();
@@ -1450,14 +1371,11 @@ public class KontrolerPlanszyGry {
                         Karta kartaPdKurs = (Karta) target.getUserData();
                         if (podgladKartyImageView != null && kartaPdKurs != null) podgladKartyImageView.setImage(ladujObrazekKarty(kartaPdKurs));
                         target.setEffect(efektObramowkiHover);
-                        // target.setTranslateY(-15); // Usunięte dla stabilności HBox
-                        // target.toFront();
                     });
                     widokKarty.setOnMouseExited(event -> {
                         ImageView target = (ImageView) event.getSource();
                         if (podgladKartyImageView != null) podgladKartyImageView.setImage(null);
                         target.setEffect(null);
-                        // target.setTranslateY(0);
                     });
                 } else {
                     widokKarty.setCursor(Cursor.DEFAULT);
@@ -1479,7 +1397,7 @@ public class KontrolerPlanszyGry {
         }
     }
 
-    public void pokazPanelWynikuRundy(String komunikatDoWyswietlenia, Gracz zwyciezcaRundy, boolean czyBylRemisPunktowy) { // NOWA SYGNATURA
+    public void pokazPanelWynikuRundy(String komunikatDoWyswietlenia, Gracz zwyciezcaRundy, boolean czyBylRemisPunktowy) {
         if (panelWynikuRundy == null || grafikaWynikuRundyImageView == null || napisWynikuRundyLabel == null) {
             System.err.println("Błąd: Nie można pokazać panelu wyniku rundy - brak elementów UI.");
             if (silnikGry != null) {
@@ -1490,32 +1408,24 @@ public class KontrolerPlanszyGry {
 
         Image grafikaDoWyswietlenia = null;
         if (zwyciezcaRundy != null) {
-            // Jeśli jest zwycięzca, zawsze pokazujemy grafikę wygranej
-            // (nawet jeśli Nilfgaard wygrał po remisie, to jest to forma wygranej)
-            grafikaDoWyswietlenia = obrazekWygranaRundyPng; // Zakładam, że 'obrazekWygranaRundyPng' jest poprawnie załadowany w initialize()
+            grafikaDoWyswietlenia = obrazekWygranaRundyPng;
         } else if (czyBylRemisPunktowy) {
-            // Jeśli nie ma zwycięzcy (zwyciezcaRundy == null) ORAZ był remis punktowy
-            // (co oznacza, że obaj gracze stracili życie lub gra zakończyła się remisem bez przełamania przez Nilfgaard)
-            grafikaDoWyswietlenia = obrazekRemisRundyPng; // Zakładam, że 'obrazekRemisRundyPng' jest poprawnie załadowany
+            grafikaDoWyswietlenia = obrazekRemisRundyPng;
         }
-        // Jeśli ani jedno, ani drugie, grafikaDoWyswietlenia pozostanie null (np. błąd w logice silnika)
-
         if (grafikaDoWyswietlenia != null) {
             grafikaWynikuRundyImageView.setImage(grafikaDoWyswietlenia);
             grafikaWynikuRundyImageView.setVisible(true);
         } else {
             grafikaWynikuRundyImageView.setImage(null);
-            grafikaWynikuRundyImageView.setVisible(false); // Ukryj, jeśli nie ma odpowiedniej grafiki
+            grafikaWynikuRundyImageView.setVisible(false);
         }
         napisWynikuRundyLabel.setText(komunikatDoWyswietlenia);
 
-        // Ukryj inne potencjalnie aktywne panele overlay
-        ukryjWszystkiePaneleOverlayOprocz(panelWynikuRundy); // Upewnij się, że masz taką metodę pomocniczą
+        ukryjWszystkiePaneleOverlayOprocz(panelWynikuRundy);
 
         panelWynikuRundy.setVisible(true);
         panelWynikuRundy.toFront();
 
-        // Jeśli nie ma przycisku "Dalej", panel zniknie automatycznie
         if (przyciskDalejPoWynikuRundy == null || !przyciskDalejPoWynikuRundy.isVisible() || !przyciskDalejPoWynikuRundy.isManaged()) {
             PauseTransition pauzaWynikuRundy = new PauseTransition(Duration.seconds(4.0));
             pauzaWynikuRundy.setOnFinished(event -> {
@@ -1528,35 +1438,32 @@ public class KontrolerPlanszyGry {
             });
             pauzaWynikuRundy.play();
         }
-        // Jeśli jest przycisk "Dalej", to on wywoła handleDalejPoWynikuRundyAction,
-        // a w tej metodzie już jest logika przejścia dalej w silniku gry.
+
     }
+
+    //Handler dla przycisku "Dalej" na panelu wyniku rundy.
     @FXML
     private void handleDalejPoWynikuRundyAction() {
         if (panelWynikuRundy != null) {
             panelWynikuRundy.setVisible(false);
         }
         if (silnikGry != null) {
-            silnikGry.przejdzDoNastepnegoEtapuPoWynikuRundy(); // POPRAWNA NAZWA
+            silnikGry.przejdzDoNastepnegoEtapuPoWynikuRundy();
         }
     }
 
+    //Handler dla przycisku "Rewanż" na panelu końca gry. Inicjuje nową partię
     @FXML
     private void handleRewanzAction() {
         System.out.println("[KONTROLER PLANSZY] Wybrano REWANŻ.");
         if (panelKoncaGry != null) panelKoncaGry.setVisible(false);
 
         if (obiektGracz1 != null && obiektGracz2 != null && pixelGwintAplikacja != null) {
-            // Resetuj stan istniejących obiektów Gracz
             obiektGracz1.resetDoNowejGry();
             obiektGracz2.resetDoNowejGry();
-
-            // Ponownie inicjalizuj grę na tej samej instancji kontrolera.
-            // Metoda inicjalizujGre powinna stworzyć nowy SilnikGry.
-            inicjalizujGre(obiektGracz1, obiektGracz2, null); // null jako trzeci argument, aby wymusić rzut monetą na planszy
+            inicjalizujGre(obiektGracz1, obiektGracz2, null);
         } else {
             System.err.println("Nie można rozpocząć rewanżu - brak obiektów graczy lub aplikacji.");
-            // Awaryjnie, wróć do menu, jeśli stan jest niepoprawny
             if (pixelGwintAplikacja != null && pixelGwintAplikacja.getProfilGracza1() != null) {
                 pixelGwintAplikacja.pokazMenuGlowne(pixelGwintAplikacja.getProfilGracza1());
             } else if (pixelGwintAplikacja != null) {
@@ -1565,6 +1472,7 @@ public class KontrolerPlanszyGry {
         }
     }
 
+    //Handler dla przycisku "Menu Główne" na panelu końca gry.
     @FXML
     private void handleMenuGlowneZKoncaGryAction() {
         System.out.println("[KONTROLER PLANSZY] Wybrano POWRÓT DO MENU GŁÓWNEGO.");
@@ -1575,9 +1483,6 @@ public class KontrolerPlanszyGry {
 
         if (panelKoncaGry != null) panelKoncaGry.setVisible(false);
         if (pixelGwintAplikacja != null) {
-            // Wróć do menu głównego, przekazując profil zalogowanego użytkownika.
-            // Załóżmy, że obiektGracz1.getProfilUzytkownika() to główny zalogowany użytkownik.
-            // Jeśli graczem głównym mógł być też obiektGracz2, trzeba by to inaczej obsłużyć.
             Uzytkownik profilDoMenu = (obiektGracz1 != null) ? obiektGracz1.getProfilUzytkownika() : null;
             if (profilDoMenu == null && pixelGwintAplikacja.getProfilGracza1() != null) {
                 profilDoMenu = pixelGwintAplikacja.getProfilGracza1(); // Fallback
@@ -1587,12 +1492,12 @@ public class KontrolerPlanszyGry {
                 pixelGwintAplikacja.pokazMenuGlowne(profilDoMenu);
             } else {
                 System.err.println("Nie można wrócić do menu - brak profilu użytkownika. Pokazywanie ekranu logowania.");
-                pixelGwintAplikacja.pokazEkranLogowania(); // Ostateczność
+                pixelGwintAplikacja.pokazEkranLogowania();
             }
         }
     }
 
-
+    //Metoda odpowiedzialna za pełną synchronizację interfejsu graficznego z aktualnym stanem gry przechowywanym w modelu (w SilnikuGry). Wywoływana po każdej akcji zmieniającej stan planszy.
     public void odswiezCalakolwiekPlansze() {
         if (silnikGry == null) { return; }
         Gracz aktualnyG1 = silnikGry.getGracz1();
@@ -1645,7 +1550,6 @@ public class KontrolerPlanszyGry {
         wyswietlKartyWHBox(aktualnyG2.getReka(), rekaGracza2HBox,
                 STANDARDOWA_SZEROKOSC_KARTY, STANDARDOWA_WYSOKOSC_KARTY, !pokazujOdkryteG2);
 
-        // Aktualizacja wyświetlania rzędów gracza 1
         wyswietlKartyWHBox(stanRundy.getPlanszaGracza1().getRzadPiechoty().getKartyJednostekWRzedzie(),
                 rzadPiechotyG1HBox, STANDARDOWA_SZEROKOSC_KARTY, STANDARDOWA_WYSOKOSC_KARTY, false);
         wyswietlKartyWHBox(stanRundy.getPlanszaGracza1().getRzadStrzelecki().getKartyJednostekWRzedzie(),
@@ -1653,7 +1557,6 @@ public class KontrolerPlanszyGry {
         wyswietlKartyWHBox(stanRundy.getPlanszaGracza1().getRzadOblezenia().getKartyJednostekWRzedzie(),
                 rzadOblezeniaG1HBox, STANDARDOWA_SZEROKOSC_KARTY, STANDARDOWA_WYSOKOSC_KARTY, false);
 
-        // Aktualizacja wyświetlania rzędów gracza 2
         wyswietlKartyWHBox(stanRundy.getPlanszaGracza2().getRzadPiechoty().getKartyJednostekWRzedzie(),
                 rzadPiechotyG2HBox, STANDARDOWA_SZEROKOSC_KARTY, STANDARDOWA_WYSOKOSC_KARTY, false);
         wyswietlKartyWHBox(stanRundy.getPlanszaGracza2().getRzadStrzelecki().getKartyJednostekWRzedzie(),
@@ -1661,7 +1564,6 @@ public class KontrolerPlanszyGry {
         wyswietlKartyWHBox(stanRundy.getPlanszaGracza2().getRzadOblezenia().getKartyJednostekWRzedzie(),
                 rzadOblezeniaG2HBox, STANDARDOWA_SZEROKOSC_KARTY, STANDARDOWA_WYSOKOSC_KARTY, false);
 
-        // Aktualizacja wyświetlania rzędu pogody
         if (pogodaHBox != null && stanRundy.getAktywneKartyWRzedziePogody() != null) {
             wyswietlKartyWHBox(stanRundy.getAktywneKartyWRzedziePogody(), pogodaHBox,
                     STANDARDOWA_SZEROKOSC_KARTY, STANDARDOWA_WYSOKOSC_KARTY, false);
@@ -1677,14 +1579,14 @@ public class KontrolerPlanszyGry {
         if (obiektGracz1 != null && dowodcaGracza1ImageView != null && obiektGracz1.getKartaDowodcy() != null) {
             dowodcaGracza1ImageView.setImage(
                     obiektGracz1.isZdolnoscDowodcyUzyta() ?
-                            ladujRewersDowodcy(obiektGracz1.getWybranaFrakcja()) : // <<< ZMIANA TUTAJ
+                            ladujRewersDowodcy(obiektGracz1.getWybranaFrakcja()) :
                             ladujObrazekKarty(obiektGracz1.getKartaDowodcy())
             );
         }
         if (obiektGracz2 != null && dowodcaGracza2ImageView != null && obiektGracz2.getKartaDowodcy() != null) {
             dowodcaGracza2ImageView.setImage(
                     obiektGracz2.isZdolnoscDowodcyUzyta() ?
-                            ladujRewersDowodcy(obiektGracz2.getWybranaFrakcja()) : // <<< ZMIANA TUTAJ
+                            ladujRewersDowodcy(obiektGracz2.getWybranaFrakcja()) :
                             ladujObrazekKarty(obiektGracz2.getKartaDowodcy())
             );
         }
@@ -1695,6 +1597,7 @@ public class KontrolerPlanszyGry {
         System.out.println("Odświeżono widok całej planszy.");
     }
 
+    //Metoda pomocnicza, która rysuje obrazek karty Rogu Dowódcy w odpowiednim slocie na planszy.
     private void ustawWidokRogu(Karta kartaRogu, StackPane slotRogu) {
         if (slotRogu == null) return;
         slotRogu.getChildren().clear();
@@ -1708,6 +1611,7 @@ public class KontrolerPlanszyGry {
         }
     }
 
+    //Handler dla kliknięcia na kartę w ręce. Zaznacza kartę i podświetla możliwe cele na planszy, do których można ją zagrać.
     @FXML private void handleKartaWRęceKliknięta(Karta wybranaKarta) {
         Gracz aktywnyGracz = (silnikGry != null) ? silnikGry.getGraczAktualnejTury() : null;
         boolean czyMogeTerazGrac = (aktywnyGracz == obiektGracz1) || (aktywnyGracz == obiektGracz2 && pixelGwintAplikacja != null && pixelGwintAplikacja.isTrybHotSeat());
@@ -1724,6 +1628,7 @@ public class KontrolerPlanszyGry {
         podswietlMozliweCeleDlaKarty(wybranaKarta, aktywnyGracz);
     }
 
+    //Metoda pomocnicza, która podświetla na planszy możliwe cele dla zaznaczonej karty.
     private void podswietlMozliweCeleDlaKarty(Karta karta, Gracz aktywnyGracz) {
         usunPodswietlenieRzedowISlotow();
         if (karta == null || aktywnyGracz == null) {
@@ -1738,7 +1643,7 @@ public class KontrolerPlanszyGry {
                 (czyKartaToSzpieg ? " (Szpiegostwo)" : "") +
                 (czyKartaMaZrecznosc ? " (Zręczność)" : ""));
 
-        HBox[] rzedyPlanszyDocelowejJednostek = null; // Zdefiniuj tutaj, aby było dostępne dla bloku jednostek/bohaterów
+        HBox[] rzedyPlanszyDocelowejJednostek = null;
         if (karta.getTyp() == TypKartyEnum.JEDNOSTKA || karta.getTyp() == TypKartyEnum.BOHATER) {
             if (czyKartaToSzpieg) {
                 rzedyPlanszyDocelowejJednostek = (aktywnyGracz == obiektGracz1) ?
@@ -1759,7 +1664,6 @@ public class KontrolerPlanszyGry {
             boolean jestKartaPogody = nazwaKartySpecjalnej.contains("mróz") ||
                     nazwaKartySpecjalnej.contains("mgła") ||
                     nazwaKartySpecjalnej.contains("deszcz");
-            // Użyj umiejętności do identyfikacji Manekina, jest bardziej niezawodna niż nazwa
             boolean jestManekinem = karta.getUmiejetnosc() != null && karta.getUmiejetnosc().equalsIgnoreCase("Manekin do ćwiczeń");
 
             if (nazwaKartySpecjalnej.contains("róg dowódcy")) {
@@ -1781,7 +1685,6 @@ public class KontrolerPlanszyGry {
                 System.out.println("  > Karta pogody (" + karta.getNazwa() + ") - podświetlanie slotu pogody.");
                 if (pogodaHBox != null) {
                     podswietlElement(pogodaHBox);
-                    // Karta pozostaje zaznaczona, nie resetujemy stanu
                 } else {
                     System.err.println("[KONTROLER] pogodaHBox jest null, nie można podświetlić dla karty pogody: " + karta.getNazwa());
                     resetujStanZaznaczonejKarty();
@@ -1789,41 +1692,26 @@ public class KontrolerPlanszyGry {
             } else if (jestManekinem) {
                 System.out.println("  > Karta Manekin (" + karta.getNazwa() + ") - inicjowanie przez silnik.");
                 if (silnikGry != null) {
-                    // silnikGry.zagrajKarte dla Manekina powinien:
-                    // 1. Sprawdzić, czy są cele. Jeśli nie, zwrócić false.
-                    // 2. Usunąć Manekina z ręki gracza.
-                    // 3. Ustawić stan w silniku (oczekiwanieNaWyborCeluDlaManekina = true).
-                    // 4. Wywołać kontrolerPlanszy.rozpocznijWyborCeluDlaManekina(...).
-                    // 5. Zwrócić true, jeśli interakcja się rozpoczęła.
                     boolean interakcjaManekinaRozpoczeta = silnikGry.zagrajKarte(aktywnyGracz, karta, null);
-
                     if (!interakcjaManekinaRozpoczeta) {
-                        // Jeśli silnik nie mógł rozpocząć interakcji (np. brak celów),
-                        // karta powinna zostać zwrócona do ręki (co silnik powinien obsłużyć w zagrajKarte zwracając false),
-                        // a stan w kontrolerze zresetowany.
                         System.out.println("[KONTROLER] Interakcja manekina nie mogła być rozpoczęta przez silnik (np. brak celów lub błąd). Resetowanie stanu.");
                         resetujStanZaznaczonejKarty();
                     }
-                    // Jeśli interakcjaManekinaRozpoczeta == true, to NIE resetujemy tutaj stanu.
-                    // Karta jest "w użyciu", kontroler czeka na wybór celu.
-                    // `aktualnieZaznaczonaKartaDoZagrnia` pozostaje ustawiona na Manekina.
                 } else {
                     System.err.println("[KONTROLER] SilnikGry jest null, nie można zainicjować Manekina.");
                     resetujStanZaznaczonejKarty();
                 }
             } else {
-                // Inne karty specjalne (np. Czyste Niebo, Pożoga S), które są zagrywane natychmiast
                 System.out.println("  > Karta specjalna globalna (" + karta.getNazwa() + ") - zagrywana bez wyboru konkretnego slotu na planszy.");
                 if (silnikGry != null) {
                     silnikGry.zagrajKarte(aktywnyGracz, karta, null);
                 }
-                resetujStanZaznaczonejKarty(); // Reset po natychmiastowym zagraniu
+                resetujStanZaznaczonejKarty();
             }
         } else if (karta.getTyp() == TypKartyEnum.JEDNOSTKA || karta.getTyp() == TypKartyEnum.BOHATER) {
             List<TypRzeduEnum> mozliweTypyRzedow = new ArrayList<>();
 
             if (czyKartaMaZrecznosc) {
-                // System.out.println("  > Karta '" + karta.getNazwa() + "' ma Zręczność. Pozycja1: '" + karta.getPozycja() + "', Pozycja2: '" + karta.getPozycja2() + "'");
                 TypRzeduEnum typRzedu1 = TypRzeduEnum.fromStringPozycjiKarty(karta.getPozycja());
                 if (typRzedu1 != null) {
                     mozliweTypyRzedow.add(typRzedu1);
@@ -1885,12 +1773,14 @@ public class KontrolerPlanszyGry {
                 System.err.println("[KONTROLER] rzedyPlanszyDocelowejJednostek są null dla karty jednostki/bohatera " + karta.getNazwa());
             }
 
-            if (!cokolwiekPodswietlono && !mozliweTypyRzedow.isEmpty()) { // Sprawdzamy też czy były jakieś możliwe rzędy
+            if (!cokolwiekPodswietlono && !mozliweTypyRzedow.isEmpty()) {
                 wyswietlKomunikatNaPlanszy("Brak dostępnych rzędów dla karty " + karta.getNazwa() + " na odpowiedniej planszy.", true);
                 resetujStanZaznaczonejKarty();
             }
         }
     }
+
+    //Metoda pomocnicza, która dodaje wizualny efekt podświetlenia
     private void podswietlElement(Node element) {
         if (element == null) return;
         String oryginalnyStyl = element.getStyle() != null ? element.getStyle() : "";
@@ -1901,6 +1791,7 @@ public class KontrolerPlanszyGry {
         podswietloneCele.add(element);
     }
 
+    //Metoda pomocnicza, która usuwa efekty podświetlenia
     private void usunPodswietlenieRzedowISlotow() {
         for (Node element : podswietloneCele) {
             if (element == null) continue;
@@ -1912,58 +1803,49 @@ public class KontrolerPlanszyGry {
                             element == rekaGracza1HBox || element == rekaGracza2HBox || element == pogodaHBox)) {
                 stylPodstawowy += " -fx-padding: 2px;";
             }
-            // Dla StackPane (sloty Rogu) nie było oryginalnie paddingu w FXML, więc -fx-background-color: transparent; wystarczy.
             element.setStyle(stylPodstawowy);
         }
         podswietloneCele.clear();
     }
+
+    //Główny handler dla kliknięć na planszy. Jego logika jest kontekstowa - zależy od tego, co gracz zaznaczył wcześniej. Uruchamia odpowiednie animacje i akcje w SilnikuGry.
     @FXML
     private void handleCelKlikniety(MouseEvent event) {
-        // Sprawdź, czy w ogóle można teraz wykonywać akcje na planszy
         Gracz aktywnyGracz = (silnikGry != null) ? silnikGry.getGraczAktualnejTury() : null;
 
-        // Jeśli nie ma aktywnego gracza, lub silnik nie istnieje, lub jest oczekiwanie na potwierdzenie tury,
-        // to generalnie nie powinniśmy przetwarzać kliknięć na cele (chyba że to panel potwierdzenia).
-        // Ten handler jest dla kliknięć na rzędy/sloty po wybraniu karty.
         if (silnikGry == null || aktywnyGracz == null || silnikGry.isOczekiwanieNaPotwierdzenieTury() || silnikGry.isCzyGraZakonczona()) {
             if (silnikGry != null && silnikGry.isOczekiwanieNaPotwierdzenieTury()) {
                 wyswietlKomunikatNaPlanszy("Poczekaj na potwierdzenie tury przez gracza.", false);
             }
-            // Jeśli kliknięto, a nie powinno się dać, na wszelki wypadek resetuj stan wyboru
             if (aktualnieZaznaczonaKartaDoZagrnia != null || trybWyboruCeluDlaManekina || aktualnieWybieranyRzadPoWskrzeszeniu) {
                 resetujStanZaznaczonejKarty();
             }
             return;
         }
 
-        // Sprawdź, czy gracz, którego jest tura, może teraz grać
         boolean czyMogeTerazGrac = (aktywnyGracz == obiektGracz1 && !obiektGracz1.isCzySpasowalWRundzie()) ||
                 (aktywnyGracz == obiektGracz2 && pixelGwintAplikacja != null && pixelGwintAplikacja.isTrybHotSeat() && !obiektGracz2.isCzySpasowalWRundzie());
 
         if (!czyMogeTerazGrac && !(trybWyboruCeluDlaManekina || aktualnieWybieranyRzadPoWskrzeszeniu)) {
-            // Jeśli nie jest to specjalny tryb wyboru, a gracz nie może grać (np. spasował), to nic nie rób
             resetujStanZaznaczonejKarty();
             return;
         }
 
-        // Jeśli nie ma zaznaczonej karty do zagrania I nie jesteśmy w żadnym trybie wyboru celu, to kliknięcie na rząd nic nie robi
         if (aktualnieZaznaczonaKartaDoZagrnia == null && !trybWyboruCeluDlaManekina && !aktualnieWybieranyRzadPoWskrzeszeniu) {
-            usunPodswietlenieRzedowISlotow(); // Na wszelki wypadek
+            usunPodswietlenieRzedowISlotow();
             return;
         }
 
         Object source = event.getSource();
         TypRzeduEnum wybranyRzadEnum = null;
 
-        // Sprawdź, czy kliknięto na podświetlony (dozwolony) cel
         if (!podswietloneCele.contains((Node) source)) {
             System.out.println("[KONTROLER] Kliknięto na niepodświetlony element. Anulowanie aktywnego wyboru.");
 
-            // Sprawdź, czy byliśmy w jakimś specjalnym trybie wyboru, który trzeba anulować w silniku
             if (aktualnieWybieranyRzadPoWskrzeszeniu && silnikGry != null && aktywnyGracz != null) {
                 System.out.println("  > Anulowanie trybu wskrzeszania.");
                 Gracz graczWskrzeszajacy = silnikGry.getGraczKladacyKartePoWskrzeszeniu();
-                if (graczWskrzeszajacy == null) graczWskrzeszajacy = aktywnyGracz; // Fallback
+                if (graczWskrzeszajacy == null) graczWskrzeszajacy = aktywnyGracz;
                 silnikGry.anulujWskrzeszanie(graczWskrzeszajacy);
             }
             else if (trybWyboruCeluDlaManekina && silnikGry != null && silnikGry.getGraczAktualnejTury() != null) {
@@ -1981,7 +1863,6 @@ public class KontrolerPlanszyGry {
             boolean czyToKartaPogody = nazwaKarty.contains("mróz") || nazwaKarty.contains("mgła") || nazwaKarty.contains("deszcz");
 
             if (czyToKartaPogody) {
-                // Znajdź ImageView karty w ręce gracza, aby je zanimować
                 HBox rekaGraczaHBox = (aktywnyGracz == obiektGracz1) ? rekaGracza1HBox : rekaGracza2HBox;
                 ImageView kartaViewDoAnimacji = null;
                 for (Node node : rekaGraczaHBox.getChildren()) {
@@ -1992,16 +1873,14 @@ public class KontrolerPlanszyGry {
                 }
 
                 if (kartaViewDoAnimacji != null) {
-                    // Uruchom animację zamiast bezpośrednio zagrywać kartę
                     animujZagranieKartyPogody(aktualnieZaznaczonaKartaDoZagrnia, kartaViewDoAnimacji, aktywnyGracz);
                 } else {
-                    // Awaryjne zagranie bez animacji
                     System.err.println("Błąd: Nie znaleziono ImageView dla karty pogody. Zagrywam bez animacji.");
                     silnikGry.zagrajKarte(aktywnyGracz, aktualnieZaznaczonaKartaDoZagrnia, null);
                 }
 
                 resetujStanZaznaczonejKarty();
-                return; // Zakończ obsługę zdarzenia
+                return;
             }
         }
 
@@ -2010,7 +1889,6 @@ public class KontrolerPlanszyGry {
             if (kliknietyRzadHBox == rzadPiechotyG1HBox || kliknietyRzadHBox == rzadPiechotyG2HBox) wybranyRzadEnum = TypRzeduEnum.PIECHOTA;
             else if (kliknietyRzadHBox == rzadStrzeleckiG1HBox || kliknietyRzadHBox == rzadStrzeleckiG2HBox) wybranyRzadEnum = TypRzeduEnum.STRZELECKIE;
             else if (kliknietyRzadHBox == rzadOblezeniaG1HBox || kliknietyRzadHBox == rzadOblezeniaG2HBox) wybranyRzadEnum = TypRzeduEnum.OBLEZENIE;
-            // celowo nie obsługujemy tutaj pogodaHBox jako rzędu jednostek
         } else if (source instanceof StackPane && aktualnieZaznaczonaKartaDoZagrnia != null &&
                 aktualnieZaznaczonaKartaDoZagrnia.getTyp() == TypKartyEnum.SPECJALNA &&
                 aktualnieZaznaczonaKartaDoZagrnia.getNazwa().toLowerCase().contains("róg dowódcy")) {
@@ -2023,7 +1901,6 @@ public class KontrolerPlanszyGry {
                 resetujStanZaznaczonejKarty();
                 return;
             }
-            // Sprawdzenie czy slot jest pusty (ważne, jeśli Róg to karta w slocie)
             if (kliknietySlotRogu.getChildren().isEmpty()) {
                 if (kliknietySlotRogu == rogPiechotyG1Slot || kliknietySlotRogu == rogPiechotyG2Slot) wybranyRzadEnum = TypRzeduEnum.PIECHOTA;
                 else if (kliknietySlotRogu == rogStrzeleckiG1Slot || kliknietySlotRogu == rogStrzeleckiG2Slot) wybranyRzadEnum = TypRzeduEnum.STRZELECKIE;
@@ -2036,17 +1913,13 @@ public class KontrolerPlanszyGry {
         }
 
         if (wybranyRzadEnum != null && aktualnieZaznaczonaKartaDoZagrnia != null && aktywnyGracz != null) {
-            // Sprawdzamy, czy to wskrzeszenie - ono na razie pozostaje bez animacji, bo karta nie leci z ręki.
             if (aktualnieWybieranyRzadPoWskrzeszeniu) {
                 Gracz graczWskrzeszajacy = silnikGry.getGraczKladacyKartePoWskrzeszeniu();
                 if (graczWskrzeszajacy == null) graczWskrzeszajacy = aktywnyGracz;
                 silnikGry.polozWskrzeszonaKarteNaRzedzie(graczWskrzeszajacy, aktualnieZaznaczonaKartaDoZagrnia, wybranyRzadEnum);
             } else {
-                // To jest główna logika dla zagrywania karty z ręki Z ANIMACJĄ.
                 HBox rekaGraczaHBox = (aktywnyGracz == obiektGracz1) ? rekaGracza1HBox : rekaGracza2HBox;
                 ImageView kartaViewDoAnimacji = null;
-
-                // 1. Znajdź konkretny ImageView karty w HBoxie ręki, aby go animować.
                 for (Node node : rekaGraczaHBox.getChildren()) {
                     if (node.getUserData() == aktualnieZaznaczonaKartaDoZagrnia) {
                         kartaViewDoAnimacji = (ImageView) node;
@@ -2054,14 +1927,12 @@ public class KontrolerPlanszyGry {
                     }
                 }
 
-                // 2. Znajdź docelowy HBox dla rzędu na planszy.
                 HBox rzadDocelowyHBox = null;
                 Object kliknieteZrodlo = event.getSource();
 
                 if (kliknieteZrodlo instanceof HBox) {
                     rzadDocelowyHBox = (HBox) kliknieteZrodlo;
                 } else if (kliknieteZrodlo instanceof StackPane) {
-                    // Mapowanie klikniętego slotu rogu na odpowiadający mu HBox rzędu
                     if (kliknieteZrodlo == rogPiechotyG1Slot) rzadDocelowyHBox = rzadPiechotyG1HBox;
                     else if (kliknieteZrodlo == rogStrzeleckiG1Slot) rzadDocelowyHBox = rzadStrzeleckiG1HBox;
                     else if (kliknieteZrodlo == rogOblezeniaG1Slot) rzadDocelowyHBox = rzadOblezeniaG1HBox;
@@ -2070,11 +1941,9 @@ public class KontrolerPlanszyGry {
                     else if (kliknieteZrodlo == rogOblezeniaG2Slot) rzadDocelowyHBox = rzadOblezeniaG2HBox;
                 }
 
-                // 3. Jeśli mamy wszystkie potrzebne elementy, uruchom animację.
                 if (kartaViewDoAnimacji != null && rzadDocelowyHBox != null) {
                     animujZagranieKarty(aktualnieZaznaczonaKartaDoZagrnia, kartaViewDoAnimacji, rzadDocelowyHBox, wybranyRzadEnum, aktywnyGracz);
                 } else {
-                    // Awaryjne zagranie bez animacji, jeśli coś pójdzie nie tak.
                     System.err.println("Błąd: Nie znaleziono ImageView lub HBoxu docelowego dla animacji. Zagrywam kartę natychmiast.");
                     silnikGry.zagrajKarte(aktywnyGracz, aktualnieZaznaczonaKartaDoZagrnia, wybranyRzadEnum);
                 }
@@ -2086,22 +1955,19 @@ public class KontrolerPlanszyGry {
                 silnikGry.anulujZagranieManekina(silnikGry.getGraczAktualnejTury(), false);
             }
         } else if (aktualnieZaznaczonaKartaDoZagrnia != null &&
-                !(source == pogodaHBox && // Jeśli nie obsłużono już pogody
+                !(source == pogodaHBox &&
                         aktualnieZaznaczonaKartaDoZagrnia.getTyp() == TypKartyEnum.SPECJALNA &&
                         (aktualnieZaznaczonaKartaDoZagrnia.getNazwa().toLowerCase().contains("mróz") ||
                                 aktualnieZaznaczonaKartaDoZagrnia.getNazwa().toLowerCase().contains("mgła") ||
                                 aktualnieZaznaczonaKartaDoZagrnia.getNazwa().toLowerCase().contains("deszcz"))
                 )) {
-            // Ten blok `else` jest na wypadek, gdybyśmy doszli tutaj z zaznaczoną kartą,
-            // ale nie został spełniony żaden z wcześniejszych warunków zagrania (np. wybranyRzadEnum jest null,
-            // a nie jesteśmy w trybie manekina i nie jest to karta pogody kliknięta na slot pogody).
-            // To może oznaczać np. próbę zagrania karty specjalnej (nie-pogody) na rząd jednostek, co jest niepoprawne.
             System.out.println("[KONTROLER] Nie udało się ustalić prawidłowej akcji dla kliknięcia z zaznaczoną kartą: " + aktualnieZaznaczonaKartaDoZagrnia.getNazwa());
         }
 
         resetujStanZaznaczonejKarty();
     }
 
+    //Wyświetla panel pozwalający graczowi wybrać jedną z kart pogody ze swojej talii w ramach użycia zdolności dowódcy Eredina.
     public void pokazPanelWyboruKartyPogodyDlaEredina(List<Karta> kartyPogody) {
         if (panelWyboruKartyEredina == null || tytulPaneluWyboruKartyEredina == null ||
                 flowPaneKartDoWyboruEredina == null || powiekszonaKartaWyboruEredina == null ||
@@ -2118,11 +1984,9 @@ public class KontrolerPlanszyGry {
         przyciskPotwierdzWyborEredina.setDisable(true);
 
         if (kartyPogody == null || kartyPogody.isEmpty()) {
-            // Ten przypadek powinien być obsłużony w SilnikuGry, ale dla pewności:
             Label brakKartLabel = new Label("Brak kart pogody w talii.");
             brakKartLabel.setTextFill(Color.WHITE);
             flowPaneKartDoWyboruEredina.getChildren().add(brakKartLabel);
-            // Można też pokazać to w miejscu opisu karty
         } else {
             for (Karta karta : kartyPogody) {
                 ImageView miniatura = stworzWidokKarty(karta, STANDARDOWA_SZEROKOSC_KARTY, STANDARDOWA_WYSOKOSC_KARTY);
@@ -2133,7 +1997,6 @@ public class KontrolerPlanszyGry {
                     this.wybranaKartaPrzezEredinaDoPodgladu = karta;
                     powiekszonaKartaWyboruEredina.setImage(ladujObrazekKarty(karta));
                     przyciskPotwierdzWyborEredina.setDisable(false);
-                    // Podświetl wybraną miniaturę
                     for(Node node : flowPaneKartDoWyboruEredina.getChildren()){
                         if(node instanceof ImageView){
                             node.setEffect(node.getUserData() == karta ? new DropShadow(15, Color.LIGHTSKYBLUE) : null);
@@ -2150,10 +2013,8 @@ public class KontrolerPlanszyGry {
                 });
                 flowPaneKartDoWyboruEredina.getChildren().add(miniatura);
             }
-            // Opcjonalnie: automatycznie zaznacz pierwszą kartę, jeśli lista nie jest pusta
             if (!kartyPogody.isEmpty() && flowPaneKartDoWyboruEredina.getChildren().get(0) instanceof ImageView) {
                 ImageView pierwszaMiniatura = (ImageView) flowPaneKartDoWyboruEredina.getChildren().get(0);
-                // Symulacja kliknięcia, aby zainicjować podgląd i stan przycisku
                 MouseEvent simMouseEvent = new MouseEvent(MouseEvent.MOUSE_CLICKED, 0, 0, 0, 0, javafx.scene.input.MouseButton.PRIMARY, 1,
                         false, false, false, false, true, false, false, true, false, false, null);
                 pierwszaMiniatura.fireEvent(simMouseEvent);
@@ -2165,6 +2026,7 @@ public class KontrolerPlanszyGry {
         panelWyboruKartyEredina.toFront();
     }
 
+    //Wyświetla panel zdolności dowódcy Eredina, na którym gracz musi wybrać dwie karty z ręki do odrzucenia.
     public void pokazPanelWyboruKartDoOdrzuceniaEredin414(List<Karta> rekaGracza) {
         if (panelWyboruOdrzucanychEredin414 == null /* ...sprawdź resztę FXML dla tego panelu... */) {
             System.err.println("KONTROLER: Błąd UI - Panel odrzucania Eredina 414 niekompletny.");
@@ -2187,30 +2049,24 @@ public class KontrolerPlanszyGry {
                 Karta kliknieta = (Karta) miniatura.getUserData();
                 if (aktualnieWybraneDoOdrzuceniaEredin414.contains(kliknieta)) {
                     aktualnieWybraneDoOdrzuceniaEredin414.remove(kliknieta);
-                    miniatura.setEffect(null); // Usuń podświetlenie
+                    miniatura.setEffect(null);
                 } else {
                     if (aktualnieWybraneDoOdrzuceniaEredin414.size() < 2) {
                         aktualnieWybraneDoOdrzuceniaEredin414.add(kliknieta);
-                        miniatura.setEffect(new DropShadow(15, Color.ORANGERED)); // Podświetl wybraną do odrzucenia
+                        miniatura.setEffect(new DropShadow(15, Color.ORANGERED));
                     }
                 }
                 infoWyboruOdrzucanychEredin414.setText("Wybierz 2 karty do odrzucenia (" + aktualnieWybraneDoOdrzuceniaEredin414.size() + "/2)");
                 przyciskPotwierdzOdrzucenieEredin414.setDisable(aktualnieWybraneDoOdrzuceniaEredin414.size() != 2);
-
-                // Podgląd ostatnio klikniętej/wybranej
                 aktualnieWybranaDoPowiekszeniaEredin414 = kliknieta;
                 powiekszonaKartaOdrzucanaEredin414.setImage(ladujObrazekKarty(kliknieta));
             });
-            // Prosty hover dla podglądu
             miniatura.setOnMouseEntered(e -> powiekszonaKartaOdrzucanaEredin414.setImage(ladujObrazekKarty((Karta)miniatura.getUserData())));
             miniatura.setOnMouseExited(e -> {
                 if(aktualnieWybranaDoPowiekszeniaEredin414 != (Karta)miniatura.getUserData() || aktualnieWybraneDoOdrzuceniaEredin414.contains((Karta)miniatura.getUserData())) {
-                    // Jeśli kursor opuścił kartę, która nie jest tą "głównie" powiększoną (ostatnio klikniętą)
-                    // LUB jeśli jest wybrana do odrzucenia, to zostawiamy podgląd ostatnio klikniętej/wybranej.
-                    // Można też czyścić podgląd: powiekszonaKartaOdrzucanaEredin414.setImage(null);
-                    // Dla prostoty, zostawmy podgląd ostatnio klikniętej.
+
                 } else {
-                    powiekszonaKartaOdrzucanaEredin414.setImage(ladujObrazekKarty(aktualnieWybranaDoPowiekszeniaEredin414)); // Przywróć ostatnio klikniętą
+                    powiekszonaKartaOdrzucanaEredin414.setImage(ladujObrazekKarty(aktualnieWybranaDoPowiekszeniaEredin414));
                 }
             });
             flowPaneOdrzucanychEredin414.getChildren().add(miniatura);
@@ -2221,6 +2077,7 @@ public class KontrolerPlanszyGry {
         panelWyboruOdrzucanychEredin414.toFront();
     }
 
+    //Handler dla przycisku potwierdzającego wybór kart do odrzucenia dla zdolności Eredina.
     @FXML
     private void handlePotwierdzOdrzucenieEredin414Action() {
         if (silnikGry != null && aktualnieWybraneDoOdrzuceniaEredin414.size() == 2) {
@@ -2231,28 +2088,29 @@ public class KontrolerPlanszyGry {
         }
     }
 
+    //Handler dla przycisku anulującego użycie zdolności Eredina na etapie wyboru kart do odrzucenia.
     @FXML
     private void handleAnulujOdrzucenieEredin414Action() {
         panelWyboruOdrzucanychEredin414.setVisible(false);
         if (silnikGry != null) {
-            silnikGry.anulujZdolnoscEredina414(false); // false = anulowanie przez gracza
+            silnikGry.anulujZdolnoscEredina414(false);
         }
     }
 
-    // Metoda do pokazywania panelu wyboru 1 karty z talii
+    //Wyświetla panel zdolności Eredina, na którym gracz wybiera jedną kartę do dobrania ze swojej talii (po odrzuceniu dwóch innych).
     public void pokazPanelWyboruKartyZTalliEredin414(List<Karta> taliaGracza) {
-        if (panelWyboruDobieranejEredin414 == null /* ...sprawdź resztę FXML dla tego panelu... */) {
+        if (panelWyboruDobieranejEredin414 == null) {
             System.err.println("KONTROLER: Błąd UI - Panel dobierania Eredina 414 niekompletny.");
             if (silnikGry != null) silnikGry.anulujZdolnoscEredina414(true);
             return;
         }
         wybranaKartaZTaliiDlaEredina414 = null;
-        aktualnieWybranaDoPowiekszeniaEredin414 = null; // Reset podglądu
+        aktualnieWybranaDoPowiekszeniaEredin414 = null;
         powiekszonaKartaDobieranaEredin414.setImage(null);
         przyciskPotwierdzDobranieEredin414.setDisable(true);
         flowPaneDobieranychEredin414.getChildren().clear();
 
-        if (taliaGracza.isEmpty()) { // SilnikGry powinien to obsłużyć, ale jako fallback
+        if (taliaGracza.isEmpty()) {
             Label brakKartLabel = new Label("Twoja talia jest pusta!");
             brakKartLabel.setTextFill(Color.WHITE);
             flowPaneDobieranychEredin414.getChildren().add(brakKartLabel);
@@ -2267,24 +2125,20 @@ public class KontrolerPlanszyGry {
                     wybranaKartaZTaliiDlaEredina414 = kliknieta;
                     powiekszonaKartaDobieranaEredin414.setImage(ladujObrazekKarty(kliknieta));
                     przyciskPotwierdzDobranieEredin414.setDisable(false);
-                    // Podświetl wybraną
                     for(Node node : flowPaneDobieranychEredin414.getChildren()){
                         if(node instanceof ImageView){
                             node.setEffect(node.getUserData() == kliknieta ? new DropShadow(15, Color.LIGHTGREEN) : null);
                         }
                     }
                 });
-                // Prosty hover dla podglądu
                 miniatura.setOnMouseEntered(e -> powiekszonaKartaDobieranaEredin414.setImage(ladujObrazekKarty((Karta)miniatura.getUserData())));
                 miniatura.setOnMouseExited(e -> {
                     if(wybranaKartaZTaliiDlaEredina414 != (Karta)miniatura.getUserData()){
-                        // Jeśli kursor opuścił kartę, która nie jest wybraną, przywróć podgląd wybranej (lub wyczyść)
                         powiekszonaKartaDobieranaEredin414.setImage(ladujObrazekKarty(wybranaKartaZTaliiDlaEredina414));
                     }
                 });
                 flowPaneDobieranychEredin414.getChildren().add(miniatura);
             }
-            // Opcjonalnie automatycznie wybierz pierwszą, jeśli chcesz
             if (!taliaGracza.isEmpty() && flowPaneDobieranychEredin414.getChildren().get(0) instanceof ImageView) {
                 MouseEvent simMouseEvent = new MouseEvent(MouseEvent.MOUSE_CLICKED, 0, 0, 0, 0, javafx.scene.input.MouseButton.PRIMARY, 1,
                         false, false, false, false, true, false, false, true, false, false, null);
@@ -2296,58 +2150,55 @@ public class KontrolerPlanszyGry {
         panelWyboruDobieranejEredin414.toFront();
     }
 
+    //Handler dla przycisku potwierdzającego wybór karty do dobrania w ramach zdolności Eredina.
     @FXML
     private void handlePotwierdzDobranieEredin414Action() {
         if (silnikGry != null && wybranaKartaZTaliiDlaEredina414 != null) {
             panelWyboruDobieranejEredin414.setVisible(false);
             silnikGry.wykonajWyborKartyZTalliEredin414(wybranaKartaZTaliiDlaEredina414);
         } else {
-            // Komunikat błędu, jeśli potrzebny
         }
     }
 
+    //Handler dla przycisku anulującego użycie zdolności Eredina na etapie wyboru karty do dobrania.
     @FXML
     private void handleAnulujDobranieEredin414Action() {
-        // Anulowanie na tym etapie (po odrzuceniu kart) jest problematyczne.
-        // Najprościej: zdolność jest marnowana. Gracz już odrzucił karty.
         panelWyboruDobieranejEredin414.setVisible(false);
         if (silnikGry != null) {
-            // Informujemy silnik, że gracz anulował na etapie dobierania.
-            // Silnik powinien zużyć zdolność i zakończyć turę.
-            // Karty do odrzucenia są już w silniku, więc silnik musi je odrzucić.
-            silnikGry.anulujZdolnoscEredina414(false); // false = anulowanie przez gracza (ale po pierwszym kroku)
+            silnikGry.anulujZdolnoscEredina414(false);
         }
     }
 
-
+    //Handler dla przycisku potwierdzającego wybór karty pogody dla zdolności Eredina.
     @FXML
     private void handlePotwierdzWyborEredinaAction() {
         if (silnikGry != null && this.wybranaKartaPrzezEredinaDoPodgladu != null) {
             panelWyboruKartyEredina.setVisible(false);
             Karta wybrana = this.wybranaKartaPrzezEredinaDoPodgladu;
-            this.wybranaKartaPrzezEredinaDoPodgladu = null; // Reset
+            this.wybranaKartaPrzezEredinaDoPodgladu = null;
             silnikGry.wykonajWyborPogodyPrzezEredina(wybrana);
         } else {
             System.err.println("KONTROLER: Nie można potwierdzić wyboru dla Eredina - brak wybranej karty lub silnika.");
             if(panelWyboruKartyEredina != null) panelWyboruKartyEredina.setVisible(false);
-            this.wybranaKartaPrzezEredinaDoPodgladu = null; // Reset
-            if(silnikGry != null) silnikGry.anulujWyborPogodyPrzezEredina(true); // true = błąd
+            this.wybranaKartaPrzezEredinaDoPodgladu = null;
+            if(silnikGry != null) silnikGry.anulujWyborPogodyPrzezEredina(true);
         }
     }
 
+    //Handler dla przycisku anulującego wybór karty pogody dla zdolności Eredina.
     @FXML
     private void handleAnulujWyborEredinaAction() {
         if (panelWyboruKartyEredina != null) {
             panelWyboruKartyEredina.setVisible(false);
         }
-        this.wybranaKartaPrzezEredinaDoPodgladu = null; // Reset
+        this.wybranaKartaPrzezEredinaDoPodgladu = null;
         if (silnikGry != null) {
-            silnikGry.anulujWyborPogodyPrzezEredina(false); // false = anulowanie przez gracza
+            silnikGry.anulujWyborPogodyPrzezEredina(false);
         }
     }
 
+    //Wyświetla panel z powiększoną kartą dowódcy i przyciskami pozwalającymi na aktywację jego zdolności lub anulowanie.
     private void pokazPanelAktywacjiDowodcy(Gracz gracz) {
-        // Usunięto 'opisUmiejetnosciDowodcyLabel' ze sprawdzenia
         if (panelAktywacjiDowodcy == null || powiekszonaKartaDowodcyImageView == null ||
                 przyciskUzyjUmiejetnosciDowodcy == null ||
                 gracz == null || gracz.getKartaDowodcy() == null || gracz.getProfilUzytkownika() == null) {
@@ -2359,9 +2210,6 @@ public class KontrolerPlanszyGry {
 
         Karta kartaDowodcy = gracz.getKartaDowodcy();
         powiekszonaKartaDowodcyImageView.setImage(ladujObrazekKarty(kartaDowodcy));
-
-        // Blok kodu ustawiający tekst dla 'opisUmiejetnosciDowodcyLabel' został całkowicie usunięty.
-
         przyciskUzyjUmiejetnosciDowodcy.setDisable(gracz.isZdolnoscDowodcyUzyta());
         panelAktywacjiDowodcy.setUserData(gracz);
         ukryjWszystkiePaneleOverlayOprocz(panelAktywacjiDowodcy);
@@ -2369,6 +2217,8 @@ public class KontrolerPlanszyGry {
         panelAktywacjiDowodcy.toFront();
         System.out.println("Panel aktywacji dowódcy pokazany dla: " + gracz.getProfilUzytkownika().getNazwaUzytkownika());
     }
+
+    //Metoda pomocnicza, która ukrywa wszystkie (overlay) z wyjątkiem jednego, podanego jako argument. Zapewnia, że na ekranie jest widoczny zawsze tylko jeden panel specjalny.
     private void ukryjWszystkiePaneleOverlayOprocz(StackPane panelDoPozostawieniaWidocznym) {
         StackPane[] wszystkiePanele = {
                 panelRzutuMonetaOverlay, panelZmianyTury, panelInfoPas,
@@ -2381,6 +2231,8 @@ public class KontrolerPlanszyGry {
             }
         }
     }
+
+    //Handler dla kliknięcia na obrazek dowódcy Gracza
     @FXML private void handleDowodcaG1Clicked(MouseEvent event) {
         if (silnikGry != null && silnikGry.getGraczAktualnejTury() == obiektGracz1 && !obiektGracz1.isZdolnoscDowodcyUzyta() && !silnikGry.isOczekiwanieNaPotwierdzenieTury()) {
             pokazPanelAktywacjiDowodcy(obiektGracz1);
@@ -2388,6 +2240,8 @@ public class KontrolerPlanszyGry {
             wyswietlKomunikatNaPlanszy("Nie możesz teraz użyć zdolności dowódcy.", false);
         }
     }
+
+    //Handler dla kliknięcia na obrazek dowódcy Gracza
     @FXML private void handleDowodcaG2Clicked(MouseEvent event) {
         if (silnikGry != null && silnikGry.getGraczAktualnejTury() == obiektGracz2 && !obiektGracz2.isZdolnoscDowodcyUzyta() && (pixelGwintAplikacja != null && pixelGwintAplikacja.isTrybHotSeat()) && !silnikGry.isOczekiwanieNaPotwierdzenieTury()) {
             pokazPanelAktywacjiDowodcy(obiektGracz2);
@@ -2396,35 +2250,31 @@ public class KontrolerPlanszyGry {
         }
     }
 
+    //Handler dla przycisku "Aktywuj" w panelu zdolności dowódcy.
     @FXML
     private void handleUzyjUmiejetnosciDowodcyAction() {
         Gracz graczAktywujacy = (panelAktywacjiDowodcy != null) ? (Gracz) panelAktywacjiDowodcy.getUserData() : null;
 
         if (silnikGry != null && graczAktywujacy != null && !graczAktywujacy.isZdolnoscDowodcyUzyta()) {
             silnikGry.uzyjZdolnosciDowodcy(graczAktywujacy);
-            // SilnikGry po użyciu zdolności wywoła kontrolerPlanszy.odswiezCalakolwiekPlansze(),
-            // co zaktualizuje obrazek dowódcy na rewers.
         }
         if (panelAktywacjiDowodcy != null) {
             panelAktywacjiDowodcy.setVisible(false);
         }
     }
 
+    //Handler dla przycisku "Anuluj" w panelu aktywacji zdolności dowódcy.
     @FXML
     private void handleAnulujUmiejetnoscDowodcyAction() {
         if (panelAktywacjiDowodcy != null) {
             panelAktywacjiDowodcy.setVisible(false);
         }
-        // Ewentualne odblokowanie interfejsu, jeśli panel go blokował
-        // if (silnikGry != null && silnikGry.getGraczAktualnejTury() != null) {
-        //     uaktywnijInterfejsDlaTury(silnikGry.getGraczAktualnejTury() == obiektGracz1);
-        // }
     }
 
+    //Wyświetla specjalny panel informujący o aktywacji pasywnej zdolności frakcji Potworów
     public void pokazPanelUmiejetnosciPotworow(String nazwaKartyWskrzeszonej) { // Możemy przekazać nazwę karty dla personalizacji
         if (panelUmiejetnosciPotworow == null || grafikaUmiejetnosciPotworowImageView == null || napisUmiejetnosciPotworowLabel == null) {
             System.err.println("Błąd: Nie można pokazać panelu umiejętności Potworów - brak elementów UI.");
-            // Zamiast wyświetlać na panelu, można użyć wyswietlKomunikatNaPlanszy jako fallback
             wyswietlKomunikatNaPlanszy("Umiejętność Potworów: " + nazwaKartyWskrzeszonej + " pozostaje!", false);
             return;
         }
@@ -2432,20 +2282,15 @@ public class KontrolerPlanszyGry {
         if (obrazekPowiadPotwoPng != null) {
             grafikaUmiejetnosciPotworowImageView.setImage(obrazekPowiadPotwoPng);
         } else {
-            grafikaUmiejetnosciPotworowImageView.setImage(null); // Jeśli obrazek nie załadowany
+            grafikaUmiejetnosciPotworowImageView.setImage(null);
         }
-
-        // Tekst jest już ustawiony w FXML, ale można go tu dostosować, np. dodając nazwę karty:
-        // napisUmiejetnosciPotworowLabel.setText("Umiejętność Potworów: " + nazwaKartyWskrzeszonej + " pozostaje na planszy!");
-        // Lub zostawić statyczny tekst z FXML:
         napisUmiejetnosciPotworowLabel.setText("Pasywna umiejętność frakcji Potwory wskrzesza losową kartę");
 
 
-        ukryjWszystkiePaneleOverlayOprocz(panelUmiejetnosciPotworow); // Ukryj inne panele
+        ukryjWszystkiePaneleOverlayOprocz(panelUmiejetnosciPotworow);
         panelUmiejetnosciPotworow.setVisible(true);
         panelUmiejetnosciPotworow.toFront();
 
-        // Automatyczne znikanie panelu
         PauseTransition pauza = new PauseTransition(Duration.seconds(3.0));
         pauza.setOnFinished(event -> {
             if (panelUmiejetnosciPotworow != null) {
@@ -2459,48 +2304,44 @@ public class KontrolerPlanszyGry {
     public void rozpocznijSekwencjeZmianyTury() {
         if (silnikGry == null || obiektGracz1 == null || obiektGracz2 == null) {
             System.err.println("Błąd w rozpocznijSekwencjeZmianyTury: kluczowe obiekty są null");
-            // Awaryjne przejście, jeśli coś poszło bardzo nie tak
             if (silnikGry != null && !silnikGry.isCzyGraZakonczona() && silnikGry.isOczekiwanieNaPotwierdzenieTury()) {
                 silnikGry.potwierdzPrzejecieTury();
             }
             return;
         }
 
-        // 1. Wyłącz możliwość interakcji na czas 3-sekundowej pauzy
-        //    Gracz, który właśnie zagrał, i tak nie powinien móc nic zrobić.
-        //    Przycisk pasowania i zdolności dowódcy powinny być nieaktywne.
         przyciskPasuj.setDisable(true);
         if (przyciskPasujG2 != null) przyciskPasujG2.setDisable(true);
         if (dowodcaGracza1ImageView != null) dowodcaGracza1ImageView.setDisable(true);
         if (dowodcaGracza2ImageView != null) dowodcaGracza2ImageView.setDisable(true);
-        // Karty w rękach staną się nieaktywne przez logikę w uaktywnijInterfejsDlaTury po faktycznej zmianie tury.
 
-        // 2. Uruchom 3-sekundową pauzę
-        System.out.println("[KONTROLER PLANSZY] Rozpoczęto sekwencję zmiany tury. Czekanie 3s."); // LOG
+        System.out.println("[KONTROLER PLANSZY] Rozpoczęto sekwencję zmiany tury. Czekanie 3s.");
 
         PauseTransition pauza = new PauseTransition(Duration.seconds(3));
         pauza.setOnFinished(event -> {
-            System.out.println("[KONTROLER PLANSZY] Pauza 3s zakończona. Próba pokazania panelu."); // LOG
+            System.out.println("[KONTROLER PLANSZY] Pauza 3s zakończona. Próba pokazania panelu.");
             Platform.runLater(() -> {
                 System.out.println("[KONTROLER PLANSZY] Wewnątrz Platform.runLater przed pokazaniem panelu.");
                 if (silnikGry != null) {
                     odswiezCalakolwiekPlansze();
                     Gracz nastepnyGraczDoTury;
-                    if (silnikGry.getGraczAktualnejTury() == obiektGracz1) { // GraczAktualnejTury to ten, kto właśnie zagrał
+                    if (silnikGry.getGraczAktualnejTury() == obiektGracz1) {
                         nastepnyGraczDoTury = obiektGracz2;
                     } else {
                         nastepnyGraczDoTury = obiektGracz1;
                     }
                     System.out.println("[KONTROLER PLANSZY] Następny gracz do tury (dla panelu): " + (nastepnyGraczDoTury != null ? nastepnyGraczDoTury.getProfilUzytkownika().getNazwaUzytkownika() : "null"));
-                    silnikGry.setGraczOczekujacyNaPotwierdzenie(nastepnyGraczDoTury); // <<< Ustawiamy w silniku, kto ma potwierdzić
+                    silnikGry.setGraczOczekujacyNaPotwierdzenie(nastepnyGraczDoTury);
                     pokazPanelPrzejeciaTury(nastepnyGraczDoTury);
                 } else{
-                    System.out.println("[KONTROLER PLANSZY] SilnikGry jest null po pauzie, nie można pokazać panelu."); // LOG
+                    System.out.println("[KONTROLER PLANSZY] SilnikGry jest null po pauzie, nie można pokazać panelu.");
                 }
             });
         });
         pauza.play();
     }
+
+    //Inicjuje krótką pauzę, po której wyświetlony zostanie panel zmiany tury.
     public void pokazPanelPrzejeciaTury(Gracz graczKtoregoTuraNadchodzi) {
         System.out.println("[KONTROLER PLANSZY] Wejście do pokazPanelPrzejeciaTury dla gracza: " +
                 (graczKtoregoTuraNadchodzi != null ? graczKtoregoTuraNadchodzi.getProfilUzytkownika().getNazwaUzytkownika() : "null") +
@@ -2508,7 +2349,6 @@ public class KontrolerPlanszyGry {
 
         if (panelZmianyTury == null) {
             System.err.println("[KONTROLER PLANSZY] panelZmianyTury jest null. Wychodzenie.");
-            // Awaryjne, jeśli panel nie istnieje, a gra powinna iść dalej
             if (silnikGry != null && !silnikGry.isCzyGraZakonczona() && silnikGry.isOczekiwanieNaPotwierdzenieTury()) {
                 silnikGry.potwierdzPrzejecieTury();
             }
@@ -2516,13 +2356,13 @@ public class KontrolerPlanszyGry {
         }
         if (silnikGry == null) {
             System.err.println("[KONTROLER PLANSZY] silnikGry jest null. Wychodzenie.");
-            panelZmianyTury.setVisible(false); // Na wszelki wypadek ukryj, jeśli był widoczny
+            panelZmianyTury.setVisible(false);
             return;
         }
         if (graczKtoregoTuraNadchodzi == null) {
             System.err.println("[KONTROLER PLANSZY] graczKtoregoTuraNadchodzi jest null. Wychodzenie.");
             if (silnikGry != null && !silnikGry.isCzyGraZakonczona() && silnikGry.isOczekiwanieNaPotwierdzenieTury()) {
-                silnikGry.potwierdzPrzejecieTury(); // Awaryjne
+                silnikGry.potwierdzPrzejecieTury();
             }
             return;
         }
@@ -2534,7 +2374,7 @@ public class KontrolerPlanszyGry {
         }
 
         Gracz aktywnyPrzeciwnik = (graczKtoregoTuraNadchodzi == obiektGracz1) ? obiektGracz2 : obiektGracz1;
-        if (aktywnyPrzeciwnik == null) { // Dodatkowe zabezpieczenie
+        if (aktywnyPrzeciwnik == null) {
             System.err.println("[KONTROLER PLANSZY] aktywnyPrzeciwnik jest null. To nie powinno się zdarzyć. Wychodzenie.");
             return;
         }
@@ -2546,8 +2386,6 @@ public class KontrolerPlanszyGry {
 
         if (obiektGracz1.isCzySpasowalWRundzie() && obiektGracz2.isCzySpasowalWRundzie()) {
             System.out.println("[KONTROLER PLANSZY] Obaj gracze (obiektGracz1, obiektGracz2) spasowali. Panel niepotrzebny.");
-            // Nie pokazuj panelu, silnik powinien zakończyć rundę.
-            // Można rozważyć ukrycie panelu, jeśli byłby widoczny z jakiegoś powodu.
             panelZmianyTury.setVisible(false);
             return;
         }
@@ -2560,7 +2398,6 @@ public class KontrolerPlanszyGry {
             return;
         }
 
-        // Jeśli doszliśmy tutaj, panel powinien się pokazać
         napisTuryLabel.setText("Tura: " + graczKtoregoTuraNadchodzi.getProfilUzytkownika().getNazwaUzytkownika());
         if (graczKtoregoTuraNadchodzi == obiektGracz1) {
             grafikaTuryImageView.setImage(ladujObrazekZElementowUI(SCIEZKA_INFO_TURA_G1));
@@ -2573,6 +2410,8 @@ public class KontrolerPlanszyGry {
         panelZmianyTury.setVisible(true);
         System.out.println("[KONTROLER PLANSZY] Panel przejęcia tury faktycznie pokazany dla: " + graczKtoregoTuraNadchodzi.getProfilUzytkownika().getNazwaUzytkownika());
     }
+
+    //Handler dla przycisku "Zacznij Turę" na panelu zmiany tury. Informuje SilnikGry, że nowy gracz jest gotowy do wykonania ruchu.
     @FXML
     private void handlePotwierdzTureAction() {
         if (panelZmianyTury == null || silnikGry == null) {
@@ -2580,11 +2419,6 @@ public class KontrolerPlanszyGry {
             return;
         }
         panelZmianyTury.setVisible(false);
-        // SilnikGry po wywołaniu potwierdzPrzejecieTury() powinien:
-        // 1. Ustawić oczekiwanieNaPotwierdzenieTury = false.
-        // 2. Zmienić gracza aktualnej tury (jeśli to konieczne).
-        // 3. Odświeżyć planszę (co odsłoni karty nowego gracza).
-        // 4. Uaktywnić interfejs dla nowego gracza.
         silnikGry.potwierdzPrzejecieTury();
     }
 
@@ -2621,6 +2455,7 @@ public class KontrolerPlanszyGry {
         System.out.println("Interfejs uaktywniony dla gracza: " + (czyTuraGracza1 ? (obiektGracz1 != null ? obiektGracz1.getProfilUzytkownika().getNazwaUzytkownika() : "G1") : (obiektGracz2 != null ? obiektGracz2.getProfilUzytkownika().getNazwaUzytkownika() : "G2")));
     }
 
+    //Wyświetla krótki komunikat tekstowy w dedykowanym miejscu na planszy
     public void wyswietlKomunikatNaPlanszy(String komunikat, boolean czyBlad) {
         System.out.println((czyBlad ? "BŁĄD GRY: " : "KOMUNIKAT GRY: ") + komunikat);
         Label labelDoKomunikatu = dodatkoweInfoG1Label;
@@ -2639,6 +2474,8 @@ public class KontrolerPlanszyGry {
             labelDoKomunikatu.setTextFill(czyBlad ? Color.RED : Color.LIGHTSKYBLUE);
         }
     }
+
+    //Dezaktywuje wszystkie interaktywne elementy na planszy (przyciski, karty), koniec gry lub podczas animacji.
     public void zablokujInterakcjePlanszy() {
         przyciskPasuj.setDisable(true);
         if (przyciskPasujG2 != null) przyciskPasujG2.setDisable(true);
@@ -2649,36 +2486,38 @@ public class KontrolerPlanszyGry {
         System.out.println("Interakcje na planszy zablokowane z powodu końca gry.");
     }
 
+    //Handler dla przycisku "Pasuj" dla Gracza 1. Informuje SilnikGry o decyzji spasowania przez gracza.
     @FXML
-    private void handlePasujAction() {// Dla Gracza 1
+    private void handlePasujAction() {
         if (aktualnieZaznaczonaKartaDoZagrnia != null) {
-            resetujStanZaznaczonejKarty(); // To usunie podświetlenie i odznaczy kartę
+            resetujStanZaznaczonejKarty();
         }
         if (silnikGry != null && !silnikGry.isCzyGraZakonczona() &&
                 silnikGry.getGraczAktualnejTury() == obiektGracz1 &&
                 !obiektGracz1.isCzySpasowalWRundzie() &&
-                !silnikGry.isOczekiwanieNaPotwierdzenieTury()) { // Dodatkowe sprawdzenie
+                !silnikGry.isOczekiwanieNaPotwierdzenieTury()) {
             silnikGry.pasuj(obiektGracz1);
         } else {
             wyswietlKomunikatNaPlanszy("Nie możesz teraz spasować.", false);
         }
     }
     @FXML
-    private void handlePasujG2Action() { // Dla Gracza 2
+    private void handlePasujG2Action() {
         if (aktualnieZaznaczonaKartaDoZagrnia != null) {
-            resetujStanZaznaczonejKarty(); // To usunie podświetlenie i odznaczy kartę
+            resetujStanZaznaczonejKarty();
         }
         if (silnikGry != null && !silnikGry.isCzyGraZakonczona() &&
                 silnikGry.getGraczAktualnejTury() == obiektGracz2 &&
                 (pixelGwintAplikacja != null && pixelGwintAplikacja.isTrybHotSeat()) &&
                 !obiektGracz2.isCzySpasowalWRundzie() &&
-                !silnikGry.isOczekiwanieNaPotwierdzenieTury()) { // Dodatkowe sprawdzenie
+                !silnikGry.isOczekiwanieNaPotwierdzenieTury()) {
             silnikGry.pasuj(obiektGracz2);
         } else {
             wyswietlKomunikatNaPlanszy("Nie możesz teraz spasować.", false);
         }
     }
 
+    //Handler dla przycisku "Opcje". Wyświetla panel z opcjami.
     @FXML
     private void handleOpcjeAction() {
         System.out.println("[KONTROLER PLANSZY] Przycisk 'Opcje' wciśnięty.");
@@ -2687,8 +2526,6 @@ public class KontrolerPlanszyGry {
                 wyswietlKomunikatNaPlanszy("Poczekaj na potwierdzenie tury przez gracza.", false);
                 return;
             }
-            // Tutaj możesz wstrzymać timery lub inne dynamiczne elementy gry, jeśli takie masz
-            // np. wstrzymajTimeryGry();
 
             ukryjWszystkiePaneleOverlayOprocz(panelOpcjiGry);
             panelOpcjiGry.setVisible(true);
@@ -2698,16 +2535,16 @@ public class KontrolerPlanszyGry {
         }
     }
 
+    //Handler dla przycisku "Kontynuuj" w panelu opcji. Zamyka panel i pozwala na wznowienie rozgrywki.
     @FXML
     private void handleOpcjeKontynuujAction() {
         if (panelOpcjiGry != null) {
             panelOpcjiGry.setVisible(false);
         }
-        // Tutaj możesz wznowić timery gry, jeśli były wstrzymane
-        // np. wznowTimeryGry();
         System.out.println("[KONTROLER PLANSZY] Wybrano 'Kontynuuj' z panelu opcji.");
     }
 
+    //Handler dla przycisku "Restart Gry" w panelu opcji. Inicjalizuje całą rozgrywkę od nowa z tymi samymi taliami.
     @FXML
     private void handleOpcjeRestartGryAction() {
         System.out.println("[KONTROLER PLANSZY] Wybrano 'Restart Gry' z panelu opcji.");
@@ -2716,35 +2553,27 @@ public class KontrolerPlanszyGry {
         }
 
         if (obiektGracz1 != null && obiektGracz2 != null && pixelGwintAplikacja != null) {
-            // Reset stanu graczy jest robiony wewnątrz inicjalizujGre -> graczX.resetDoNowejGry()
-            // inicjalizujGre stworzy nowy silnik i rozpocznie grę od nowa z tymi samymi obiektami Gracz (ale zresetowanymi)
-            // i tymi samymi taliami (które są częścią obiektów Gracz)
-            // Rzut monetą/wybór Scoia'tael również odbędzie się ponownie.
             this.inicjalizujGre(this.obiektGracz1, this.obiektGracz2, null);
         } else {
             System.err.println("Nie można zrestartować gry - brak obiektów graczy lub aplikacji.");
-            // Awaryjnie, wróć do menu
             handleOpcjePowrotDoMenuAction();
         }
     }
 
+    //Handler dla przycisku "Powrót do Menu" w panelu opcji. Przełącza widok z powrotem do menu głównego i wznawia muzykę menu.
     @FXML
     private void handleOpcjePowrotDoMenuAction() {
         System.out.println("[KONTROLER PLANSZY] Wybrano 'Powrót do Menu' z panelu opcji.");
         if (pixelGwintAplikacja != null && pixelGwintAplikacja.getMenedzerMuzyki() != null) {
-            // Przełącz na losowy utwór z playlisty menu
             pixelGwintAplikacja.getMenedzerMuzyki().uruchomPlaylistMenu(true);
         }
         if (panelOpcjiGry != null) {
             panelOpcjiGry.setVisible(false);
         }
         if (pixelGwintAplikacja != null) {
-            // Użyj profilu gracza 1 jako zalogowanego użytkownika do powrotu do menu.
-            // Jeśli grasz z dwoma różnymi zalogowanymi użytkownikami (co nie jest typowe dla hot-seat),
-            // musiałbyś zdecydować, który profil jest "główny".
             Uzytkownik profilDoMenu = (obiektGracz1 != null && obiektGracz1.getProfilUzytkownika() != null)
                     ? obiektGracz1.getProfilUzytkownika()
-                    : pixelGwintAplikacja.getProfilGracza1(); // Fallback na profil przechowywany w aplikacji
+                    : pixelGwintAplikacja.getProfilGracza1();
 
             if (profilDoMenu != null) {
                 pixelGwintAplikacja.pokazMenuGlowne(profilDoMenu);
@@ -2755,19 +2584,17 @@ public class KontrolerPlanszyGry {
         }
     }
 
+    //Metoda pomocnicza, która czyści stan interakcji gracza. Odznacza zaznaczoną kartę, wyłącza tryby specjalne (np. wybór celu dla manekina) i usuwa podświetlenie z planszy.
     public void resetujStanZaznaczonejKarty() {
         this.aktualnieZaznaczonaKartaDoZagrnia = null;
         this.trybWyboruCeluDlaManekina = false;
         this.aktualnieWybieranyRzadPoWskrzeszeniu = false;
-        // Usuń wszelkie inne flagi stanu związane z wyborem karty/celu
         usunPodswietlenieRzedowISlotow();
         System.out.println("[KONTROLER] Zresetowano stan zaznaczonej karty i podświetleń.");
-        // Nie ma potrzeby wywoływania uaktywnijInterfejsDlaTury tutaj,
-        // zrobi to SilnikGry w anulujZagranieManekina lub gdy zagrajKarte zwróci false.
     }
 
 
-
+    //Sprawdza, czy Gracz 1 może użyć zdolności dowódcy (czy jest jego tura,  czy zdolność nie została już użyta) i jeśli tak, wyświetla panel aktywacji.
     private void probaAktywacjiZdolnosciDowodcyG1() {
         if (silnikGry != null && silnikGry.getGraczAktualnejTury() == obiektGracz1 && !obiektGracz1.isZdolnoscDowodcyUzyta() && !silnikGry.isOczekiwanieNaPotwierdzenieTury()) {
             pokazPanelAktywacjiDowodcy(obiektGracz1);
@@ -2776,32 +2603,32 @@ public class KontrolerPlanszyGry {
         }
     }
 
+    //Handler dla kliknięcia na obrazek dowódcy Gracza 1. Wywołuje metodę próbującą aktywować zdolność.
     @FXML
     private void handleZdolnoscDowodcyG1Action() { // Możesz dodać (ActionEvent event) jeśli potrzebujesz
         probaAktywacjiZdolnosciDowodcyG1();
     }
 
+    //Metoda, która wywołuje główną funkcję pokazania panelu cmentarza, ustawiając jej kontekst na potrzeby zdolności dowódcy Eredina (ID 415).
     public void pokazPanelCmentarzaDlaEredina415(Gracz gracz, String tytul) {
-        // Ta metoda powinna już wywoływać Twoją główną, zrefaktoryzowaną metodę pokazPanelCmentarza
         pokazPanelCmentarza(gracz, tytul, TrybPaneluCmentarzaKontekst.EREDIN_ZABOJCA_AUBERONA_415);
     }
 
     public void pokazPanelCmentarzaDlaWyboru(Gracz graczKtoregoCmentarzPokazac, String tytul) {
         if (graczKtoregoCmentarzPokazac == null || panelCmentarza == null || tytulPaneluCmentarza == null ||
                 cmentarzListaKartFlowPane == null || cmentarzPowiekszonaKartaImageView == null ||
-                przyciskZamknijCmentarz == null || przyciskWskrzesKarteZCmentarza == null ) { // Zakładamy, że przyciskWskrzesKarteZCmentarza będzie reużywany
+                przyciskZamknijCmentarz == null || przyciskWskrzesKarteZCmentarza == null ) {
             System.err.println("Błąd: Nie można pokazać panelu cmentarza dla wyboru (Emhyr) - brak gracza lub kluczowych elementów UI.");
             if (silnikGry != null && silnikGry.getGraczAktualnejTury() != null) {
-                silnikGry.anulujWyborDlaEmhyra(); // Poinformuj silnik o problemie
+                silnikGry.anulujWyborDlaEmhyra();
             }
-            resetStatePoOperacjiNaCmentarzu(); // Resetuj stany kontrolera
+            resetStatePoOperacjiNaCmentarzu();
             return;
         }
 
-        resetStatePoOperacjiNaCmentarzu(); // Wyczyść poprzednie stany cmentarza na wszelki wypadek
+        resetStatePoOperacjiNaCmentarzu();
 
         this.trybWyboruKartyDlaEmhyra = true;
-        // this.graczPrzeciwnikaDlaEmhyra = graczKtoregoCmentarzPokazac; // Niepotrzebne, silnik zarządza tym, kto jest przeciwnikiem
 
         tytulPaneluCmentarza.setText(tytul);
         cmentarzListaKartFlowPane.getChildren().clear();
@@ -2809,13 +2636,13 @@ public class KontrolerPlanszyGry {
         if (cmentarzOpisPowiekszonejKartyLabel != null) cmentarzOpisPowiekszonejKartyLabel.setText("Wybierz kartę z cmentarza przeciwnika...");
 
         List<Karta> kartyNaCmentarzu = new ArrayList<>(graczKtoregoCmentarzPokazac.getOdrzucone());
-        Collections.reverse(kartyNaCmentarzu); // Pokaż ostatnio odrzucone jako pierwsze
+        Collections.reverse(kartyNaCmentarzu);
 
         if (kartyNaCmentarzu.isEmpty()) {
             if (cmentarzOpisPowiekszonejKartyLabel != null) cmentarzOpisPowiekszonejKartyLabel.setText("Cmentarz przeciwnika jest pusty.");
-            przyciskWskrzesKarteZCmentarza.setText("Wybierz Kartę"); // Ogólny tekst
+            przyciskWskrzesKarteZCmentarza.setText("Wybierz Kartę");
             przyciskWskrzesKarteZCmentarza.setDisable(true);
-            przyciskWskrzesKarteZCmentarza.setVisible(true); // Może być widoczny, ale wyłączony
+            przyciskWskrzesKarteZCmentarza.setVisible(true);
             przyciskWskrzesKarteZCmentarza.setManaged(true);
         } else {
             for (Karta kartaZCmentarza : kartyNaCmentarzu) {
@@ -2834,12 +2661,12 @@ public class KontrolerPlanszyGry {
                 cmentarzListaKartFlowPane.getChildren().add(miniatura);
             }
             if (!kartyNaCmentarzu.isEmpty() && cmentarzPowiekszonaKartaImageView.getImage() == null) {
-                handleCmentarzMiniaturaKartyKliknieta(kartyNaCmentarzu.get(0)); // Pokaż pierwszą kartę
+                handleCmentarzMiniaturaKartyKliknieta(kartyNaCmentarzu.get(0));
             }
-            przyciskWskrzesKarteZCmentarza.setText("Wybierz dla Emhyra"); // Zmień tekst przycisku
+            przyciskWskrzesKarteZCmentarza.setText("Wybierz dla Emhyra");
             przyciskWskrzesKarteZCmentarza.setVisible(true);
             przyciskWskrzesKarteZCmentarza.setManaged(true);
-            przyciskWskrzesKarteZCmentarza.setDisable(kartaPodgladanaZCmentarza == null); // Włącz, jeśli coś jest już podglądane
+            przyciskWskrzesKarteZCmentarza.setDisable(kartaPodgladanaZCmentarza == null);
         }
 
         przyciskZamknijCmentarz.setVisible(true);
@@ -2850,34 +2677,30 @@ public class KontrolerPlanszyGry {
         panelCmentarza.toFront();
     }
 
-    public static enum TrybPaneluCmentarzaKontekst { // <<< ZMIEŃ NA PUBLIC STATIC
+    public static enum TrybPaneluCmentarzaKontekst {
         PODGLAD,
         WSKRZESZANIE_MEDYK,
         EMHYR_PAN_POLUDNIA,
         EREDIN_ZABOJCA_AUBERONA_415
     }
 
-    private TrybPaneluCmentarzaKontekst aktualnyTrybPaneluCmentarza = TrybPaneluCmentarzaKontekst.PODGLAD; // To pole pozostaje private
+    private TrybPaneluCmentarzaKontekst aktualnyTrybPaneluCmentarza = TrybPaneluCmentarzaKontekst.PODGLAD;
 
-
+    //Wyświetla panel wymiany kart (Mulligan) na początku gry, pozwalając graczowi na wymianę do dwóch kart z ręki startowej.
     public void pokazPanelMulligan(Gracz gracz) {
         if (gracz == null || panelMulligan == null) {
             System.err.println("BŁĄD: Nie można pokazać panelu Mulligan - gracz lub panel jest null.");
-            // Awaryjne pominięcie fazy mulligan, jeśli coś pójdzie nie tak z UI
             if (silnikGry != null) silnikGry.pominMulligan(gracz);
             return;
         }
 
-        // Reset stanu dla nowego gracza
         kartyWybraneDoWymiany.clear();
         mulliganHandPane.getChildren().clear();
-
         mulliganInfoLabel.setText(gracz.getProfilUzytkownika().getNazwaUzytkownika() + ", wymień do 2 kart");
         mulliganCounterLabel.setText("Wybrano: 0 / 2");
 
-        // Wypełnij panel kartami z ręki gracza
         for (Karta karta : gracz.getReka()) {
-            ImageView widokKarty = stworzWidokKarty(karta, 140, 203); // Nieco większe karty dla lepszej widoczności
+            ImageView widokKarty = stworzWidokKarty(karta, 140, 203);
             widokKarty.setUserData(karta);
             widokKarty.setCursor(Cursor.HAND);
 
@@ -2885,25 +2708,23 @@ public class KontrolerPlanszyGry {
 
             mulliganHandPane.getChildren().add(widokKarty);
         }
-
         ukryjWszystkiePaneleOverlayOprocz(panelMulligan);
         panelMulligan.setVisible(true);
         panelMulligan.toFront();
     }
 
+    //Handler dla przycisku potwierdzającego wymianę kart w fazie Mulligan. Przekazuje wybrane karty do SilnikaGry.
     private void handleMulliganCardClicked(MouseEvent event) {
         ImageView kliknietyWidok = (ImageView) event.getSource();
         Karta kliknietaKarta = (Karta) kliknietyWidok.getUserData();
 
         if (kartyWybraneDoWymiany.contains(kliknietaKarta)) {
-            // Odznacz kartę
             kartyWybraneDoWymiany.remove(kliknietaKarta);
-            kliknietyWidok.setEffect(null); // Usuń efekt podświetlenia
+            kliknietyWidok.setEffect(null);
         } else {
-            // Zaznacz kartę, jeśli nie przekroczono limitu 2 kart
             if (kartyWybraneDoWymiany.size() < 2) {
                 kartyWybraneDoWymiany.add(kliknietaKarta);
-                kliknietyWidok.setEffect(new DropShadow(20, Color.DEEPSKYBLUE)); // Efekt zaznaczenia
+                kliknietyWidok.setEffect(new DropShadow(20, Color.DEEPSKYBLUE));
             } else {
                 wyswietlKomunikatNaPlanszy("Możesz wymienić maksymalnie 2 karty.", false);
             }
@@ -2911,12 +2732,12 @@ public class KontrolerPlanszyGry {
         mulliganCounterLabel.setText("Wybrano: " + kartyWybraneDoWymiany.size() + " / 2");
     }
 
+    //Handler dla przycisku potwierdzającego wymianę kart w fazie Mulligan. Przekazuje wybrane karty do SilnikaGry.
     @FXML
     private void handleMulliganConfirmAction() {
         if (silnikGry != null) {
-            Gracz aktualnyGracz = silnikGry.getGraczDlaMulligan(); // Potrzebujemy nowego gettera w SilnikGry
+            Gracz aktualnyGracz = silnikGry.getGraczDlaMulligan();
             if (aktualnyGracz != null) {
-                // Przekaż wybrane karty do silnika i ukryj panel
                 panelMulligan.setVisible(false);
                 silnikGry.wykonajMulligan(aktualnyGracz, new ArrayList<>(kartyWybraneDoWymiany));
             } else {
@@ -2924,15 +2745,14 @@ public class KontrolerPlanszyGry {
             }
         }
     }
+
+    //Animuje "przelot" karty jednostki z ręki gracza na wskazane miejsce na planszy. Uruchamiana przez handlery kliknięć, a po zakończeniu animacji wywołuje zwrotnie SilnikGry w celu aktualizacji modelu.
     private void animujZagranieKarty(Karta kartaDoZagrnia, ImageView kartaView, HBox rzadDocelowyHBox, TypRzeduEnum rzadDocelowyEnum, Gracz aktywnyGracz) {
-        // 1. Zablokuj dalsze interakcje na czas animacji
         zablokujInterakcjePlanszy();
 
-        // 2. Pobierz pozycję startową (środek karty w ręce)
         Point2D startPointScene = kartaView.localToScene(kartaView.getBoundsInLocal().getWidth() / 2, kartaView.getBoundsInLocal().getHeight() / 2);
         Point2D startPointInPane = glownyKontenerPlanszy.sceneToLocal(startPointScene);
 
-        // 3. Usuń kartę z ręki i dodaj ją do głównego kontenera, aby mogła "latać" ponad wszystkim
         HBox rekaHBox = (HBox) kartaView.getParent();
         if (rekaHBox != null) {
             rekaHBox.getChildren().remove(kartaView);
@@ -2942,7 +2762,6 @@ public class KontrolerPlanszyGry {
         kartaView.setLayoutX(startPointInPane.getX() - kartaView.getBoundsInLocal().getWidth() / 2);
         kartaView.setLayoutY(startPointInPane.getY() - kartaView.getBoundsInLocal().getHeight() / 2);
 
-        // 4. Oblicz pozycję końcową
         int iloscKartJuzWRzedzie = rzadDocelowyHBox.getChildren().size();
         double szerokoscKartyWRzedzie = STANDARDOWA_SZEROKOSC_KARTY;
         double odstep = rzadDocelowyHBox.getSpacing();
@@ -2953,23 +2772,20 @@ public class KontrolerPlanszyGry {
         Point2D endPointScene = rzadDocelowyHBox.localToScene(doceloweXwewnatrzHBox, doceloweYwewnatrzHBox);
         Point2D endPointInPane = glownyKontenerPlanszy.sceneToLocal(endPointScene);
 
-        // 5. <<< UPROSZCZONA ANIMACJA >>>
-        // Używamy już tylko TranslateTransition, bez ScaleTransition i ParallelTransition.
         TranslateTransition tt = new TranslateTransition(Duration.seconds(0.7), kartaView);
         tt.setToX(endPointInPane.getX() - startPointInPane.getX());
         tt.setToY(endPointInPane.getY() - startPointInPane.getY());
-        // 6. Po zakończeniu animacji, zaktualizuj model gry i odśwież planszę
         tt.setOnFinished(event -> {
             glownyKontenerPlanszy.getChildren().remove(kartaView);
             silnikGry.zagrajKarte(aktywnyGracz, kartaDoZagrnia, rzadDocelowyEnum);
         });
 
-        // 7. Uruchom animację
         tt.play();
     }
+
+    //Uruchamia sekwencyjną animację "przelotu" dobieranych kart z talii do ręki gracza. Wywoływana przez SilnikGry po zagraniu Szpiega
     public void rozpocznijAnimacjeDobierania(Gracz gracz, List<Karta> kartyDoAnimacji) {
         if (kartyDoAnimacji.isEmpty()) {
-            // Jeśli nie ma kart do dobrania, od razu finalizuj turę
             silnikGry.finalizujTurePoDobieraniu(gracz, kartyDoAnimacji);
             return;
         }
@@ -2986,31 +2802,25 @@ public class KontrolerPlanszyGry {
         SequentialTransition sekwencjaAnimacji = new SequentialTransition();
 
         for (Karta karta : kartyDoAnimacji) {
-            // Stwórz tymczasowy obrazek karty (teraz AWERS) do animacji
-            Image awers = ladujObrazekKarty(karta); // Używamy istniejącej metody do ładowania awersu
+            Image awers = ladujObrazekKarty(karta);
             ImageView animowanaKartaView = new ImageView(awers);
             animowanaKartaView.setFitWidth(STANDARDOWA_SZEROKOSC_KARTY);
             animowanaKartaView.setFitHeight(STANDARDOWA_WYSOKOSC_KARTY);
             animowanaKartaView.setManaged(false);
 
-            // Dodaj kartę do głównego kontenera w miejscu talii
             glownyKontenerPlanszy.getChildren().add(animowanaKartaView);
             animowanaKartaView.setLayoutX(startPointInPane.getX() - STANDARDOWA_SZEROKOSC_KARTY / 2);
             animowanaKartaView.setLayoutY(startPointInPane.getY() - STANDARDOWA_WYSOKOSC_KARTY / 2);
 
-            // Stwórz animację przelotu dla tej jednej karty
             TranslateTransition tt = new TranslateTransition(Duration.seconds(0.6), animowanaKartaView);
             tt.setToX(endPointInPane.getX() - startPointInPane.getX());
             tt.setToY(endPointInPane.getY() - startPointInPane.getY());
-            // Po zakończeniu animacji jednej karty, usuń jej tymczasowy obrazek
             tt.setOnFinished(e -> glownyKontenerPlanszy.getChildren().remove(animowanaKartaView));
 
             sekwencjaAnimacji.getChildren().add(tt);
-            // Można dodać pauzę między kartami
             sekwencjaAnimacji.getChildren().add(new PauseTransition(Duration.millis(200)));
         }
 
-        // Po zakończeniu całej sekwencji animacji, poinformuj silnik gry
         sekwencjaAnimacji.setOnFinished(event -> {
             silnikGry.finalizujTurePoDobieraniu(gracz, kartyDoAnimacji);
         });
@@ -3018,15 +2828,14 @@ public class KontrolerPlanszyGry {
         sekwencjaAnimacji.play();
 
     }
+
+    //Animuje przelot karty pogodowej z ręki gracza do rzędu pogody.
     private void animujZagranieKartyPogody(Karta kartaPogody, ImageView kartaView, Gracz aktywnyGracz) {
-        // 1. Zablokuj interakcje na czas animacji
         zablokujInterakcjePlanszy();
 
-        // 2. Pobierz pozycję startową (środek karty w ręce)
         Point2D startPointScene = kartaView.localToScene(kartaView.getBoundsInLocal().getWidth() / 2, kartaView.getBoundsInLocal().getHeight() / 2);
         Point2D startPointInPane = glownyKontenerPlanszy.sceneToLocal(startPointScene);
 
-        // 3. Przenieś kartę do głównego kontenera, aby mogła "latać"
         HBox rekaHBox = (HBox) kartaView.getParent();
         if (rekaHBox != null) {
             rekaHBox.getChildren().remove(kartaView);
@@ -3036,27 +2845,23 @@ public class KontrolerPlanszyGry {
         kartaView.setLayoutX(startPointInPane.getX() - kartaView.getBoundsInLocal().getWidth() / 2);
         kartaView.setLayoutY(startPointInPane.getY() - kartaView.getBoundsInLocal().getHeight() / 2);
 
-        // 4. Oblicz pozycję końcową w rzędzie pogody (pogodaHBox)
         int iloscKartJuzWRzedzie = pogodaHBox.getChildren().size();
         double szerokoscKarty = STANDARDOWA_SZEROKOSC_KARTY;
         double odstep = pogodaHBox.getSpacing();
 
-        // Rząd pogody jest wyrównany do lewej, więc obliczenia są prostsze
         double doceloweXwewnatrzHBox = iloscKartJuzWRzedzie * (szerokoscKarty + odstep) + (szerokoscKarty / 2.0);
         double doceloweYwewnatrzHBox = pogodaHBox.getHeight() / 2.0;
 
         Point2D endPointScene = pogodaHBox.localToScene(doceloweXwewnatrzHBox, doceloweYwewnatrzHBox);
         Point2D endPointInPane = glownyKontenerPlanszy.sceneToLocal(endPointScene);
 
-        // 5. Stwórz animację przelotu
         TranslateTransition tt = new TranslateTransition(Duration.seconds(0.7), kartaView);
         tt.setToX(endPointInPane.getX() - startPointInPane.getX());
         tt.setToY(endPointInPane.getY() - startPointInPane.getY());
         tt.setInterpolator(Interpolator.EASE_OUT);
 
-        // 6. Po zakończeniu animacji, zaktualizuj model gry
         tt.setOnFinished(event -> {
-            glownyKontenerPlanszy.getChildren().remove(kartaView); // Usuń tymczasowy obrazek
+            glownyKontenerPlanszy.getChildren().remove(kartaView);
             silnikGry.zagrajKarte(aktywnyGracz, kartaPogody, null);
         });
 

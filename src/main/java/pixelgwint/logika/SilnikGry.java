@@ -6,12 +6,10 @@ import pixelgwint.widok.KontrolerPlanszyGry;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Collections; // Upewnij się, że jest ten import
-import java.util.HashMap; // Upewnij się, że jest ten import
-import java.util.Map; // Upewnij się, że jest ten import
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-import javafx.scene.image.Image;
-// import java.util.Random; // Usunięty, jeśli nie jest używany
 
 public class SilnikGry {
 
@@ -53,6 +51,22 @@ public class SilnikGry {
     private boolean oczekiwanieNaMulliganGracza1 = false;
     private boolean oczekiwanieNaMulliganGracza2 = false;
 
+    public Gracz getGracz1() { return gracz1; }
+    public Gracz getGracz2() { return gracz2; }
+    public Gracz getGraczAktualnejTury() { return graczAktualnejTury; }
+    public StanRundy getStanRundy() { return aktualnyStanRundy; }
+    public int getNumerRundyGry() { return numerRundyGry; }
+    public boolean isCzyGraZakonczona() { return czyGraZakonczona; }
+    public boolean isOczekiwanieNaPotwierdzenieTury() { return oczekiwanieNaPotwierdzenieTury; }
+
+
+    //Zwraca gracza, który aktywował kartę "Manekin do ćwiczeń" i jest w trakcie wyboru celu.
+    public Gracz getGraczUzywajacyManekina() {
+        return this.graczUzywajacyManekina;
+    }
+
+
+    //Konstruktor klasy SilnikGry. Inicjalizuje stan gry, przypisując graczy, planszę oraz referencję do kontrolera widoku.
     public SilnikGry(Gracz g1, Gracz g2, Gracz graczRozpoczynajacy, KontrolerPlanszyGry kontroler, List<Karta> wszystkieKarty) {
         this.gracz1 = g1;
         this.gracz2 = g2;
@@ -61,12 +75,8 @@ public class SilnikGry {
         this.historiaWynikowRund = new ArrayList<>();
 
 
-        if (g1 != null && g2 != null && g1.getPlanszaGry() != null && g2.getPlanszaGry() != null) { // Dodatkowe sprawdzenie plansz graczy
+        if (g1 != null && g2 != null && g1.getPlanszaGry() != null && g2.getPlanszaGry() != null) {
             this.aktualnyStanRundy = new StanRundy(g1.getPlanszaGry(), g2.getPlanszaGry());
-
-            // --- POCZĄTEK DODANEGO FRAGMENTU ---
-            // Ustawianie referencji do StanRundy dla każdego rzędu
-            // Upewnij się, że plansze i rzędy nie są null
             PlanszaGracza planszaG1 = this.aktualnyStanRundy.getPlanszaGracza1();
             if (planszaG1 != null) {
                 if (planszaG1.getRzadPiechoty() != null) {
@@ -92,20 +102,10 @@ public class SilnikGry {
                     planszaG2.getRzadOblezenia().setStanRundyRef(this.aktualnyStanRundy);
                 }
             }
-            // --- KONIEC DODANEGO FRAGMENTU ---
-
         } else {
             System.err.println("BŁĄD KRYTYCZNY: Obiekty graczy lub ich plansze są null przy tworzeniu SilnikaGry! Nie można ustawić referencji StanRundy dla rzędów.");
-            // Jeśli aktualnyStanRundy nie mógł zostać poprawnie utworzony,
-            // to nie ma sensu kontynuować z ustawianiem referencji.
-            // Można tu rzucić wyjątek lub odpowiednio obsłużyć błąd.
-            // Na razie, jeśli this.aktualnyStanRundy nie zostanie utworzony,
-            // to kod ustawiający referencje nie wykona się.
-            // Jeśli jednak aktualnyStanRundy jest tworzony z nullami (co jest złe),
-            // to powyższy kod też będzie miał problemy.
-            // Poprawiłem warunek `if` powyżej, aby obejmował sprawdzenie plansz graczy.
-            if (this.aktualnyStanRundy == null) { // Jeśli mimo wszystko aktualnyStanRundy jest null
-                this.aktualnyStanRundy = new StanRundy(null, null); // Awaryjne, aby uniknąć NullPointerException dalej, ale to maskuje problem
+                     if (this.aktualnyStanRundy == null) {
+                this.aktualnyStanRundy = new StanRundy(null, null);
             }
         }
 
@@ -121,17 +121,8 @@ public class SilnikGry {
                 (this.graczRozpoczynajacyPartie != null && this.graczRozpoczynajacyPartie.getProfilUzytkownika() != null ? this.graczRozpoczynajacyPartie.getProfilUzytkownika().getNazwaUzytkownika() : "null lub profil null") +
                 " (Obiekt ID: " + System.identityHashCode(this.graczRozpoczynajacyPartie) + ")");
     }
-    // Gettery
-    public Gracz getGracz1() { return gracz1; }
-    public Gracz getGracz2() { return gracz2; }
-    public Gracz getGraczAktualnejTury() { return graczAktualnejTury; }
-    public StanRundy getStanRundy() { return aktualnyStanRundy; }
-    public int getNumerRundyGry() { return numerRundyGry; }
-    public boolean isCzyGraZakonczona() { return czyGraZakonczona; }
-    public boolean isOczekiwanieNaPotwierdzenieTury() { return oczekiwanieNaPotwierdzenieTury; }
-    public Gracz getGraczUzywajacyManekina() {
-        return this.graczUzywajacyManekina;
-    }
+
+    //Metoda pomocnicza resetująca stan związany z użyciem zdolności Emhyra.
     private void resetStanuWyboruEmhyra() {
         this.oczekiwanieNaWyborKartyDlaEmhyra = false;
         this.graczAktywujacyEmhyra = null;
@@ -143,6 +134,7 @@ public class SilnikGry {
         this.graczAktywujacyEredina415 = null;
     }
 
+    //Rozpoczyna całą partię. Resetuje stan graczy, tasuje talie, rozdaje karty startowe i inicjuje fazę wymiany kart (Mulligan).
     public void rozpocznijGre() {
         this.historiaWynikowRund.clear();
         this.numerRundyGry = 0;
@@ -209,12 +201,15 @@ public class SilnikGry {
         rozpocznijFazeMulligan();
     }
 
+    //Zwraca gracza, który aktywował zdolność dowódcy Emhyra i jest w trakcie wyboru karty z cmentarza przeciwnika.
     public Gracz getGraczAktywujacyEmhyra() {
         return this.graczAktywujacyEmhyra;
     }
 
+    //Zwraca gracza, który aktywował zdolność dowódcy Eredina (ID 415) i jest w trakcie wyboru karty ze swojego cmentarza.
     public Gracz getGraczAktywujacyEredina415() { return this.graczAktywujacyEredina415; }
 
+    //Zwraca gracza, który aktywował zdolność dowódcy Eredina (ID 415) i jest w trakcie wyboru karty ze swojego cmentarza.
     private void dociagnijKartyDoReki(Gracz gracz, int iloscDoDociagniecia) { // Zmieniona nazwa parametru dla jasności
 
 
@@ -226,25 +221,27 @@ public class SilnikGry {
         if (gracz.getReka() == null) {
             gracz.setReka(new ArrayList<>());
         }
-        gracz.getReka().clear(); // Czyścimy rękę PRZED początkowym dociągnięciem
+        gracz.getReka().clear();
 
         List<Karta> talia = gracz.getTaliaDoGry();
         System.out.println("[SilnikGry.dociagnijKarty] Gracz: " + gracz.getProfilUzytkownika().getNazwaUzytkownika() + ", rozmiar taliaDoGry: " + (talia != null ? talia.size() : "Talia jest NULL"));
 
         int faktycznieDociagnieto = 0;
-        for (int i = 0; i < iloscDoDociagniecia; i++) { // Dociągamy żądaną ilość
+        for (int i = 0; i < iloscDoDociagniecia; i++) {
             if (!talia.isEmpty()) {
                 gracz.getReka().add(talia.remove(0));
                 faktycznieDociagnieto++;
             } else {
                 System.out.println("SILNIK OSTRZEŻENIE: Talia gracza " + gracz.getProfilUzytkownika().getNazwaUzytkownika() +
                         " jest pusta. Dociągnięto " + faktycznieDociagnieto + " z " + iloscDoDociagniecia + " kart na start.");
-                break; // Nie ma więcej kart do dociągnięcia
+                break;
             }
         }
         System.out.println("SILNIK DEBUG (start): Gracz " + gracz.getProfilUzytkownika().getNazwaUzytkownika() +
                 " dociągnął " + gracz.getReka().size() + " kart. W talii pozostało: " + talia.size());
     }
+
+    //Rozpoczyna nową rundę. Resetuje flagi pasowania, czyści plansze, ustala, który gracz rozpoczyna, i prosi go o potwierdzenie tury.
     public void rozpocznijNowaRunde() {
         resetStanuWyboruEmhyra();
         if (czyGraZakonczona) return;
@@ -272,23 +269,24 @@ public class SilnikGry {
             }
         }
         graczPoprzednioZaczynajacyRunde = graczAktualnejTury;
-        this.graczOczekujacyNaPotwierdzenie = graczAktualnejTury; // <<< Kluczowa zmiana: ustawiamy kto ma potwierdzić
+        this.graczOczekujacyNaPotwierdzenie = graczAktualnejTury;
         oczekiwanieNaPotwierdzenieTury = true;
         System.out.println("[SILNIK (rozpocznijNowaRunde)] Runda " + numerRundyGry + ". Ustalony gracz aktualnej tury (oczekujący): " +
                 (this.graczOczekujacyNaPotwierdzenie != null ? this.graczOczekujacyNaPotwierdzenie.getProfilUzytkownika().getNazwaUzytkownika() : "null") +
                 " (Obiekt ID: " + System.identityHashCode(this.graczOczekujacyNaPotwierdzenie) + ")");
         if (kontrolerPlanszy != null) {
             kontrolerPlanszy.odswiezCalakolwiekPlansze();
-            kontrolerPlanszy.pokazPanelPrzejeciaTury(this.graczOczekujacyNaPotwierdzenie); // Panel dla tego, kto ma zacząć
+            kontrolerPlanszy.pokazPanelPrzejeciaTury(this.graczOczekujacyNaPotwierdzenie);
         }
     }
 
+    //Zwraca gracza, który zagrał Medyka i jest w trakcie wybierania miejsca dla wskrzeszonej karty.
     public Gracz getGraczKladacyKartePoWskrzeszeniu() {
         return this.graczKladacyKartePoWskrzeszeniu;
     }
 
+    //Wykonuje akcję zamiany jednostki na Manekina do Ćwiczeń.
     public void wykonajZamianeManekinem(Gracz graczZagrywajacyManekina, Karta wybranaJednostka, RzadPlanszy rzadPochodzenia, int indeksWRzedzie) {
-        // Używamy graczZagrywajacyManekina (z parametru) dla pewności, że operujemy na poprawnym graczu
         if (!oczekiwanieNaWyborCeluDlaManekina || graczZagrywajacyManekina != this.graczUzywajacyManekina || this.kartaManekinaDoPolozenia == null) {
             System.err.println("SILNIK: Niepoprawny stan do wykonania zamiany manekinem.");
             if (this.graczUzywajacyManekina != null && this.kartaManekinaDoPolozenia != null &&
@@ -302,7 +300,6 @@ public class SilnikGry {
 
         System.out.println("SILNIK: Wykonuję zamianę manekinem. Manekin: " + kartaManekinaDoPolozenia.getNazwa() + ", Jednostka: " + wybranaJednostka.getNazwa());
 
-        // 1. Usuń wybraną jednostkę z rzędu
         Karta usunietaKarta = rzadPochodzenia.usunKarteJednostkiZIndeksu(indeksWRzedzie);
         if (usunietaKarta != wybranaJednostka) {
             System.err.println("SILNIK: Błąd! Usunięto inną kartę niż oczekiwano podczas zamiany manekinem.");
@@ -315,23 +312,18 @@ public class SilnikGry {
             return;
         }
 
-        // 2. Dodaj wybraną jednostkę do ręki gracza
         graczZagrywajacyManekina.getReka().add(wybranaJednostka);
         System.out.println(" > Jednostka " + wybranaJednostka.getNazwa() + " wróciła do ręki gracza " + graczZagrywajacyManekina.getProfilUzytkownika().getNazwaUzytkownika());
 
-        // 3. Umieść kartę Manekina na planszy w miejscu usuniętej jednostki
         rzadPochodzenia.getKartyJednostekWRzedzie().add(indeksWRzedzie, kartaManekinaDoPolozenia);
         System.out.println(" > Manekin " + kartaManekinaDoPolozenia.getNazwa() + " umieszczony w rzędzie " + rzadPochodzenia.getTypRzedu() + " na pozycji " + indeksWRzedzie);
 
-        // 4. Zresetuj stan manekina i odśwież planszę
         resetStanuManekina();
         przeliczWszystkiePunktyNaPlanszy();
         if (kontrolerPlanszy != null) kontrolerPlanszy.odswiezCalakolwiekPlansze();
 
-        // --- NOWA, BARDZIEJ ROZBUDOWANA LOGIKA FINALIZACJI TURY Z DEBUGOWANIEM ---
         System.out.println("[SILNIK Manekin] Finalizowanie tury dla gracza: " + graczZagrywajacyManekina.getProfilUzytkownika().getNazwaUzytkownika());
 
-        // Sprawdź auto-pass (choć po wzięciu karty na rękę ręka nie powinna być pusta, to dobra praktyka)
         if (checkAndPerformAutoPassIfHandEmpty(graczZagrywajacyManekina)) {
             System.out.println("[SILNIK Manekin] Gracz automatycznie spasował po zagraniu Manekina.");
             return;
@@ -358,16 +350,14 @@ public class SilnikGry {
             }
         }
     }
-    public void anulujZagranieManekina(Gracz graczAnulujacy, boolean czyBladSystemowy) { // Dodajmy parametr, czy to błąd
+
+    //Anuluje akcję zagrania Manekina i przywraca go na rękę gracza. Tura nie przechodzi, a gracz może wykonać inną akcję.
+    public void anulujZagranieManekina(Gracz graczAnulujacy, boolean czyBladSystemowy) {
         if (!oczekiwanieNaWyborCeluDlaManekina || graczAnulujacy != this.graczUzywajacyManekina || this.kartaManekinaDoPolozenia == null) {
             System.err.println("SILNIK: Niepoprawny stan do anulowania zagrania manekinem lub brak danych.");
             resetStanuManekina();
-            // Jeśli to błąd systemowy, można by rozważyć inne zakończenie tury.
-            // Na razie, jeśli stan jest zły, po prostu resetujemy i nic więcej.
             if (czyBladSystemowy && this.kontrolerPlanszy != null) {
                 this.kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Błąd Manekina. Spróbuj ponownie.", true);
-                // W przypadku błędu, tura nie powinna przechodzić, gracz powinien móc wybrać inną akcję.
-                // Interfejs powinien zostać odblokowany dla tego samego gracza.
                 this.kontrolerPlanszy.resetujStanZaznaczonejKarty();
                 this.kontrolerPlanszy.uaktywnijInterfejsDlaTury(graczAnulujacy == this.gracz1);
             }
@@ -375,8 +365,6 @@ public class SilnikGry {
         }
 
         System.out.println("SILNIK: Gracz " + graczAnulujacy.getProfilUzytkownika().getNazwaUzytkownika() + " anulował zagranie Manekina.");
-
-        // Zwróć kartę Manekina do ręki (bo została usunięta, gdy znaleziono cele)
         if (graczAnulujacy.getReka() != null && this.kartaManekinaDoPolozenia != null &&
                 !graczAnulujacy.getReka().contains(this.kartaManekinaDoPolozenia)) {
             graczAnulujacy.getReka().add(this.kartaManekinaDoPolozenia);
@@ -385,14 +373,14 @@ public class SilnikGry {
         resetStanuManekina();
 
         if (this.kontrolerPlanszy != null) {
-            this.kontrolerPlanszy.odswiezCalakolwiekPlansze(); // Pokaż Manekina z powrotem w ręce
+            this.kontrolerPlanszy.odswiezCalakolwiekPlansze();
             this.kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Zagranie Manekina anulowane. Wybierz inną akcję.", false);
-            this.kontrolerPlanszy.resetujStanZaznaczonejKarty(); // Ważne, aby zresetować stan w kontrolerze
-            this.kontrolerPlanszy.uaktywnijInterfejsDlaTury(graczAnulujacy == this.gracz1); // Uaktywnij interfejs dla tego samego gracza
+            this.kontrolerPlanszy.resetujStanZaznaczonejKarty();
+            this.kontrolerPlanszy.uaktywnijInterfejsDlaTury(graczAnulujacy == this.gracz1);
         }
-        // WAŻNE: Tura NIE przechodzi. Gracz może wybrać inną kartę/akcję.
     }
 
+    //Metoda pomocnicza resetująca stan związany z użyciem zdolności Eredina (ID 414).
     private void resetStanuEredina414() {
         this.oczekiwanieNaWyborKartDoOdrzuceniaEredin414 = false;
         this.oczekiwanieNaWyborKartyZTaliiPrzezEredin414 = false;
@@ -404,11 +392,10 @@ public class SilnikGry {
         }
     }
 
-    // Metoda pomocnicza do finalizowania tury, gdy karta nie została zagrana poprawnie lub akcja została anulowana
+    //Metoda pomocnicza do finalizowania tury, gdy zagranie karty nie powiodło się lub zostało anulowane. Przekazuje turę do przeciwnika.
     private void finalizujTurePoNieudanymZagraniaKarty(Gracz graczKtoryProbowałZagrać) {
         System.out.println("SILNIK: Finalizowanie tury po nieudanym/anulowanym zagraniu karty przez " + graczKtoryProbowałZagrać.getProfilUzytkownika().getNazwaUzytkownika());
-        // Nie przeliczamy punktów, bo zakładamy, że stan planszy się nie zmienił lub został przywrócony
-        if (kontrolerPlanszy != null) kontrolerPlanszy.odswiezCalakolwiekPlansze(); // Aby odświeżyć np. rękę
+        if (kontrolerPlanszy != null) kontrolerPlanszy.odswiezCalakolwiekPlansze();
 
         Gracz przeciwnik = (graczKtoryProbowałZagrać == this.gracz1) ? this.gracz2 : this.gracz1;
         if (przeciwnik.isCzySpasowalWRundzie()) {
@@ -423,8 +410,7 @@ public class SilnikGry {
         }
     }
 
-// W klasie SilnikGry.java
-
+    //Przetwarza akcję zagrania karty przez gracza. Jest to jedna z najbardziej złożonych metod, obsługująca różne typy kart i ich umiejętności.
     public boolean zagrajKarte(Gracz graczZagrywajacy, Karta karta, TypRzeduEnum rzadDocelowyEnumDlaKartyPierwotnej) {
         if (graczZagrywajacy == null || karta == null || aktualnyStanRundy == null) {
             System.err.println("Błąd w zagrajKarte: graczZagrywajacy, karta lub aktualnyStanRundy jest null");
@@ -443,7 +429,7 @@ public class SilnikGry {
 
         if (oczekiwanieNaWyborRzeduPoWskrzeszeniu || oczekiwanieNaWyborCeluDlaManekina || oczekiwanieNaWyborKartyDlaEmhyra ||
                 oczekiwanieNaWyborKartyPogodyPrzezEredina || oczekiwanieNaWyborKartDoOdrzuceniaEredin414 ||
-                oczekiwanieNaWyborKartyZTaliiPrzezEredin414 || oczekiwanieNaWyborKartyZCmentarzaPrzezEredina415) { // Sprawdź wszystkie stany oczekiwania
+                oczekiwanieNaWyborKartyZTaliiPrzezEredin414 || oczekiwanieNaWyborKartyZCmentarzaPrzezEredina415) {
             System.err.println("SILNIK: Próba zagrania karty podczas oczekiwania na inną akcję specjalną.");
             if (kontrolerPlanszy != null) kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Dokończ poprzednią akcję specjalną.", true);
             return false;
@@ -464,7 +450,6 @@ public class SilnikGry {
                 (czyZagrywanaKartaToManekin ? " (MANEKIN)" : "")
         );
 
-        // Logika dla Manekina - musi być przed usunięciem karty z ręki, jeśli ma zwracać false
         if (czyZagrywanaKartaToManekin && karta.getTyp() == TypKartyEnum.SPECJALNA) {
             List<Karta> celeDlaManekina = znajdzPoprawneCeleDlaManekina(graczZagrywajacy);
 
@@ -474,10 +459,9 @@ public class SilnikGry {
                     this.kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Brak jednostek do zamiany z Manekinem. Wybierz inną kartę.", false);
                     this.kontrolerPlanszy.resetujStanZaznaczonejKarty();
                 }
-                return false; // Karta nie zagrana, nie usuwamy z ręki
+                return false;
             }
 
-            // Cele istnieją, usuń kartę z ręki i rozpocznij interakcję
             if (!graczZagrywajacy.getReka().remove(karta)) {
                 System.err.println("SILNIK: Błąd krytyczny - karty Manekin nie udało się usunąć z ręki.");
                 if (this.kontrolerPlanszy != null) this.kontrolerPlanszy.resetujStanZaznaczonejKarty();
@@ -492,16 +476,11 @@ public class SilnikGry {
                 this.kontrolerPlanszy.rozpocznijWyborCeluDlaManekina(graczZagrywajacy, celeDlaManekina);
                 this.kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Wybierz jednostkę (nie Bohatera) do zamiany z Manekinem.", false);
             }
-            // Interakcja z manekinem rozpoczęta, tura nie kończy się tutaj.
-            // Zakończenie tury nastąpi w wykonajZamianeManekinem() lub anulujZagranieManekina().
             return true;
         }
 
-        // Usunięcie karty z ręki dla wszystkich innych kart (poza Manekinem, który jest obsługiwany wyżej)
         if (!graczZagrywajacy.getReka().remove(karta)) {
             System.err.println("SILNIK: Błąd krytyczny - karty " + karta.getNazwa() + " nie udało się usunąć z ręki gracza " + graczZagrywajacy.getProfilUzytkownika().getNazwaUzytkownika());
-            // Może nie być potrzeby resetowania stanu zaznaczonej karty w kontrolerze tutaj,
-            // bo jeśli karta nie mogła być usunięta z ręki, to jest to błąd wewnętrzny silnika.
             return false;
         }
 
@@ -536,8 +515,7 @@ public class SilnikGry {
                 else System.err.println("Cmentarz gracza zagrywającego jest null dla Pożoga_S!");
                 czyPoprawnieZagranaPierwotnaKarta = true;
             }
-            // Manekin do ćwiczeń jest już obsłużony na początku metody
-            else if (!czyZagrywanaKartaToManekin) { // Upewnijmy się, że Manekin nie jest tu ponownie przetwarzany
+            else if (!czyZagrywanaKartaToManekin) {
                 System.out.println("SILNIK: Zagrano inną kartę specjalną: " + karta.getNazwa() + " (nie pogodę, czyste niebo, róg, pożogę S, manekina). Trafia na cmentarz.");
                 if (graczZagrywajacy.getOdrzucone() != null) graczZagrywajacy.getOdrzucone().add(karta);
                 else System.err.println("Cmentarz gracza zagrywającego jest null dla karty: " + karta.getNazwa());
@@ -555,14 +533,14 @@ public class SilnikGry {
 
             if (graczNaPlanszyKtoregoLadujeJednostka == null) {
                 System.err.println("SILNIK: Błąd krytyczny - nie można ustalić gracza docelowego dla jednostki/bohatera: " + karta.getNazwa());
-                graczZagrywajacy.getReka().add(karta); // Zwróć kartę
+                graczZagrywajacy.getReka().add(karta);
                 return false;
             }
             planszaDocelowaDlaJednostki = (graczNaPlanszyKtoregoLadujeJednostka == gracz1) ? aktualnyStanRundy.getPlanszaGracza1() : aktualnyStanRundy.getPlanszaGracza2();
 
             if (planszaDocelowaDlaJednostki == null) {
                 System.err.println("BŁĄD KRYTYCZNY: planszaDocelowaDlaJednostki jest null dla karty: " + karta.getNazwa());
-                graczZagrywajacy.getReka().add(karta); // Zwróć kartę
+                graczZagrywajacy.getReka().add(karta);
                 return false;
             }
 
@@ -571,14 +549,14 @@ public class SilnikGry {
                 rzadDoUmieszczeniaKarty = TypRzeduEnum.fromStringPozycjiKarty(karta.getPozycja());
                 if (rzadDoUmieszczeniaKarty == null && karta.getPozycja().toLowerCase().contains("dowolne")) {
                     System.err.println("SILNIK: Karta '" + karta.getNazwa() + "' z pozycją 'Dowolne' wymaga wyboru rzędu przez gracza (nie przekazano).");
-                    graczZagrywajacy.getReka().add(karta); // Zwróć kartę
+                    graczZagrywajacy.getReka().add(karta);
                     return false;
                 }
             }
 
             if (rzadDoUmieszczeniaKarty == null) {
                 System.err.println("SILNIK: Nie można ustalić rzędu dla karty '" + karta.getNazwa() + "' (pozycja: " + karta.getPozycja() + ").");
-                graczZagrywajacy.getReka().add(karta); // Zwróć kartę
+                graczZagrywajacy.getReka().add(karta);
                 return false;
             }
 
@@ -590,10 +568,9 @@ public class SilnikGry {
                 System.out.println(" > Karta " + karta.getNazwa() + " dodana do rzędu " + rzadDoUmieszczeniaKarty + " na planszy gracza " + graczNaPlanszyKtoregoLadujeJednostka.getProfilUzytkownika().getNazwaUzytkownika());
 
                 if (czyZagrywanaKartaToSzpieg) {
-                    // Najpierw aktywuj inne umiejętności (np. Braterstwo), jeśli szpieg je ma
                     aktywujUmiejetnosciPoZagrywce(graczNaPlanszyKtoregoLadujeJednostka, karta, rzadNaKtoryTrafiaPierwotnaKarta, false);
-                    przeliczWszystkiePunktyNaPlanszy(); // Przelicz punkty po dodaniu szpiega
-                    if(kontrolerPlanszy != null) kontrolerPlanszy.odswiezCalakolwiekPlansze(); // Odśwież widok
+                    przeliczWszystkiePunktyNaPlanszy();
+                    if(kontrolerPlanszy != null) kontrolerPlanszy.odswiezCalakolwiekPlansze();
 
                     // Teraz poproś kontroler o animację dobierania kart
                     System.out.println(" > Szpieg zagrany. Inicjowanie animacji dobierania kart.");
@@ -605,45 +582,34 @@ public class SilnikGry {
                     if (!kartyDoDobrania.isEmpty() && kontrolerPlanszy != null) {
                         kontrolerPlanszy.rozpocznijAnimacjeDobierania(graczZagrywajacy, kartyDoDobrania);
                     } else {
-                        // Awaryjnie, jeśli nie ma kart do dobrania, od razu finalizuj turę
                         finalizujTurePoDobieraniu(graczZagrywajacy, new ArrayList<>());
                     }
-                    // WAŻNE: Tura nie kończy się tutaj. Zostanie zakończona po animacji.
-                    // Zwracamy true, bo zagranie karty się powiodło.
                     return true;
                 }
-
-                // Umiejętności Pożoga_K i Zmartwychwstanie mają specjalne timingi i nie są aktywowane przez aktywujUmiejetnosciPoZagrywce.
-                // Manekin jest już obsłużony.
                 if (!czyZagrywanaKartaMaZmartwychwstanie && !czyZagrywanaKartaMaPozogaK) {
                     System.out.println("  DEBUG (Braterstwo/Inne): Wywołuję aktywujUmiejetnosciPoZagrywce dla: " + karta.getNazwa());
                     aktywujUmiejetnosciPoZagrywce(graczNaPlanszyKtoregoLadujeJednostka, karta, rzadNaKtoryTrafiaPierwotnaKarta, false);
                 }
             } else {
                 System.err.println("SILNIK: Nie można było uzyskać konkretnego rzędu (" + rzadDoUmieszczeniaKarty + ") dla karty " + karta.getNazwa() + ".");
-                graczZagrywajacy.getReka().add(karta); // Zwróć kartę
+                graczZagrywajacy.getReka().add(karta);
                 return false;
             }
-        } else { // Typ karty nie jest ani SPECJALNA, ani JEDNOSTKA, ani BOHATER
+        } else {
             System.err.println("SILNIK: Próba zagrania karty nieobsługiwanego typu na planszę: " + (karta.getTyp() != null ? karta.getTyp().name() : "TYP NULL"));
-            graczZagrywajacy.getReka().add(karta); // Zwróć kartę
+            graczZagrywajacy.getReka().add(karta);
             return false;
         }
-
-        // Jeśli karta została poprawnie umieszczona na planszy lub jej efekt (jak pogoda) został zastosowany
         if (czyPoprawnieZagranaPierwotnaKarta) {
-            // Aktywacja efektów, które dzieją się PO umieszczeniu karty lub globalnie
             if (czyZagrywanaKartaMaPozogaS) {
                 aktywujPozogaGlobalna(graczZagrywajacy);
             } else if (czyZagrywanaKartaMaPozogaK) {
-                // Pożoga_K aktywowana jest z jednostki, rzadNaKtoryTrafiaPierwotnaKarta powinien być rzędem tej jednostki
                 aktywujPozogaNaRzedzie(graczZagrywajacy, karta, rzadNaKtoryTrafiaPierwotnaKarta);
             }
 
-            // Specjalna obsługa dla Medyka - rozpoczyna interakcję wyboru karty z cmentarza
             if (czyZagrywanaKartaMaZmartwychwstanie) {
                 System.out.println("SILNIK: Karta '" + karta.getNazwa() + "' (Medyk) aktywuje Zmartwychwstanie.");
-                przeliczWszystkiePunktyNaPlanszy(); // Przelicz punkty PRZED pokazaniem panelu cmentarza
+                przeliczWszystkiePunktyNaPlanszy();
                 if (kontrolerPlanszy != null) kontrolerPlanszy.odswiezCalakolwiekPlansze();
 
                 boolean emhyr71AktywnyWGrze = (gracz1.getKartaDowodcy() != null && gracz1.getKartaDowodcy().getId() == 71 && !gracz1.isZdolnoscDowodcyUzyta()) ||
@@ -654,31 +620,21 @@ public class SilnikGry {
                     if (kontrolerPlanszy != null) {
                         kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Emhyr (Najeźdźca): Losowe wskrzeszenie z Twojego cmentarza...", false);
                     }
-                    zastosujEfektLosowegoWskrzeszeniaPrzezNjezdzce(graczZagrywajacy); // Ta metoda umieści kartę
-                    // Po losowym wskrzeszeniu, turę finalizuje finalizujTurePoWskrzeszeniu
-                    // Ale najpierw musimy sprawdzić auto-pass
-                    finalizujTurePoWskrzeszeniu(graczZagrywajacy); // Ta metoda powinna zawierać auto-pass check
+                    zastosujEfektLosowegoWskrzeszeniaPrzezNjezdzce(graczZagrywajacy);
+                    finalizujTurePoWskrzeszeniu(graczZagrywajacy);
                 } else {
                     System.out.println("SILNIK: Standardowe Zmartwychwstanie - otwieranie cmentarza dla gracza: " + graczZagrywajacy.getProfilUzytkownika().getNazwaUzytkownika());
                     if (this.kontrolerPlanszy != null) {
                         this.kontrolerPlanszy.pokazPanelCmentarza(graczZagrywajacy, "Wybierz kartę do wskrzeszenia", KontrolerPlanszyGry.TrybPaneluCmentarzaKontekst.WSKRZESZANIE_MEDYK);
                     }
-                    // Tura nie kończy się tutaj, czeka na wybór z cmentarza lub anulowanie.
                 }
-                return true; // Interakcja Medyka rozpoczęta
+                return true;
             }
-
-            // Przelicz punkty i odśwież planszę po wszystkich innych efektach
             przeliczWszystkiePunktyNaPlanszy();
             if (kontrolerPlanszy != null) kontrolerPlanszy.odswiezCalakolwiekPlansze();
-
-            // *** NOWA LOGIKA AUTO-PASS (dla kart innych niż Medyk/Manekin, które nie zakończyły tury wcześniej) ***
             if (checkAndPerformAutoPassIfHandEmpty(graczZagrywajacy)) {
-                return true; // Auto-pass zainicjowany, dalsza logika zmiany tury obsłużona przez kontynuujPoWyswietleniuInfoOPasie()
+                return true;
             }
-            // *** KONIEC NOWEJ LOGIKI AUTO-PASS ***
-
-            // Standardowa logika zmiany tury, jeśli nie było auto-passu
             Gracz przeciwnik = (graczZagrywajacy == this.gracz1) ? this.gracz2 : this.gracz1;
             if (przeciwnik.isCzySpasowalWRundzie()) {
                 graczAktualnejTury = graczZagrywajacy;
@@ -694,23 +650,18 @@ public class SilnikGry {
                     kontrolerPlanszy.rozpocznijSekwencjeZmianyTury();
                 }
             }
-            return true; // Karta zagrana pomyślnie
-
-        } else { // Karta nie została poprawnie zagrana (czyPoprawnieZagranaPierwotnaKarta == false)
-            // LUB nie była to karta specjalna, jednostka ani bohater (co już powinno zwrócić false wcześniej)
-
-            // Jeśli karta została usunięta z ręki, ale jej zagranie się nie powiodło
-            // (np. Róg na zajęty slot, zła pozycja dla jednostki, która nie została przechwycona wcześniej),
-            // powinna wrócić do ręki.
-            // Sprawdzenie !graczZagrywajacy.getReka().contains(karta) jest ważne, bo karta została usunięta na początku.
-            if (!graczZagrywajacy.getReka().contains(karta)) { // Jeśli nie ma jej już w ręce (bo została usunięta)
-                graczZagrywajacy.getReka().add(karta); // Zwróć ją do ręki
+            return true;
+        } else {
+            if (!graczZagrywajacy.getReka().contains(karta)) {
+                graczZagrywajacy.getReka().add(karta);
                 System.out.println("SILNIK: Karta " + karta.getNazwa() + " zwrócona do ręki gracza " + graczZagrywajacy.getProfilUzytkownika().getNazwaUzytkownika() + " z powodu nieudanego zagrania lub braku celu.");
             }
-            if (kontrolerPlanszy != null) kontrolerPlanszy.odswiezCalakolwiekPlansze(); // Odśwież rękę
-            return false; // Zagranie nie powiodło się
+            if (kontrolerPlanszy != null) kontrolerPlanszy.odswiezCalakolwiekPlansze();
+            return false;
         }
     }
+
+    //Uruchamia umiejętności karty tuż po jej umieszczeniu na planszy, takie jak 'Braterstwo' (Muster) czy 'Wysokie morale' (Morale Boost).
     private void aktywujUmiejetnosciPoZagrywce(Gracz graczNaPlanszyKtoregoLadujeKarta, Karta karta, RzadPlanszy rzadNaKtoryTrafia, boolean czyPoWskrzeszeniu) {
         if (karta == null || rzadNaKtoryTrafia == null || graczNaPlanszyKtoregoLadujeKarta == null) return;
         String umiejetnosc = karta.getUmiejetnosc();
@@ -718,13 +669,8 @@ public class SilnikGry {
 
         System.out.println("  DEBUG (aktywujUmiejetnosciPoZagrywce): Karta '" + karta.getNazwa() + "', Umiejętność: '" + umiejetnosc + "'");
 
-        // Zakładamy, że "Braterstwo" to umiejętność typu Muster (wzywanie jednostek)
         if (umiejetnosc.equalsIgnoreCase("Braterstwo")) {
             System.out.println("    DEBUG (Braterstwo): Rozpoznano umiejętność Braterstwo dla '" + karta.getNazwa() + "'.");
-
-            // Efekt Braterstwa (Muster) aktywuje się dla gracza, który KONTROLUJE kartę inicjującą na planszy
-            // i ciągnie z WŁASNEJ ręki/talii.
-            // 'graczNaPlanszyKtoregoLadujeKarta' to ten, kto kontroluje kartę.
             if (graczNaPlanszyKtoregoLadujeKarta != null) {
                 System.out.println("    DEBUG (Braterstwo): Aktywuję Braterstwo dla gracza: " + graczNaPlanszyKtoregoLadujeKarta.getProfilUzytkownika().getNazwaUzytkownika() + " dla karty " + karta.getNazwa());
                 aktywujBraterstwo(graczNaPlanszyKtoregoLadujeKarta, karta, rzadNaKtoryTrafia);
@@ -733,20 +679,17 @@ public class SilnikGry {
             }
         } else if (umiejetnosc.equalsIgnoreCase("Wysokie morale")) {
             System.out.println(" > Karta '" + karta.getNazwa() + "' z umiejętnością 'Wysokie morale' została umieszczona w rzędzie. Efekt jest ciągły (aura).");
-            // Nie ma tu dodatkowej akcji, RzadPlanszy.przeliczSumePunktow() obsłuży aurę.
         }
-        // TODO: Inne umiejętności aktywowane po zagraniu/wskrzeszeniu (np. Pożoga_K jednostki, jeśli nie jest obsługiwana bezpośrednio w zagrajKarte)
     }
+
+    //Metoda pomocnicza czyszcząca stan związany z użyciem karty 'Manekin do ćwiczeń', przywracając domyślne wartości.
     private void resetStanuManekina() {
         this.oczekiwanieNaWyborCeluDlaManekina = false;
         this.kartaManekinaDoPolozenia = null;
         this.graczUzywajacyManekina = null;
     }
 
-
-
-// W klasie SilnikGry.java
-
+    //Aktywuje efekt karty Pożoga (Scorch), niszcząc najsilniejszą lub najsilniejsze jednostki (nie-bohaterów) na całej planszy.
     private void aktywujPozogaGlobalna(Gracz graczZagrywajacy) {
         System.out.println("SILNIK: Aktywacja Pożogi Globalnej (Pożoga_S) przez gracza: " + graczZagrywajacy.getProfilUzytkownika().getNazwaUzytkownika());
 
@@ -754,25 +697,22 @@ public class SilnikGry {
         Map<Karta, RzadPlanszy> rzedyKart = new HashMap<>();
         Map<Karta, Gracz> wlascicieleKart = new HashMap<>();
 
-        // Przetwarzanie planszy Gracza 1
         PlanszaGracza planszaG1 = aktualnyStanRundy.getPlanszaGracza1();
         if (planszaG1 != null) {
             for (TypRzeduEnum typRzedu : TypRzeduEnum.values()) {
                 RzadPlanszy rzad = planszaG1.getRzad(typRzedu);
                 if (rzad != null) {
                     for (Karta k : rzad.getKartyJednostekWRzedzie()) {
-                        if (k.getTyp() != TypKartyEnum.BOHATER) { // Pożoga nie wpływa na Bohaterów
+                        if (k.getTyp() != TypKartyEnum.BOHATER) {
                             int efektywnaSila = rzad.obliczSileEfektywnaKarty(k);
                             sileEfektywneWszystkichKart.put(k, efektywnaSila);
                             rzedyKart.put(k, rzad);
-                            wlascicieleKart.put(k, gracz1); // Bezpośrednie użycie gracz1
+                            wlascicieleKart.put(k, gracz1);
                         }
                     }
                 }
             }
         }
-
-        // Przetwarzanie planszy Gracza 2
         PlanszaGracza planszaG2 = aktualnyStanRundy.getPlanszaGracza2();
         if (planszaG2 != null) {
             for (TypRzeduEnum typRzedu : TypRzeduEnum.values()) {
@@ -783,7 +723,7 @@ public class SilnikGry {
                             int efektywnaSila = rzad.obliczSileEfektywnaKarty(k);
                             sileEfektywneWszystkichKart.put(k, efektywnaSila);
                             rzedyKart.put(k, rzad);
-                            wlascicieleKart.put(k, gracz2); // Bezpośrednie użycie gracz2
+                            wlascicieleKart.put(k, gracz2);
                         }
                     }
                 }
@@ -794,10 +734,7 @@ public class SilnikGry {
             System.out.println("SILNIK: Pożoga Globalna - brak jednostek nie-bohaterów na planszy.");
             return;
         }
-
-        // Znajdź maksymalną efektywną siłę na całej planszy
         int maxSila = 0;
-        // Używamy .values(), aby iterować tylko po wartościach (siłach)
         for (Integer sila : sileEfektywneWszystkichKart.values()) {
             if (sila > maxSila) {
                 maxSila = sila;
@@ -808,8 +745,6 @@ public class SilnikGry {
             System.out.println("SILNIK: Pożoga Globalna - brak jednostek z siłą > 0.");
             return;
         }
-
-        // Zbierz wszystkie karty o maksymalnej sile
         List<Karta> kartyDoZniszczenia = new ArrayList<>();
         for (Map.Entry<Karta, Integer> entry : sileEfektywneWszystkichKart.entrySet()) {
             if (entry.getValue() == maxSila) {
@@ -823,7 +758,7 @@ public class SilnikGry {
                 Gracz wlasciciel = wlascicieleKart.get(k);
                 RzadPlanszy rzad = rzedyKart.get(k);
                 if (wlasciciel != null && rzad != null) {
-                    rzad.usunKarteJednostki(k); // usuniecie karty z rzędu wywoła w nim przeliczSumePunktow
+                    rzad.usunKarteJednostki(k);
                     wlasciciel.getOdrzucone().add(k);
                     System.out.print(k.getNazwa() + " (gracza " + wlasciciel.getProfilUzytkownika().getNazwaUzytkownika() + "), ");
                 }
@@ -831,6 +766,8 @@ public class SilnikGry {
             System.out.println();
         }
     }
+
+    //Aktywuje efekt Pożogi na konkretnym rzędzie przeciwnika, jeśli suma siły w tym rzędzie wynosi co najmniej 10. Niszczy najsilniejszą jednostkę (lub jednostki) w tym rzędzie.
     private void aktywujPozogaNaRzedzie(Gracz graczAktywujacy, Karta kartaPozogi, RzadPlanszy rzadGdzieKartaPozogiLandowala) {
         if (rzadGdzieKartaPozogiLandowala == null) {
             System.err.println("SILNIK: Pożoga_K - karta Pozogi nie została umieszczona w żadnym rzędzie.");
@@ -846,7 +783,6 @@ public class SilnikGry {
             return;
         }
 
-        // Warunek: suma punktów w rzędzie przeciwnika >= 10
         if (rzadPrzeciwnika.getSumaPunktowWRzedzie() >= 10) {
             Map<Karta, Integer> sileEfektywneWRzedzie = new HashMap<>();
             for (Karta k : rzadPrzeciwnika.getKartyJednostekWRzedzie()) {
@@ -878,6 +814,7 @@ public class SilnikGry {
         }
     }
 
+    //Metoda wywoływana po wybraniu przez gracza karty z cmentarza do wskrzeszenia. Usuwa kartę z cmentarza i sprawdza, czy wymaga ona wyboru rzędu.
     public void rozpocznijProcesWskrzeszaniaKarty(Gracz graczWskrzeszajacy, Karta kartaDoWskrzeszenia) {
         System.out.println("SILNIK: Gracz " + graczWskrzeszajacy.getProfilUzytkownika().getNazwaUzytkownika() + " wybrał do wskrzeszenia: " + kartaDoWskrzeszenia.getNazwa());
 
@@ -920,7 +857,6 @@ public class SilnikGry {
                 System.out.println("SILNIK: Wskrzeszony szpieg " + kartaDoWskrzeszenia.getNazwa() + " umieszczony na planszy przeciwnika w rzędzie " + rzadSzpiega);
                 dociagnijKartyDoRekiPoZagrywce(graczWskrzeszajacy, 2);
                 aktywujUmiejetnosciPoZagrywce(przeciwnik, kartaDoWskrzeszenia, rzadDocelowy, true);
-                // USUNIĘTO: sprawdzIZastosujEfektEmhyraNjezdzcy(graczWskrzeszajacy, kartaDoWskrzeszenia);
                 finalizujTurePoWskrzeszeniu(graczWskrzeszajacy);
             } else {
                 System.err.println("SILNIK: Nie można umieścić wskrzeszonego szpiega ("+kartaDoWskrzeszenia.getNazwa()+") - niepoprawny rząd docelowy: " + rzadSzpiega + " lub plansza przeciwnika jest null.");
@@ -935,7 +871,7 @@ public class SilnikGry {
             if (kontrolerPlanszy != null) {
                 kontrolerPlanszy.poprosOWyborRzeduDlaKarty(kartaDoWskrzeszenia, graczWskrzeszajacy, true);
             }
-        } else { // Standardowa jednostka (nie szpieg, nie zręczność/dowolne)
+        } else {
             PlanszaGracza planszaGraczaWskrzeszajacego = (graczWskrzeszajacy == gracz1) ? aktualnyStanRundy.getPlanszaGracza1() : aktualnyStanRundy.getPlanszaGracza2();
             TypRzeduEnum rzadKarty = TypRzeduEnum.fromStringPozycjiKarty(kartaDoWskrzeszenia.getPozycja());
 
@@ -944,7 +880,6 @@ public class SilnikGry {
                 rzadDocelowy.dodajKarteJednostki(kartaDoWskrzeszenia);
                 System.out.println("SILNIK: Wskrzeszona karta " + kartaDoWskrzeszenia.getNazwa() + " umieszczona w rzędzie " + rzadKarty);
                 aktywujUmiejetnosciPoZagrywce(graczWskrzeszajacy, kartaDoWskrzeszenia, rzadDocelowy, true);
-                // USUNIĘTO: sprawdzIZastosujEfektEmhyraNjezdzcy(graczWskrzeszajacy, kartaDoWskrzeszenia);
                 finalizujTurePoWskrzeszeniu(graczWskrzeszajacy);
             } else {
                 System.err.println("SILNIK: Nie można umieścić wskrzeszonej karty '" + kartaDoWskrzeszenia.getNazwa() + "' - niepoprawny lub nieokreślony rząd docelowy (pozycja: '" + kartaDoWskrzeszenia.getPozycja() + "') lub plansza gracza jest null.");
@@ -952,9 +887,10 @@ public class SilnikGry {
                 finalizujTurePoNieudanymWskrzeszeniu(graczWskrzeszajacy);
             }
         }
-    }    public void polozWskrzeszonaKarteNaRzedzie(Gracz graczKtoryWybralRzadFaktycznie, Karta karta, TypRzeduEnum rzadDocelowyEnum) {
-        // graczKladacyKartePoWskrzeszeniu to ten, kto oryginalnie zagrał medyka
-        // graczKtoryWybralRzadFaktycznie to ten, kto fizycznie kliknął rząd (w hotseat to będzie graczKladacyKartePoWskrzeszeniu)
+    }
+
+    //Umieszcza wskrzeszoną kartę na wybranym przez gracza rzędzie.
+    public void polozWskrzeszonaKarteNaRzedzie(Gracz graczKtoryWybralRzadFaktycznie, Karta karta, TypRzeduEnum rzadDocelowyEnum) {
 
         if (!oczekiwanieNaWyborRzeduPoWskrzeszeniu || karta != kartaOczekujacaNaPolozeniePoWskrzeszeniu || graczKladacyKartePoWskrzeszeniu == null) {
             System.err.println("SILNIK: Niespójny stan przy próbie położenia wskrzeszonej karty (oczekiwanie: " + oczekiwanieNaWyborRzeduPoWskrzeszeniu +
@@ -962,7 +898,6 @@ public class SilnikGry {
                     ", karta aktualna: " + (karta != null ? karta.getNazwa() : "null") +
                     ", gracz kładący: " + (graczKladacyKartePoWskrzeszeniu != null ? graczKladacyKartePoWskrzeszeniu.getProfilUzytkownika().getNazwaUzytkownika() : "null") + ")");
 
-            // Zwróć kartę na cmentarz gracza, który miał ją wskrzesić
             if(kartaOczekujacaNaPolozeniePoWskrzeszeniu != null && graczKladacyKartePoWskrzeszeniu != null) {
                 graczKladacyKartePoWskrzeszeniu.getOdrzucone().add(kartaOczekujacaNaPolozeniePoWskrzeszeniu);
             } else if (karta != null) {
@@ -976,7 +911,6 @@ public class SilnikGry {
             return;
         }
 
-        // Używamy graczKladacyKartePoWskrzeszeniu jako tego, kto inicjował wskrzeszanie
         System.out.println("SILNIK: Gracz " + graczKtoryWybralRzadFaktycznie.getProfilUzytkownika().getNazwaUzytkownika() +
                 " wybrał rząd " + rzadDocelowyEnum +
                 " dla wskrzeszonej karty " + karta.getNazwa() +
@@ -1028,7 +962,6 @@ public class SilnikGry {
             }
             aktywujUmiejetnosciPoZagrywce(graczNaPlanszyDocelowej, karta, rzadNaPlanszy, true);
 
-            // USUNIĘTO: sprawdzIZastosujEfektEmhyraNjezdzcy(graczKladacyKartePoWskrzeszeniu, karta);
 
             finalizujTurePoWskrzeszeniu(graczKladacyKartePoWskrzeszeniu);
         } else {
@@ -1039,6 +972,7 @@ public class SilnikGry {
         resetStanuOczekiwaniaNaPolozenieWskrzeszonej();
     }
 
+    //Metoda pomocnicza resetująca stan związany z procesem wskrzeszania karty.
     private void resetStanuOczekiwaniaNaPolozenieWskrzeszonej() {
         this.kartaOczekujacaNaPolozeniePoWskrzeszeniu = null;
         this.graczKladacyKartePoWskrzeszeniu = null;
@@ -1046,6 +980,7 @@ public class SilnikGry {
     }
 
 
+    //Finalizuje turę po udanej operacji wskrzeszenia. Przelicza punkty, odświeża widok i przekazuje turę do przeciwnika.
     private void finalizujTurePoWskrzeszeniu(Gracz graczKtoryWskrzeszal) {
         System.out.println("SILNIK: Finalizowanie tury po udanym wskrzeszeniu przez " + graczKtoryWskrzeszal.getProfilUzytkownika().getNazwaUzytkownika());
         przeliczWszystkiePunktyNaPlanszy();
@@ -1053,35 +988,30 @@ public class SilnikGry {
         resetStanuOczekiwaniaNaPolozenieWskrzeszonej();
 
         Gracz przeciwnik = (graczKtoryWskrzeszal == this.gracz1) ? this.gracz2 : this.gracz1;
-        // graczAktualnejTury to wciąż graczKtoryWskrzeszal (ten, kto zagrał medyka)
         if (przeciwnik.isCzySpasowalWRundzie()) {
-            // Tura pozostaje u gracza, który wskrzeszał (graczAktualnejTury)
             oczekiwanieNaPotwierdzenieTury = false;
             setGraczOczekujacyNaPotwierdzenie(null);
             System.out.println("SILNIK (po wskrzeszeniu): Przeciwnik spasował, tura pozostaje u " + graczAktualnejTury.getProfilUzytkownika().getNazwaUzytkownika());
             if (kontrolerPlanszy != null) kontrolerPlanszy.uaktywnijInterfejsDlaTury(graczAktualnejTury == this.gracz1);
         } else {
-            // Tura przechodzi do przeciwnika
             oczekiwanieNaPotwierdzenieTury = true;
-            // setGraczOczekujacyNaPotwierdzenie nie zmienia graczAktualnejTury, tylko kto ma kliknąć "Potwierdź"
-            // graczAktualnejTury w silniku zmieni się dopiero po potwierdzeniu przez kontrolerPlanszy -> silnik.potwierdzPrzejecieTury()
             setGraczOczekujacyNaPotwierdzenie(przeciwnik);
             System.out.println("SILNIK (po wskrzeszeniu): Przekazywanie tury do " + przeciwnik.getProfilUzytkownika().getNazwaUzytkownika());
             if (kontrolerPlanszy != null) kontrolerPlanszy.rozpocznijSekwencjeZmianyTury();
         }
     }
 
+    //Anuluje proces wskrzeszania, jeśli gracz zamknie panel cmentarza bez wyboru. Tura normalnie przechodzi do przeciwnika.
     public void anulujWskrzeszanie(Gracz graczKtoryAnulowal) {
         System.out.println("SILNIK: Gracz " + graczKtoryAnulowal.getProfilUzytkownika().getNazwaUzytkownika() + " anulował wskrzeszanie.");
-        resetStanuOczekiwaniaNaPolozenieWskrzeszonej(); // Na wszelki wypadek
-        // Tura normalnie przechodzi do przeciwnika, tak jakby medyk nie miał dodatkowego efektu
-        // lub jakby gracz po prostu zakończył swój ruch.
+        resetStanuOczekiwaniaNaPolozenieWskrzeszonej();
         finalizujTurePoNieudanymWskrzeszeniu(graczKtoryAnulowal);
     }
 
+    //Metoda pomocnicza do finalizowania tury, gdy proces wskrzeszania karty został anulowany lub zakończył się niepowodzeniem.
     private void finalizujTurePoNieudanymWskrzeszeniu(Gracz graczKtoryProbowaWskrzesic) {
         System.out.println("SILNIK: Finalizowanie tury po nieudanym/anulowanym wskrzeszeniu przez " + graczKtoryProbowaWskrzesic.getProfilUzytkownika().getNazwaUzytkownika());
-        przeliczWszystkiePunktyNaPlanszy(); // Przelicz punkty (np. za położonego medyka)
+        przeliczWszystkiePunktyNaPlanszy();
         if (kontrolerPlanszy != null) kontrolerPlanszy.odswiezCalakolwiekPlansze();
         resetStanuOczekiwaniaNaPolozenieWskrzeszonej();
 
@@ -1100,6 +1030,7 @@ public class SilnikGry {
         }
     }
 
+    //Metoda pomocnicza zwracająca obiekt PlanszaGracza dla podanego gracza.
     private PlanszaGracza getPlanszaGracza(Gracz gracz) {
         if (gracz == null || aktualnyStanRundy == null) {
             System.err.println("SILNIK (getPlanszaGracza): Gracz lub aktualnyStanRundy jest null.");
@@ -1113,6 +1044,8 @@ public class SilnikGry {
         System.err.println("SILNIK (getPlanszaGracza): Nie udało się zidentyfikować planszy dla podanego gracza.");
         return null;
     }
+
+    //Aktywuje umiejętność "Braterstwo" (Muster), wyszukując w talii i ręce gracza inne karty o tej samej nazwie i zagrywając je automatycznie.
     private void aktywujBraterstwo(Gracz graczZagrywajacy, Karta kartaInicjujaca, RzadPlanszy rzadDocelowy) {
         String grupaIDKartyInicjujacej = kartaInicjujaca.getGrupaBraterstwa();
         if (grupaIDKartyInicjujacej == null || grupaIDKartyInicjujacej.trim().isEmpty()) {
@@ -1120,48 +1053,33 @@ public class SilnikGry {
             return;
         }
         System.out.println("    Aktywacja Braterstwa dla grupy: '" + grupaIDKartyInicjujacej + "' (karta inicjująca: " + kartaInicjujaca.getNazwa() + ")");
-
-        // 1. Wezwij z ręki
-        // Używamy iteratora, aby bezpiecznie usuwać elementy z ręki podczas iteracji
         Iterator<Karta> iteratorReki = graczZagrywajacy.getReka().iterator();
-        List<Karta> kartyDoDodaniaZreki = new ArrayList<>(); // Tymczasowa lista, aby uniknąć modyfikacji podczas iteracji
+        List<Karta> kartyDoDodaniaZreki = new ArrayList<>();
         while (iteratorReki.hasNext()) {
             Karta kartaWRęce = iteratorReki.next();
-            // Wzywamy INNE karty (różne ID) z tej samej grupy Braterstwa.
-            // Nie wzywamy Bohaterów przez Braterstwo (typowa zasada).
             if (grupaIDKartyInicjujacej.equals(kartaWRęce.getGrupaBraterstwa()) &&
                     kartaWRęce.getId() != kartaInicjujaca.getId() &&
                     kartaWRęce.getTyp() != TypKartyEnum.BOHATER) {
 
-                kartyDoDodaniaZreki.add(kartaWRęce); // Dodaj do listy do późniejszego usunięcia z ręki
+                kartyDoDodaniaZreki.add(kartaWRęce);
             }
         }
-        // Teraz usuń z ręki i dodaj na planszę
         for (Karta kartaDoWezwania : kartyDoDodaniaZreki) {
-            graczZagrywajacy.getReka().remove(kartaDoWezwania); // Usuń z ręki
-            rzadDocelowy.dodajKarteJednostki(kartaDoWezwania);   // Dodaj do rzędu
+            graczZagrywajacy.getReka().remove(kartaDoWezwania);
+            rzadDocelowy.dodajKarteJednostki(kartaDoWezwania);
             System.out.println("    > Wezwano z ręki: " + kartaDoWezwania.getNazwa() + " (ID: " + kartaDoWezwania.getId() + ")");
         }
-
-
-        // 2. Wezwij z talii
-        // Używamy iteratora, aby bezpiecznie usuwać elementy z talii podczas iteracji
         Iterator<Karta> iteratorTalii = graczZagrywajacy.getTaliaDoGry().iterator();
         while (iteratorTalii.hasNext()) {
             Karta kartaWTalii = iteratorTalii.next();
-            // Wzywamy karty z tej samej grupy Braterstwa.
-            // Nie musimy sprawdzać ID, bo karta inicjująca jest już na planszy, nie w talii.
-            // Nie wzywamy Bohaterów.
             if (grupaIDKartyInicjujacej.equals(kartaWTalii.getGrupaBraterstwa()) &&
                     kartaWTalii.getTyp() != TypKartyEnum.BOHATER) {
 
-                iteratorTalii.remove(); // Usuń z talii
-                rzadDocelowy.dodajKarteJednostki(kartaWTalii); // Dodaj do rzędu
+                iteratorTalii.remove();
+                rzadDocelowy.dodajKarteJednostki(kartaWTalii);
                 System.out.println("    > Wezwano z talii: " + kartaWTalii.getNazwa() + " (ID: " + kartaWTalii.getId() + ")");
             }
         }
-        // Punkty zostaną przeliczone globalnie przez przeliczWszystkiePunktyNaPlanszy()
-        // wywołane na końcu metody zagrajKarte, jeśli czyPoprawnieZagrana jest true.
     }
 
     // Upewnij się, że masz tę metodę pomocniczą w klasie SilnikGry:
@@ -1177,7 +1095,7 @@ public class SilnikGry {
             System.err.println("Błąd: Talia gracza " + gracz.getProfilUzytkownika().getNazwaUzytkownika() + " jest null. Nie można dociągnąć kart.");
             return;
         }
-        if (reka == null) { // Na wszelki wypadek, gdyby ręka była null
+        if (reka == null) {
             reka = new ArrayList<>();
             gracz.setReka(reka);
         }
@@ -1185,13 +1103,12 @@ public class SilnikGry {
         int dociagnieto = 0;
         for (int i = 0; i < ilosc; i++) {
             if (!talia.isEmpty()) {
-                // USUWAMY WARUNEK: if (reka.size() < ILOSC_KART_STARTOWYCH)
                 reka.add(talia.remove(0));
                 dociagnieto++;
             } else {
                 System.out.println("SILNIK OSTRZEŻENIE: Talia gracza " + gracz.getProfilUzytkownika().getNazwaUzytkownika() +
                         " jest pusta. Dociągnięto " + dociagnieto + " z " + ilosc + " kart po zagrywce.");
-                break; // Nie ma więcej kart do dociągnięcia
+                break;
             }
         }
         System.out.println("SILNIK DEBUG (po zagrywce): Gracz " + gracz.getProfilUzytkownika().getNazwaUzytkownika() +
@@ -1199,25 +1116,18 @@ public class SilnikGry {
                 ". W talii pozostało: " + talia.size());
     }
 
+    //Metoda wywoływana przez kontroler po zniknięciu panelu wyniku rundy.
     public void przejdzDoNastepnegoEtapuPoWynikuRundy() {
         System.out.println("[SILNIK] Kontynuacja po wyświetleniu panelu wyniku rundy.");
-
-        // Krok 1: Przenieś WSZYSTKIE karty z planszy na cmentarze (STANDARDOWO)
-        przeniesWszystkieKartyZPlanszNaCmentarze(); // Karta Potwora też idzie na cmentarz
-
-        // Krok 2: Usuń karty pogody
+        przeniesWszystkieKartyZPlanszNaCmentarze();
         if (aktualnyStanRundy != null) {
             aktualnyStanRundy.wyczyscPogode();
             System.out.println("[SILNIK] Aktywne karty pogody zostały usunięte z planszy (jeśli jakieś były).");
         }
-
-        // Krok 3: Przelicz punkty (będą 0) i odśwież UI
         przeliczWszystkiePunktyNaPlanszy();
         if (kontrolerPlanszy != null) {
             kontrolerPlanszy.odswiezCalakolwiekPlansze();
         }
-
-        // Krok 4: Sprawdź warunki końca gry
         boolean g1Przegral = (gracz1 != null && gracz1.getWygraneRundy() <= 0);
         boolean g2Przegral = (gracz2 != null && gracz2.getWygraneRundy() <= 0);
         boolean maxRundOsiagniety = (numerRundyGry >= 3);
@@ -1227,11 +1137,11 @@ public class SilnikGry {
             zakonczGre();
         } else {
             System.out.println("[SILNIK] Rozpoczynanie nowej rundy (po etapie pośrednim).");
-            // Tu NIE ma dociągania kart ani przywracania Potwora
-            rozpocznijNowaRunde(); // To ustawi panel przejęcia tury
+            rozpocznijNowaRunde();
         }
     }
 
+    //Metoda wywoływana przez kontroler, gdy gracz potwierdzi przejęcie tury.
     public void potwierdzPrzejecieTury() {
         oczekiwanieNaPotwierdzenieTury = false;
         System.out.println("[SILNIK (potwierdzPrzejecieTury)] Wejście. Gracz, który kliknął potwierdzenie (oczekujący): " +
@@ -1250,14 +1160,11 @@ public class SilnikGry {
         } else {
             graczAktualnejTury = graczOczekujacyNaPotwierdzenie;
         }
-        graczOczekujacyNaPotwierdzenie = null; // Wyzeruj po użyciu
+        graczOczekujacyNaPotwierdzenie = null;
 
         System.out.println("[SILNIK] Po potwierdzeniu, ustalony gracz aktualnej tury: " +
                 (graczAktualnejTury != null ? graczAktualnejTury.getProfilUzytkownika().getNazwaUzytkownika() : "null") +
                 " (Obiekt ID: " + System.identityHashCode(graczAktualnejTury) + ")");
-
-
-        // ---- POCZĄTEK LOGIKI AKTYWACJI UMIEJĘTNOŚCI POTWORA ----
         if (this.kartaPotworaDoZachowaniaNaKolejnaRunde != null &&
                 this.graczPotworowZkartaDoZachowania != null &&
                 this.rzadKartyPotworaDoZachowania != null) {
@@ -1269,14 +1176,8 @@ public class SilnikGry {
                 System.out.println("SILNIK (potwierdzPrzejecieTury): Potwory - Aktywacja umiejętności frakcji. Przywracanie karty '" +
                         nazwaKartyPotwora + "' gracza " + nazwaGraczaPotwora);
 
-                // Wywołaj nowy panel *PRZED* dodaniem karty do modelu i odświeżeniem planszy
                 if (kontrolerPlanszy != null) {
-                    // Przekazujemy nazwę karty do wyświetlenia na panelu, jeśli panel to obsługuje
                     kontrolerPlanszy.pokazPanelUmiejetnosciPotworow(nazwaKartyPotwora);
-                    // Poniższy komunikat jest teraz opcjonalny, bo główny jest na panelu
-                    // kontrolerPlanszy.wyswietlKomunikatNaPlanszy(
-                    //    "Umiejętność Potworów: " + nazwaKartyPotwora + " gracza " + nazwaGraczaPotwora + " pozostaje!", false
-                    // );
                 }
 
                 boolean usunietoZCmentarza = this.graczPotworowZkartaDoZachowania.getOdrzucone().remove(this.kartaPotworaDoZachowaniaNaKolejnaRunde);
@@ -1300,8 +1201,7 @@ public class SilnikGry {
                             this.rzadKartyPotworaDoZachowania + " dla karty '" + nazwaKartyPotwora + "'. Zwracanie na cmentarz, jeśli usunięto.");
                     if(usunietoZCmentarza) this.graczPotworowZkartaDoZachowania.getOdrzucone().add(this.kartaPotworaDoZachowaniaNaKolejnaRunde);
                 }
-                // Aktualizacja sumy punktów planszy gracza Potworów
-                if (planszaPotwora != null) { // Dodatkowe sprawdzenie na wszelki wypadek
+                if (planszaPotwora != null) {
                     planszaPotwora.przeliczLacznaSumePunktow();
                 }
 
@@ -1310,80 +1210,48 @@ public class SilnikGry {
                         (this.graczPotworowZkartaDoZachowania != null ? this.graczPotworowZkartaDoZachowania.getProfilUzytkownika().getNazwaUzytkownika() : "null") +
                         ") jest null.");
             }
-            // Wyzeruj pola po próbie aktywacji, niezależnie od sukcesu
             this.kartaPotworaDoZachowaniaNaKolejnaRunde = null;
             this.graczPotworowZkartaDoZachowania = null;
             this.rzadKartyPotworaDoZachowania = null;
         }
-        // ---- KONIEC LOGIKI AKTYWACJI UMIEJĘTNOŚCI POTWORA ----
-
         if (graczAktualnejTury != null && checkAndPerformAutoPassIfHandEmpty(graczAktualnejTury)) {
-            // Jeśli gracz automatycznie spasował (np. zaczął turę bez kart),
-            // metoda checkAndPerformAutoPassIfHandEmpty już wywołała pokazPanelInfoPas.
-            // Dalsza logika (zmiana tury/koniec rundy) zostanie obsłużona przez
-            // KontrolerPlanszyGry.kontynuujPoWyswietleniuInfoOPasie().
-            // Dlatego tutaj po prostu kończymy tę metodę.
             System.out.println("[SILNIK (potwierdzPrzejecieTury)] Gracz " + graczAktualnejTury.getProfilUzytkownika().getNazwaUzytkownika() + " automatycznie spasował na początku tury (brak kart).");
             return;
         }
 
-        // Standardowa kontynuacja sprawdzania stanu gry i aktywacji interfejsu
         if (gracz1.isCzySpasowalWRundzie() && gracz2.isCzySpasowalWRundzie()) {
             if (!czyGraZakonczona) {
                 System.out.println("[SILNIK (potwierdzPrzejecieTury)] Obaj spasowali, kończenie rundy.");
                 zakonczRunde();
             }
-            return; // Zakończ, jeśli obaj spasowali
+            return;
         }
-
-        // Sprawdzenie, czy gracz, który potwierdził turę, już spasował
         if (graczAktualnejTury != null && graczAktualnejTury.isCzySpasowalWRundzie()) {
             Gracz aktywnyPrzeciwnik = (graczAktualnejTury == gracz1) ? gracz2 : gracz1;
             if (aktywnyPrzeciwnik != null && !aktywnyPrzeciwnik.isCzySpasowalWRundzie()) {
                 System.out.println("[SILNIK] Gracz " + graczAktualnejTury.getProfilUzytkownika().getNazwaUzytkownika() +
                         " potwierdził, ale jest już spasowany. Przeciwnik " + aktywnyPrzeciwnik.getProfilUzytkownika().getNazwaUzytkownika() +
                         " jest aktywny. Tura przechodzi do przeciwnika, pokazując panel.");
-                this.graczOczekujacyNaPotwierdzenie = aktywnyPrzeciwnik; // Kto ma potwierdzić następnym razem
-                oczekiwanieNaPotwierdzenieTury = true; // Ustaw ponownie, bo panel dla przeciwnika
+                this.graczOczekujacyNaPotwierdzenie = aktywnyPrzeciwnik;
+                oczekiwanieNaPotwierdzenieTury = true;
 
                 if (kontrolerPlanszy != null) {
-                    kontrolerPlanszy.odswiezCalakolwiekPlansze(); // Odśwież po ewentualnej aktywacji Potworów
+                    kontrolerPlanszy.odswiezCalakolwiekPlansze();
                     kontrolerPlanszy.pokazPanelPrzejeciaTury(this.graczOczekujacyNaPotwierdzenie);
                 }
-                return; // Zakończ, panel dla aktywnego przeciwnika
+                return;
             }
         }
 
-        // Jeśli doszło tutaj, graczAktualnejTury jest poprawny i nie jest spasowany (lub jego przeciwnik też spasował)
         if (kontrolerPlanszy != null) {
-            // To jest kluczowe odświeżenie, które pokaże kartę Potwora, jeśli została dodana,
-            // oraz wszelkie inne zmiany stanu.
             kontrolerPlanszy.odswiezCalakolwiekPlansze();
             kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Tura gracza: " + (graczAktualnejTury != null ? graczAktualnejTury.getProfilUzytkownika().getNazwaUzytkownika() : "BŁĄD"), false);
             kontrolerPlanszy.uaktywnijInterfejsDlaTury(graczAktualnejTury == this.gracz1);
         }
     }
-    private void zmienTureFaktycznie() {
-        Gracz poprzedniaTura = graczAktualnejTury;
-        graczAktualnejTury = (graczAktualnejTury == this.gracz1) ? this.gracz2 : this.gracz1;
 
-        if (graczAktualnejTury.isCzySpasowalWRundzie()) {
-            if (poprzedniaTura.isCzySpasowalWRundzie()) {
-                System.err.println("SILNIK: Obaj gracze spasowali, runda powinna się już zakończyć.");
-                return;
-            }
-            System.out.println("SILNIK: Gracz " + graczAktualnejTury.getProfilUzytkownika().getNazwaUzytkownika() + " już spasował, tura wraca do " + poprzedniaTura.getProfilUzytkownika().getNazwaUzytkownika());
-            graczAktualnejTury = poprzedniaTura;
-        }
 
-        System.out.println("SILNIK: Zmiana tury na: " + graczAktualnejTury.getProfilUzytkownika().getNazwaUzytkownika());
-        if (kontrolerPlanszy != null) {
-            kontrolerPlanszy.odswiezCalakolwiekPlansze();
-            kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Tura gracza: " + graczAktualnejTury.getProfilUzytkownika().getNazwaUzytkownika(), false);
-            kontrolerPlanszy.uaktywnijInterfejsDlaTury(graczAktualnejTury == this.gracz1);
-        }
-    }
-
+    //Przetwarza akcję pasowania przez gracza.
     public void pasuj(Gracz graczKtorySpasowal) {
         if (czyGraZakonczona || oczekiwanieNaPotwierdzenieTury || graczKtorySpasowal != graczAktualnejTury || graczKtorySpasowal.isCzySpasowalWRundzie()) {
             System.err.println("[SILNIK] Nie można spasować w tym momencie.");
@@ -1394,34 +1262,28 @@ public class SilnikGry {
         graczKtorySpasowal.setCzySpasowalWRundzie(true);
         System.out.println("[SILNIK] Gracz " + graczKtorySpasowal.getProfilUzytkownika().getNazwaUzytkownika() + " spasował.");
 
-        // Poinformuj kontroler, aby pokazał panel "Gracz X spasował!"
-        // Dalsza logika (zmiana tury, koniec rundy) zostanie obsłużona po zniknięciu tego panelu.
         if (kontrolerPlanszy != null) {
-            kontrolerPlanszy.odswiezCalakolwiekPlansze(); // Odśwież UI, aby np. wygasić przycisk "Pasuj" spasowanego gracza
+            kontrolerPlanszy.odswiezCalakolwiekPlansze();
             kontrolerPlanszy.pokazPanelInfoPas(graczKtorySpasowal);
         } else {
-            // Jeśli nie ma kontrolera (np. testy), od razu przejdź dalej
             kontynuujPoWyswietleniuInfoOPasie();
         }
     }
 
+    //Metoda wywoływana przez kontroler po zniknięciu panelu informacyjnego o pasie. Sprawdza, czy obaj gracze spasowali (kończąc rundę), czy też tura przechodzi do aktywnego przeciwnika.
     public void kontynuujPoWyswietleniuInfoOPasie() {
-        // graczAktualnejTury to wciąż ten, który WŁAŚNIE spasował.
         Gracz spasowanyGracz = graczAktualnejTury;
         Gracz drugiGracz = (spasowanyGracz == gracz1) ? gracz2 : gracz1;
 
         System.out.println("[SILNIK] Kontynuacja po informacji o pasie gracza: " + spasowanyGracz.getProfilUzytkownika().getNazwaUzytkownika());
 
         if (drugiGracz.isCzySpasowalWRundzie()) {
-            // Obaj gracze spasowali, więc zakończ rundę.
             System.out.println("[SILNIK] Obaj gracze spasowali. Kończenie rundy.");
             zakonczRunde();
         } else {
-            // Drugi gracz jeszcze nie spasował. Tura przechodzi do niego.
-            // Ten gracz będzie teraz kontynuował swój "blok" tur.
             graczAktualnejTury = drugiGracz;
-            oczekiwanieNaPotwierdzenieTury = false; // Nie ma potrzeby potwierdzania jego tury panelem "Tura gracza..."
-            setGraczOczekujacyNaPotwierdzenie(null); // Nie ma oczekującego na potwierdzenie
+            oczekiwanieNaPotwierdzenieTury = false;
+            setGraczOczekujacyNaPotwierdzenie(null);
 
             System.out.println("[SILNIK] Po pasie, tura przechodzi do (i pozostaje u): " + graczAktualnejTury.getProfilUzytkownika().getNazwaUzytkownika());
             if (kontrolerPlanszy != null) {
@@ -1432,9 +1294,8 @@ public class SilnikGry {
         }
     }
 
+    //Metoda pomocnicza, która zleca przeliczenie sumy punktów dla wszystkich rzędów na obu planszach graczy.
     private void przeliczWszystkiePunktyNaPlanszy() {
-        // Ta metoda działa na planszach przechowywanych w aktualnyStanRundy,
-        // które są teraz tymi samymi planszami, co w obiektach Gracz.
         if (aktualnyStanRundy != null) {
             if (aktualnyStanRundy.getPlanszaGracza1() != null) {
                 aktualnyStanRundy.getPlanszaGracza1().przeliczLacznaSumePunktow();
@@ -1445,6 +1306,7 @@ public class SilnikGry {
         }
     }
 
+    //Kończy bieżącą rundę, gdy obaj gracze spasują. Oblicza punkty, przyznaje zwycięstwo, aktualizuje 'życia' graczy i aktywuje zdolności frakcyjne po rundzie (Potwory, Królestwa Północy).
     private void zakonczRunde() {
         if (czyGraZakonczona) return;
         System.out.println("SILNIK: Rozpoczynanie procesu zakończenia Rundy " + numerRundyGry);
@@ -1452,11 +1314,10 @@ public class SilnikGry {
         setGraczOczekujacyNaPotwierdzenie(null);
 
         przeliczWszystkiePunktyNaPlanszy();
-        // Sprawdzenie null obiektów przed dostępem
         if (aktualnyStanRundy == null || aktualnyStanRundy.getPlanszaGracza1() == null || aktualnyStanRundy.getPlanszaGracza2() == null ||
                 gracz1 == null || gracz1.getProfilUzytkownika() == null || gracz2 == null || gracz2.getProfilUzytkownika() == null) {
             System.err.println("Błąd krytyczny w zakonczRunde: Brak kluczowych obiektów stanu gry lub graczy/profili.");
-            zakonczGre(); // Awaryjne zakończenie gry
+            zakonczGre();
             return;
         }
 
@@ -1473,7 +1334,7 @@ public class SilnikGry {
             gracz1.stracZycie();
             zwyciezcaRundy = gracz2;
             wiadomoscWynikuRundy = "Gracz " + gracz2.getProfilUzytkownika().getNazwaUzytkownika() + " wygrywa rundę! (" + punktyG2 + " vs " + punktyG1 + ")";
-        } else { // Remis punktowy
+        } else {
             boolean nilfgaardPrzelamalRemis = false;
             if (gracz1.getWybranaFrakcja() == FrakcjaEnum.NILFGAARD && gracz2.getWybranaFrakcja() != FrakcjaEnum.NILFGAARD) {
                 gracz2.stracZycie();
@@ -1487,24 +1348,21 @@ public class SilnikGry {
                 wiadomoscWynikuRundy = "Remis! Gracz : " + gracz2.getProfilUzytkownika().getNazwaUzytkownika() + " wygrywa dzięki zdolności talii Nilfgaardu.";
             }
 
-            if (!nilfgaardPrzelamalRemis) { // Standardowy remis, obaj tracą życie
+            if (!nilfgaardPrzelamalRemis) {
                 gracz1.stracZycie();
                 gracz2.stracZycie();
-                // ZwyciezcaRundy pozostaje null
                 wiadomoscWynikuRundy = "Remis! Obydwaj gracze tracą żeton życia.";
             }
         }
         graczOstatnioWygralRunde = zwyciezcaRundy;
 
-        if (this.historiaWynikowRund != null && this.historiaWynikowRund.size() < 3) { // Ograniczenie do 3 rund
+        if (this.historiaWynikowRund != null && this.historiaWynikowRund.size() < 3) {
             String podsumowanieRundy = "Runda " + numerRundyGry + ": " + wiadomoscWynikuRundy;
             this.historiaWynikowRund.add(podsumowanieRundy);
         }
 
         System.out.println("[SILNIK] Wynik rundy ustalony: " + wiadomoscWynikuRundy);
-
-        // ---- POCZĄTEK LOGIKI ZAZNACZANIA KARTY POTWORA ----
-        this.kartaPotworaDoZachowaniaNaKolejnaRunde = null; // Resetuj przed każdym sprawdzeniem
+        this.kartaPotworaDoZachowaniaNaKolejnaRunde = null;
         this.rzadKartyPotworaDoZachowania = null;
         this.graczPotworowZkartaDoZachowania = null;
 
@@ -1518,16 +1376,14 @@ public class SilnikGry {
         if (graczKtoryMoglGracPotworami != null) {
             List<Karta> jednostkiNaPlanszyPotwora = new ArrayList<>();
             Map<Karta, TypRzeduEnum> mapaKartaNaRzad = new HashMap<>();
-            // Użyj getPlanszaGracza, która odwołuje się do aktualnyStanRundy
             PlanszaGracza planszaPotwora = getPlanszaGracza(graczKtoryMoglGracPotworami);
 
             if (planszaPotwora != null) {
-                // Iteruj tylko po rzędach jednostek
                 for (TypRzeduEnum typRzedu : new TypRzeduEnum[]{TypRzeduEnum.PIECHOTA, TypRzeduEnum.STRZELECKIE, TypRzeduEnum.OBLEZENIE}) {
                     RzadPlanszy rzad = planszaPotwora.getRzad(typRzedu);
                     if (rzad != null) {
                         for (Karta k : rzad.getKartyJednostekWRzedzie()) {
-                            if (k.getTyp() == TypKartyEnum.JEDNOSTKA) { // Tylko zwykłe jednostki (nie Bohater, nie Specjalna)
+                            if (k.getTyp() == TypKartyEnum.JEDNOSTKA) {
                                 jednostkiNaPlanszyPotwora.add(k);
                                 mapaKartaNaRzad.put(k, typRzedu);
                             }
@@ -1548,23 +1404,19 @@ public class SilnikGry {
                 System.out.println("SILNIK (zakonczRunde): Potwory - brak jednostek na planszy do zaznaczenia.");
             }
         }
-        // ---- KONIEC LOGIKI ZAZNACZANIA KARTY POTWORA ----
 
 
         if (kontrolerPlanszy != null) {
-            kontrolerPlanszy.odswiezCalakolwiekPlansze(); // Odśwież stan przed pokazaniem panelu wyniku
+            kontrolerPlanszy.odswiezCalakolwiekPlansze();
             boolean czyRemisPunktowy = (punktyG1 == punktyG2);
             kontrolerPlanszy.pokazPanelWynikuRundy(wiadomoscWynikuRundy, zwyciezcaRundy, czyRemisPunktowy);
         } else {
-            // Jeśli nie ma kontrolera (np. testy jednostkowe), przejdź dalej bezpośrednio
             przejdzDoNastepnegoEtapuPoWynikuRundy();
         }
-
-        // Zdolność frakcji Królestw Północy (pozostaje bez zmian)
         if (zwyciezcaRundy != null && zwyciezcaRundy.getWybranaFrakcja() == FrakcjaEnum.KROLESTWA_POLNOCY) {
             System.out.println("SILNIK: " + zwyciezcaRundy.getProfilUzytkownika().getNazwaUzytkownika() +
                     " (Królestwa Północy) wygrał rundę. Aktywacja zdolności frakcji.");
-            dociagnijKarteZeZdolnosci(zwyciezcaRundy, 1, "Królestwa Północy"); // Metoda dociagnijKarteZeZdolnosci zamiast dociagnijKartyDoReki
+            dociagnijKarteZeZdolnosci(zwyciezcaRundy, 1, "Królestwa Północy");
             if (kontrolerPlanszy != null) {
                 kontrolerPlanszy.wyswietlKomunikatNaPlanszy(
                         zwyciezcaRundy.getProfilUzytkownika().getNazwaUzytkownika() +
@@ -1573,6 +1425,8 @@ public class SilnikGry {
             }
         }
     }
+
+    //Metoda pomocnicza wywoływana na końcu rundy. Przenosi wszystkie karty jednostek i karty specjalne (np. Róg Dowódcy) z plansz obu graczy na ich cmentarze.
     private void przeniesWszystkieKartyZPlanszNaCmentarze() {
         if (aktualnyStanRundy == null || gracz1 == null || gracz2 == null) {
             System.err.println("[SILNIK] Błąd: Nie można przenieść kart na cmentarze - brak stanu rundy lub graczy.");
@@ -1580,19 +1434,16 @@ public class SilnikGry {
         }
         System.out.println("[SILNIK] Przenoszenie kart z plansz na cmentarze.");
 
-        // Plansza Gracza 1
         PlanszaGracza planszaG1 = aktualnyStanRundy.getPlanszaGracza1();
         if (planszaG1 != null) {
-            List<Karta> kartyG1 = planszaG1.wyczyscPlanszeIZwrocKarty(); // Ta metoda zbiera karty jednostek
+            List<Karta> kartyG1 = planszaG1.wyczyscPlanszeIZwrocKarty();
             gracz1.getOdrzucone().addAll(kartyG1);
             System.out.println("  > Z planszy G1 przeniesiono na cmentarz: " + kartyG1.size() + " kart jednostek.");
-            // Obsługa Rogów Dowódcy (jeśli były specjalnymi kartami w slotach)
             przeniesRogDowodcyNaCmentarz(planszaG1.getRzadPiechoty(), gracz1.getOdrzucone());
             przeniesRogDowodcyNaCmentarz(planszaG1.getRzadStrzelecki(), gracz1.getOdrzucone());
             przeniesRogDowodcyNaCmentarz(planszaG1.getRzadOblezenia(), gracz1.getOdrzucone());
         }
 
-        // Plansza Gracza 2
         PlanszaGracza planszaG2 = aktualnyStanRundy.getPlanszaGracza2();
         if (planszaG2 != null) {
             List<Karta> kartyG2 = planszaG2.wyczyscPlanszeIZwrocKarty();
@@ -1608,17 +1459,17 @@ public class SilnikGry {
     private void przeniesRogDowodcyNaCmentarz(RzadPlanszy rzad, List<Karta> cmentarz) {
         if (rzad != null && rzad.getKartaRoguDowodcy() != null) {
             Karta rog = rzad.getKartaRoguDowodcy();
-            // Upewnij się, że Róg jest kartą specjalną, a nie np. jednostką z efektem rogu
             if (rog.getTyp() == TypKartyEnum.SPECJALNA && rog.getNazwa().toLowerCase().contains("róg dowódcy")) {
                 cmentarz.add(rog);
                 System.out.println("    > Róg Dowódcy z rzędu " + rzad.getTypRzedu() + " przeniesiony na cmentarz.");
             }
-            rzad.setKartaRoguDowodcy(null); // Usuń róg ze slotu
+            rzad.setKartaRoguDowodcy(null);
         }
     }
 
+    //Definitywnie kończy partię. Ustala ostatecznego zwycięzcę na podstawie liczby pozostałych 'żyć' i zleca kontrolerowi wyświetlenie panelu końca gry.
     private void zakonczGre() {
-        if (czyGraZakonczona) return; // Zapobiegaj wielokrotnemu wywołaniu
+        if (czyGraZakonczona) return;
         czyGraZakonczona = true;
         oczekiwanieNaPotwierdzenieTury = false;
         setGraczOczekujacyNaPotwierdzenie(null);
@@ -1634,22 +1485,18 @@ public class SilnikGry {
         int zyciaPozostaleG1 = (gracz1 != null) ? gracz1.getWygraneRundy() : 0;
         int zyciaPozostaleG2 = (gracz2 != null) ? gracz2.getWygraneRundy() : 0;
 
-        // Kto wygrał grę? Ten, kto ma więcej pozostałych "żyć" (kamieni wygranych rund).
-        // Standardowo każdy ma 2 życia na start. Jeśli ktoś ma 0, przegrał.
-        if (zyciaPozostaleG1 <= 0 && zyciaPozostaleG2 <= 0) { // Obaj mają 0 żyć (np. remis w ostatniej możliwej rundzie)
+        if (zyciaPozostaleG1 <= 0 && zyciaPozostaleG2 <= 0) {
             czyRemisWGrze = true;
-        } else if (zyciaPozostaleG2 <= 0) { // Gracz 2 nie ma żyć -> Gracz 1 wygrywa
+        } else if (zyciaPozostaleG2 <= 0) {
             zwyciezcaGry = gracz1;
-        } else if (zyciaPozostaleG1 <= 0) { // Gracz 1 nie ma żyć -> Gracz 2 wygrywa
+        } else if (zyciaPozostaleG1 <= 0) {
             zwyciezcaGry = gracz2;
         } else {
-            // Jeśli nikt nie stracił wszystkich żyć (np. po 3 rundach, gdzie były remisy nieprzełamane przez Nilfgaard)
-            // Wygrywa ten, kto ma więcej żyć.
             if (zyciaPozostaleG1 > zyciaPozostaleG2) {
                 zwyciezcaGry = gracz1;
             } else if (zyciaPozostaleG2 > zyciaPozostaleG1) {
                 zwyciezcaGry = gracz2;
-            } else { // Tyle samo żyć po max rundach
+            } else {
                 czyRemisWGrze = true;
             }
         }
@@ -1658,11 +1505,12 @@ public class SilnikGry {
                 (zwyciezcaGry != null ? zwyciezcaGry.getProfilUzytkownika().getNazwaUzytkownika() : (czyRemisWGrze ? "REMIS" : "Nieustalony")));
 
         if (kontrolerPlanszy != null) {
-            kontrolerPlanszy.odswiezCalakolwiekPlansze(); // Ostatnie odświeżenie UI
+            kontrolerPlanszy.odswiezCalakolwiekPlansze();
             kontrolerPlanszy.pokazPanelKoncaGry(zwyciezcaGry, czyRemisWGrze, historiaWynikowRund);
         }
     }
 
+    //Przetwarza użycie zdolności karty dowódcy. Zawiera logikę dla wszystkich możliwych zdolności dowódców w grze.
     public void uzyjZdolnosciDowodcy(Gracz gracz) {
         if (gracz == null || gracz.getKartaDowodcy() == null) {
             System.err.println("SILNIK: Próba użycia zdolności przez gracza null lub gracza bez karty dowódcy.");
@@ -1670,7 +1518,7 @@ public class SilnikGry {
             return;
         }
 
-        // 1. Sprawdź, czy zdolność dowódcy gracza jest zablokowana przez Emhyra ID 73
+
         if (gracz.isZdolnoscDowodcyZablokowana()) {
             System.out.println("SILNIK: Próba użycia zablokowanej zdolności dowódcy przez gracza " + gracz.getProfilUzytkownika().getNazwaUzytkownika());
             if (kontrolerPlanszy != null) {
@@ -1679,14 +1527,12 @@ public class SilnikGry {
             return;
         }
 
-        // 2. Sprawdź ogólne warunki gry
         if (czyGraZakonczona || oczekiwanieNaPotwierdzenieTury || gracz != graczAktualnejTury) {
             System.out.println("Nie można użyć zdolności dowódcy - zły stan gry ("+ (czyGraZakonczona ? "Gra zakończona" : "") + (oczekiwanieNaPotwierdzenieTury ? "OczekiwaniePotwierdzenie" : "") +") lub nie tura gracza (" + (graczAktualnejTury != null ? graczAktualnejTury.getProfilUzytkownika().getNazwaUzytkownika() : "null") +").");
             if (kontrolerPlanszy != null) kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Nie można teraz użyć zdolności dowódcy.", true);
             return;
         }
 
-        // 3. Sprawdź, czy gracz nie jest w trakcie innej specjalnej akcji
         if (oczekiwanieNaWyborRzeduPoWskrzeszeniu || oczekiwanieNaWyborCeluDlaManekina || oczekiwanieNaWyborKartyDlaEmhyra) {
             System.err.println("SILNIK: Próba użycia zdolności dowódcy podczas oczekiwania na inną akcję.");
             if (kontrolerPlanszy != null) kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Dokończ poprzednią akcję.", true);
@@ -1696,13 +1542,11 @@ public class SilnikGry {
         Karta kartaDowodcy = gracz.getKartaDowodcy();
         int idDowodcy = kartaDowodcy.getId();
 
-        // --- POCZĄTEK POPRAWKI: Deklaracja i inicjalizacja 'czyToAktywnaZdolnoscDoZuzycia' ---
-        // 4. Określ, czy to zdolność pasywna (której "użycie" przez kliknięcie jest tylko informacyjne)
-        boolean czyToPasywnaZdolnoscInformacyjna = (idDowodcy == 71 || idDowodcy == 73); // ID 71 (Najeźdźca), ID 73 (Biały Płomień)
-        boolean czyToAktywnaZdolnoscDoZuzycia = !czyToPasywnaZdolnoscInformacyjna; // Wszystkie inne są traktowane jako aktywne
+        boolean czyToPasywnaZdolnoscInformacyjna = (idDowodcy == 71 || idDowodcy == 73);
+        boolean czyToAktywnaZdolnoscDoZuzycia = !czyToPasywnaZdolnoscInformacyjna;
         boolean czyZdolnoscZostalaFaktycznieUzytaPrzezDowodce = false;
 
-        // 5. Sprawdź, czy AKTYWNA zdolność nie została już użyta
+
         if (czyToAktywnaZdolnoscDoZuzycia && gracz.isZdolnoscDowodcyUzyta()) {
             System.out.println("Zdolność dowódcy " + kartaDowodcy.getNazwa() + " została już użyta.");
             if (kontrolerPlanszy != null) kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Zdolność dowódcy już użyta.", false);
@@ -1713,26 +1557,23 @@ public class SilnikGry {
 
         boolean czyZdolnoscZostalaFaktycznieUzyta = false;
 
-        // Oznacz zdolność jako użytą dla aktywnych zdolności (z wyjątkiem tych, które wchodzą w stan oczekiwania,
-        // np. ID 69 - Pan Południa; dla nich flaga zostanie ustawiona w metodach wykonaj/anuluj wybór)
         if (czyToAktywnaZdolnoscDoZuzycia && idDowodcy != 69) {
             gracz.setZdolnoscDowodcyUzyta(true);
         }
 
-        if (kontrolerPlanszy != null && czyToAktywnaZdolnoscDoZuzycia) { // Odśwież UI tylko jeśli to była aktywna zdolność
+        if (kontrolerPlanszy != null && czyToAktywnaZdolnoscDoZuzycia) {
             kontrolerPlanszy.odswiezCalakolwiekPlansze();
         }
 
-        // --- Logika specyficzna dla dowódców ---
-        if (idDowodcy == 69) { // Emhyr var Emreis "Pan południa" (AKTYWNA, Z INTERAKCJĄ)
+        if (idDowodcy == 69) {
             Gracz przeciwnik69 = (gracz == gracz1) ? gracz2 : gracz1;
             if (przeciwnik69 == null || przeciwnik69.getOdrzucone() == null || przeciwnik69.getOdrzucone().isEmpty()) {
                 if (kontrolerPlanszy != null) {
                     kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Cmentarz przeciwnika jest pusty. Zdolność Emhyra nie ma celu.", false);
                 }
-                gracz.setZdolnoscDowodcyUzyta(true); // Mimo braku celu, zdolność zużyta
-                czyZdolnoscZostalaFaktycznieUzytaPrzezDowodce = false; // Zmienione z czyZdolnoscZostalaFaktycznieUzyta
-                // Tura zakończy się w standardowym bloku poniżej, bo nie ma 'return'
+                gracz.setZdolnoscDowodcyUzyta(true);
+                czyZdolnoscZostalaFaktycznieUzytaPrzezDowodce = false;
+
             } else {
                 this.oczekiwanieNaWyborKartyDlaEmhyra = true;
                 this.graczAktywujacyEmhyra = gracz;
@@ -1740,14 +1581,11 @@ public class SilnikGry {
                 if (kontrolerPlanszy != null) {
                     kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Emhyr: Wybierz kartę z cmentarza przeciwnika.", false);
 
-                    // --- ZMIEŃ TO WYWOŁANIE ---
-                    // ZAMIEN: kontrolerPlanszy.pokazPanelCmentarzaDlaWyboru(przeciwnik69, "Cmentarz Przeciwnika - Wybierz Kartę");
-                    // NA:
                     kontrolerPlanszy.pokazPanelCmentarza(przeciwnik69, "Cmentarz Przeciwnika - Wybierz Kartę", KontrolerPlanszyGry.TrybPaneluCmentarzaKontekst.EMHYR_PAN_POLUDNIA);
                 }
-                return; // Czekamy na interakcję, zakończenie tury w metodach wykonaj/anuluj wybór
+                return;
             }
-        } else if (idDowodcy == 70) { // Emhyr var Emreis "Jeż z Erlenwaldu" (AKTYWNA, NATYCHMIASTOWA)
+        } else if (idDowodcy == 70) {
             Karta kartaDeszczuDoZagrnia = null;
             List<Karta> taliaGracza = gracz.getTaliaDoGry();
             Iterator<Karta> iteratorTalii = taliaGracza.iterator();
@@ -1766,9 +1604,8 @@ public class SilnikGry {
             } else {
                 if (kontrolerPlanszy != null) kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Nie znaleziono 'Ulewny deszcz' w Twojej talii.", false);
             }
-            // gracz.setZdolnoscDowodcyUzyta(true); // Już ustawione wyżej
-        } else if (idDowodcy == 71 || idDowodcy == 73 || idDowodcy == 413) { // Pasywne zdolności lub informacyjne kliknięcie
-            czyToAktywnaZdolnoscDoZuzycia = false; // Nie jest to typowa aktywna zdolność do zużycia
+        } else if (idDowodcy == 71 || idDowodcy == 73 || idDowodcy == 413) {
+            czyToAktywnaZdolnoscDoZuzycia = false;
             if (kontrolerPlanszy != null) {
                 String komunikatPasywny = "";
                 if (idDowodcy == 71) komunikatPasywny = ": Umiejętność pasywna (losowe wskrzeszenie z Medykiem).";
@@ -1776,10 +1613,10 @@ public class SilnikGry {
                 else if (idDowodcy == 413) komunikatPasywny = ": Umiejętność pasywna - podwaja siłę Szpiegów.";
                 else if (idDowodcy == 489) komunikatPasywny = ": Umiejętność pasywna - jedna dodatkowa karta na początku gry.";
                 kontrolerPlanszy.wyswietlKomunikatNaPlanszy(kartaDowodcy.getNazwa() + komunikatPasywny, false);
-                kontrolerPlanszy.uaktywnijInterfejsDlaTury(graczAktualnejTury == this.gracz1); // Upewnij się, że UI jest aktywne
+                kontrolerPlanszy.uaktywnijInterfejsDlaTury(graczAktualnejTury == this.gracz1);
             }
-            return; // Pasywne zdolności nie kończą tury i nie są "używane" w sensie flagi
-        } else if (idDowodcy == 72) { // Emhyr "Cesarz Nilfgaardu" (AKTYWNA, NATYCHMIASTOWA)
+            return;
+        } else if (idDowodcy == 72) {
             Gracz przeciwnik72 = (gracz == gracz1) ? gracz2 : gracz1;
             if (przeciwnik72 == null || przeciwnik72.getReka() == null || przeciwnik72.getReka().isEmpty()) {
                 if (kontrolerPlanszy != null) kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Ręka przeciwnika jest pusta.", false);
@@ -1796,8 +1633,7 @@ public class SilnikGry {
                     czyZdolnoscZostalaFaktycznieUzyta = true;
                 }
             }
-            // gracz.setZdolnoscDowodcyUzyta(true); // Już ustawione wyżej
-        } else if (idDowodcy == 331) { // Foltest "Syn Medella" (AKTYWNA, NATYCHMIASTOWA)
+        } else if (idDowodcy == 331) {
             Gracz przeciwnik331 = (gracz == gracz1) ? gracz2 : gracz1;
             if (przeciwnik331 != null && przeciwnik331.getPlanszaGry() != null) {
                 RzadPlanszy rzadStrzelecki = przeciwnik331.getPlanszaGry().getRzadStrzelecki();
@@ -1808,8 +1644,7 @@ public class SilnikGry {
                     if (kontrolerPlanszy != null) kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Foltest (SM): Warunek siły rzędu strzeleckiego przeciwnika niespełniony.", false);
                 }
             } else { if (kontrolerPlanszy != null) kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Błąd: Brak danych przeciwnika dla Foltesta (SM).", true); }
-            // gracz.setZdolnoscDowodcyUzyta(true); // Już ustawione wyżej
-        } else if (idDowodcy == 332) { // Foltest "Żelazny Władca" (AKTYWNA, NATYCHMIASTOWA)
+        } else if (idDowodcy == 332) {
             Gracz przeciwnik332 = (gracz == gracz1) ? gracz2 : gracz1;
             if (przeciwnik332 != null && przeciwnik332.getPlanszaGry() != null) {
                 RzadPlanszy rzadOblezniczy = przeciwnik332.getPlanszaGry().getRzadOblezenia();
@@ -1820,8 +1655,7 @@ public class SilnikGry {
                     if (kontrolerPlanszy != null) kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Foltest (ŻW): Warunek siły rzędu oblężniczego przeciwnika niespełniony.", false);
                 }
             } else { if (kontrolerPlanszy != null) kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Błąd: Brak danych przeciwnika dla Foltesta (ŻW).", true); }
-            // gracz.setZdolnoscDowodcyUzyta(true); // Już ustawione wyżej
-        } else if (idDowodcy == 333) { // Foltest "Zdobywca" (AKTYWNA, NATYCHMIASTOWA)
+        } else if (idDowodcy == 333) {
             RzadPlanszy rzadOblezniczyGracza = gracz.getPlanszaGry().getRzadOblezenia();
             if (rzadOblezniczyGracza != null) {
                 if (rzadOblezniczyGracza.getKartaRoguDowodcy() == null && !rzadOblezniczyGracza.isWzmocnieniePrzezDowodceAktywne()) {
@@ -1834,8 +1668,7 @@ public class SilnikGry {
             } else {
                 if (kontrolerPlanszy != null) kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Foltest (Zdobywca): Nie posiadasz rzędu oblężniczego.", false);
             }
-            // gracz.setZdolnoscDowodcyUzyta(true); // Już ustawione wyżej
-        } else if (idDowodcy == 334) { // Foltest "Dowódca Północy" (AKTYWNA, NATYCHMIASTOWA)
+        } else if (idDowodcy == 334) {
             if (aktualnyStanRundy != null) {
                 aktualnyStanRundy.wyczyscPogode();
                 if (kontrolerPlanszy != null) kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Foltest (Dowódca Północy): Czyste niebo!", false);
@@ -1843,8 +1676,7 @@ public class SilnikGry {
             } else {
                 System.err.println("SILNIK: Błąd - aktualnyStanRundy jest null przy Folteście (DP).");
             }
-            // gracz.setZdolnoscDowodcyUzyta(true); // Już ustawione wyżej
-        } else if (idDowodcy == 335) { // Foltest "Król Temerii" (AKTYWNA, NATYCHMIASTOWA)
+        } else if (idDowodcy == 335) {
             Karta kartaMglyDoZagrnia = null;
             List<Karta> taliaGracza = gracz.getTaliaDoGry();
             Iterator<Karta> iteratorTalii = taliaGracza.iterator();
@@ -1863,8 +1695,7 @@ public class SilnikGry {
             } else {
                 if (kontrolerPlanszy != null) kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Nie znaleziono 'Gęsta mgła' w Twojej talii.", false);
             }
-            // gracz.setZdolnoscDowodcyUzyta(true); // Już ustawione wyżej
-        }else if (idDowodcy == 416) { // Eredin Bréacc Glas "Król Dzikiego Gonu"
+        }else if (idDowodcy == 416) {
             List<Karta> kartyPogodyWTalii = new ArrayList<>();
             for (Karta k : gracz.getTaliaDoGry()) {
                 if (k.getTyp() == TypKartyEnum.SPECJALNA) {
@@ -1876,10 +1707,9 @@ public class SilnikGry {
                             nazwaKartyLower.contains("słoneczna pogoda");
 
                     if (jestKartaPogodyNegatywnej || jestKartaPogodyPozytywnej) {
-                        // Dodatkowe wykluczenie innych kart specjalnych, które mogłyby przypadkiem zawierać te słowa
                         if (!nazwaKartyLower.contains("manekin") &&
                                 !nazwaKartyLower.contains("róg dowódcy") &&
-                                !nazwaKartyLower.contains("pożoga")) { // Dodaj inne, jeśli potrzeba
+                                !nazwaKartyLower.contains("pożoga")) {
                             kartyPogodyWTalii.add(k);
                         }
                     }
@@ -1890,9 +1720,8 @@ public class SilnikGry {
                 if (kontrolerPlanszy != null) {
                     kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Brak kart pogody w Twojej talii!", false);
                 }
-                gracz.setZdolnoscDowodcyUzyta(true); // Zużyj zdolność
+                gracz.setZdolnoscDowodcyUzyta(true);
                 czyZdolnoscZostalaFaktycznieUzytaPrzezDowodce = false;
-                // Tura zakończy się w standardowym bloku poniżej
             } else {
                 this.oczekiwanieNaWyborKartyPogodyPrzezEredina = true;
                 this.graczAktywujacyEredina336 = gracz;
@@ -1901,17 +1730,13 @@ public class SilnikGry {
                 if (kontrolerPlanszy != null) {
                     kontrolerPlanszy.pokazPanelWyboruKartyPogodyDlaEredina(this.dostepneKartyPogodyDlaEredina);
                 }
-                // Nie oznaczamy zdolności jako użytej i nie kończymy tury - czekamy na wybór
-                return; // Wyjdź z metody, czekając na interakcję gracza
+                return;
             }
-        }else if (idDowodcy == 336) { // Eredin Bréacc Glas "Dowódca Czerwonych Jeźdźców"
+        }else if (idDowodcy == 336) {
             if (gracz.getPlanszaGry() != null) {
                 RzadPlanszy rzadPiechotyGracza = gracz.getPlanszaGry().getRzadPiechoty();
                 if (rzadPiechotyGracza != null) {
                     if (rzadPiechotyGracza.getKartaRoguDowodcy() == null && !rzadPiechotyGracza.isWzmocnieniePrzezDowodceAktywne()) {
-                        // Ustawiamy kartę dowódcy jako "źródło" wzmocnienia dla tego rzędu.
-                        // Metoda setKartaRoguDowodcy w RzadPlanszy powinna obsłużyć ustawienie
-                        // zarówno karty, jak i flagi wzmocnieniePrzezDowodceAktywne.
                         rzadPiechotyGracza.setKartaRoguDowodcy(kartaDowodcy);
                         czyZdolnoscZostalaFaktycznieUzytaPrzezDowodce = true;
                         if (kontrolerPlanszy != null) {
@@ -1936,23 +1761,21 @@ public class SilnikGry {
                 }
                 czyZdolnoscZostalaFaktycznieUzytaPrzezDowodce = false;
             }
-            gracz.setZdolnoscDowodcyUzyta(true); // Zdolność jest zużywana niezależnie od efektu (jeśli próbowano jej użyć)
+            gracz.setZdolnoscDowodcyUzyta(true);
 
-        }else if (idDowodcy == 414) { // Eredin Bréacc Glas: Władca Tir ná Lia
+        }else if (idDowodcy == 414) {
             if (gracz.getReka().size() < 2) {
                 if (this.kontrolerPlanszy != null) {
                     this.kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Potrzebujesz co najmniej 2 kart w ręce, aby użyć tej zdolności!", true);
                 }
                 gracz.setZdolnoscDowodcyUzyta(true);
                 czyZdolnoscZostalaFaktycznieUzytaPrzezDowodce = false;
-                // Przejdzie do standardowego bloku zakończenia tury
             } else if (gracz.getTaliaDoGry().isEmpty()) {
                 if (this.kontrolerPlanszy != null) {
                     this.kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Twoja talia jest pusta, nie możesz dobrać karty!", true);
                 }
                 gracz.setZdolnoscDowodcyUzyta(true);
                 czyZdolnoscZostalaFaktycznieUzytaPrzezDowodce = false;
-                // Przejdzie do standardowego bloku zakończenia tury
             } else {
                 this.oczekiwanieNaWyborKartDoOdrzuceniaEredin414 = true;
                 this.graczAktywujacyEredina414 = gracz;
@@ -1965,39 +1788,34 @@ public class SilnikGry {
                 if (this.kontrolerPlanszy != null) {
                     this.kontrolerPlanszy.pokazPanelWyboruKartDoOdrzuceniaEredin414(new ArrayList<>(gracz.getReka()));
                 }
-                return; // Czekaj na wybór gracza (2 karty do odrzucenia)
+                return;
             }
-        }else if (idDowodcy == 415) { // Eredin Bréacc Glas: Zabójca Auberona
+        }else if (idDowodcy == 415) {
             if (gracz.getOdrzucone() == null || gracz.getOdrzucone().isEmpty()) {
                 if (this.kontrolerPlanszy != null) {
                     this.kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Twój cmentarz jest pusty!", true);
                 }
-                gracz.setZdolnoscDowodcyUzyta(true); // Zdolność zużyta mimo braku kart
+                gracz.setZdolnoscDowodcyUzyta(true);
                 czyZdolnoscZostalaFaktycznieUzytaPrzezDowodce = false;
-                // Przejdzie do standardowego bloku zakończenia tury
             } else {
                 this.oczekiwanieNaWyborKartyZCmentarzaPrzezEredina415 = true;
                 this.graczAktywujacyEredina415 = gracz;
                 if (this.kontrolerPlanszy != null) {
-                    // Użyjemy istniejącego panelu cmentarza, ale kontroler musi wiedzieć, że to dla Eredina 415
-                    // Można dodać nowy parametr do pokazPanelCmentarza lub nową metodę w kontrolerze
                     this.kontrolerPlanszy.pokazPanelCmentarzaDlaEredina415(gracz, "Eredin: Wybierz kartę z cmentarza");
                 }
-                return; // Czekaj na wybór gracza
+                return;
             }
-        } else if (idDowodcy == 490) { // Francesca Findabair "Elfka czystej krwi"
-            // Nie trzeba sprawdzać gracz.isZdolnoscDowodcyUzyta(), bo to jest robione na początku dla 'czyToAktywnaZdolnoscDoZuzycia'
+        } else if (idDowodcy == 490) {
 
             Karta trzaskajacyMrozDoZagrnia = null;
             Iterator<Karta> iteratorTalii = gracz.getTaliaDoGry().iterator();
             while (iteratorTalii.hasNext()) {
                 Karta kartaZTali = iteratorTalii.next();
-                // Sprawdzamy nazwę i typ, aby upewnić się, że to karta specjalna pogody
                 if (kartaZTali.getTyp() == TypKartyEnum.SPECJALNA &&
                         (kartaZTali.getNazwa().equalsIgnoreCase("Trzaskający mróz") ||
-                                kartaZTali.getNazwa().toLowerCase().contains("mróz"))) { // Dodatkowa elastyczność dla "mróz"
+                                kartaZTali.getNazwa().toLowerCase().contains("mróz"))) {
                     trzaskajacyMrozDoZagrnia = kartaZTali;
-                    iteratorTalii.remove(); // Usuń z talii
+                    iteratorTalii.remove();
                     break;
                 }
             }
@@ -2005,7 +1823,6 @@ public class SilnikGry {
             if (trzaskajacyMrozDoZagrnia != null) {
                 if (aktualnyStanRundy != null) {
                     aktualnyStanRundy.dodajKartePogody(trzaskajacyMrozDoZagrnia);
-                    // Karta pogody typu Mróz nie idzie na cmentarz po zagraniu, zostaje w strefie pogody.
                     System.out.println("SILNIK: Francesca (490) zagrała '" + trzaskajacyMrozDoZagrnia.getNazwa() + "' z talii.");
                     if (this.kontrolerPlanszy != null) {
                         this.kontrolerPlanszy.wyswietlKomunikatNaPlanszy(kartaDowodcy.getNazwa() + ": 'Trzaskający mróz' zagrany z talii.", false);
@@ -2013,7 +1830,7 @@ public class SilnikGry {
                     czyZdolnoscZostalaFaktycznieUzytaPrzezDowodce = true;
                 } else {
                     System.err.println("SILNIK: Błąd krytyczny - aktualnyStanRundy jest null przy zagrywaniu Mrozu przez Francescę 490.");
-                    gracz.getTaliaDoGry().add(trzaskajacyMrozDoZagrnia); // Spróbuj zwrócić kartę do talii, jeśli nie można zagrać
+                    gracz.getTaliaDoGry().add(trzaskajacyMrozDoZagrnia);
                     czyZdolnoscZostalaFaktycznieUzytaPrzezDowodce = false;
                 }
             } else {
@@ -2023,9 +1840,8 @@ public class SilnikGry {
                 }
                 czyZdolnoscZostalaFaktycznieUzytaPrzezDowodce = false;
             }
-            gracz.setZdolnoscDowodcyUzyta(true); // Zdolność jest zużywana niezależnie od tego, czy karta została znaleziona
-            // Tura zakończy się w standardowym bloku poniżej, ponieważ ta zdolność nie robi 'return'
-        }else if (idDowodcy == 491) { // Francesca Findabair "Nadzieja Dol Blathanna"
+            gracz.setZdolnoscDowodcyUzyta(true);
+        }else if (idDowodcy == 491) {
             czyToAktywnaZdolnoscDoZuzycia = true;
             boolean dokonanoJakiegokolwiekPrzesuniecia = false;
 
@@ -2101,8 +1917,7 @@ public class SilnikGry {
                                     "' z " + obecnyTypRzedu + " (siła: " + obecnaSilaKarty +
                                     ") do " + najlepszyRzadDocelowyDlaTejKarty + " (potencjalna siła: " + maksymalnaPotencjalnaSilaDlaTejKarty + ")");
 
-                            // **** POPRAWKA TUTAJ ****
-                            if (obecnyRzadObiekt.usunKarteJednostki(kartaZreczna) != null) { // Sprawdź, czy usunięcie się powiodło (zwrócona karta nie jest null)
+                            if (obecnyRzadObiekt.usunKarteJednostki(kartaZreczna) != null) {
                                 nowyRzadObiekt.dodajKarteJednostki(kartaZreczna);
                                 dokonanoJakiegokolwiekPrzesuniecia = true;
                             } else {
@@ -2125,9 +1940,8 @@ public class SilnikGry {
                 }
             }
             gracz.setZdolnoscDowodcyUzyta(true);
-            // ... reszta bloku if/else if dla innych dowódców ...
-        }else if (idDowodcy == 492) { // Francesca Findabair "Królowa Dol Blathanna"
-            czyToAktywnaZdolnoscDoZuzycia = true; // To jest aktywna zdolność
+        }else if (idDowodcy == 492) {
+            czyToAktywnaZdolnoscDoZuzycia = true;
 
             Gracz przeciwnik = (gracz == gracz1) ? gracz2 : gracz1;
             RzadPlanszy rzadBliskiegoStarciaPrzeciwnika = null;
@@ -2136,16 +1950,14 @@ public class SilnikGry {
             if (przeciwnik != null && przeciwnik.getPlanszaGry() != null) {
                 rzadBliskiegoStarciaPrzeciwnika = przeciwnik.getPlanszaGry().getRzadPiechoty();
                 if (rzadBliskiegoStarciaPrzeciwnika != null) {
-                    // getSumaPunktowWRzedzie() zwraca aktualną, efektywną siłę rzędu
                     sumaPunktowRzeduPrzeciwnika = rzadBliskiegoStarciaPrzeciwnika.getSumaPunktowWRzedzie();
                 }
             }
 
             if (rzadBliskiegoStarciaPrzeciwnika != null && sumaPunktowRzeduPrzeciwnika >= 10) {
                 System.out.println("SILNIK: Francesca (492) - Rząd bliskiego starcia przeciwnika ma " + sumaPunktowRzeduPrzeciwnika + " pkt (>=10). Aktywacja efektu.");
-                // Wywołaj zmodyfikowaną metodę niszczącą
                 boolean czyCosZniszczono = zniszczNajsilniejszeJednostkiNaRzedzie(przeciwnik, TypRzeduEnum.PIECHOTA, "Zdolność Franceski (492)", null);
-                czyZdolnoscZostalaFaktycznieUzytaPrzezDowodce = czyCosZniszczono; // Ustaw flagę na podstawie wyniku
+                czyZdolnoscZostalaFaktycznieUzytaPrzezDowodce = czyCosZniszczono;
             } else {
                 String przyczynaBrakuEfektu = "nieznana";
                 if (rzadBliskiegoStarciaPrzeciwnika == null) {
@@ -2159,9 +1971,8 @@ public class SilnikGry {
                 }
                 czyZdolnoscZostalaFaktycznieUzytaPrzezDowodce = false;
             }
-            gracz.setZdolnoscDowodcyUzyta(true); // Zdolność jest zużywana niezależnie od efektu
-            // Tura zakończy się w standardowym bloku poniżej, bo ta zdolność nie robi 'return'
-        }else if (idDowodcy == 493) { // Francesca Findabair "Najpiękniejsza kobieta na świecie"
+            gracz.setZdolnoscDowodcyUzyta(true);
+        }else if (idDowodcy == 493) {
             czyToAktywnaZdolnoscDoZuzycia = true;
 
             if (gracz.getPlanszaGry() != null) {
@@ -2193,30 +2004,22 @@ public class SilnikGry {
                 czyZdolnoscZostalaFaktycznieUzytaPrzezDowodce = false;
             }
             gracz.setZdolnoscDowodcyUzyta(true);
-            // Tura zakończy się w standardowym bloku poniżej
         }
-        // TODO: Inne AKTYWNE zdolności dowódców
-
-        // Wspólne zakończenie
         przeliczWszystkiePunktyNaPlanszy();
         if (kontrolerPlanszy != null) {
             kontrolerPlanszy.odswiezCalakolwiekPlansze();
-            // Komunikat o użyciu zdolności
-            if (czyToAktywnaZdolnoscDoZuzycia && // Tylko jeśli to była próba użycia aktywnej zdolności
-                    gracz.isZdolnoscDowodcyUzyta() && // I została oznaczona jako użyta
+            if (czyToAktywnaZdolnoscDoZuzycia &&
+                    gracz.isZdolnoscDowodcyUzyta() &&
                     !oczekiwanieNaWyborKartyDlaEmhyra &&
                     !oczekiwanieNaWyborCeluDlaManekina &&
                     !oczekiwanieNaWyborRzeduPoWskrzeszeniu) {
-                // Dodatkowy warunek, aby nie wyświetlać komunikatu dla zdolności, które nie miały efektu, a tylko zużyły użycie
-                if (czyZdolnoscZostalaFaktycznieUzyta || idDowodcy == 72) { // Dla Cesarza zawsze pokazuj, że użył, nawet jak ręka pusta
+                if (czyZdolnoscZostalaFaktycznieUzyta || idDowodcy == 72) {
                     kontrolerPlanszy.wyswietlKomunikatNaPlanszy(gracz.getProfilUzytkownika().getNazwaUzytkownika() + " użył zdolności: " + kartaDowodcy.getNazwa() + "!", false);
-                } else if (!czyZdolnoscZostalaFaktycznieUzyta && idDowodcy != 69) { // Dla ID69 komunikat jest w metodach wykonaj/anuluj
-                    // Można dodać komunikat "Zdolność użyta, ale bez efektu", jeśli chcesz
+                } else if (!czyZdolnoscZostalaFaktycznieUzyta && idDowodcy != 69) {
                 }
             }
         }
 
-        // ZAKOŃCZENIE TURY - tylko dla AKTYWNYCH zdolności, które nie weszły w stan oczekiwania
         if (czyToAktywnaZdolnoscDoZuzycia &&
                 !oczekiwanieNaWyborKartyDlaEmhyra &&
                 !oczekiwanieNaWyborCeluDlaManekina &&
@@ -2228,12 +2031,11 @@ public class SilnikGry {
             setGraczOczekujacyNaPotwierdzenie(nastepnyPrzeciwnik);
             if (kontrolerPlanszy != null) kontrolerPlanszy.rozpocznijSekwencjeZmianyTury();
         }
-        // Jeśli to było kliknięcie na pasywną zdolność (ID 71, 73), metoda zwróciła wcześniej.
-        // Jeśli zdolność aktywna weszła w stan oczekiwania (ID 69), metoda też zwróciła wcześniej.
     }
 
+    //Metoda pomocnicza używana przez zdolność Franceski Findabair. Oblicza, jaką siłę miałaby dana karta, gdyby znalazła się w określonym rzędzie, uwzględniając wszystkie aktywne efekty (pogoda, róg, morale).
     private int obliczPotencjalnaSileKartyWRzedzie(Karta kartaDoSprawdzenia, TypRzeduEnum typRzeduDocelowego, Gracz wlascicielKarty) {
-        if (kartaDoSprawdzenia.getTyp() == TypKartyEnum.BOHATER) { // Bohaterowie mają stałą siłę
+        if (kartaDoSprawdzenia.getTyp() == TypKartyEnum.BOHATER) {
             int silaBohatera = kartaDoSprawdzenia.getPunktySily();
             boolean czySzpieg = kartaDoSprawdzenia.getUmiejetnosc() != null && kartaDoSprawdzenia.getUmiejetnosc().equalsIgnoreCase("Szpiegostwo");
             if (czySzpieg && aktualnyStanRundy.isEredin413Active()) {
@@ -2244,21 +2046,16 @@ public class SilnikGry {
 
         int efektywnaSila = kartaDoSprawdzenia.getPunktySily();
 
-        // 1. Efekt Eredina 413 dla Szpiegów (na bazową siłę)
         boolean czySzpiegJednostka = kartaDoSprawdzenia.getUmiejetnosc() != null && kartaDoSprawdzenia.getUmiejetnosc().equalsIgnoreCase("Szpiegostwo");
         if (czySzpiegJednostka && aktualnyStanRundy.isEredin413Active()) {
             efektywnaSila *= 2;
         }
-
-        // Pobierz docelowy rząd z planszy właściciela
-        // Zakładamy, że jednostki ze Zręcznością są przesuwane w ramach planszy ich właściciela
         PlanszaGracza planszaWlasciciela = getPlanszaGracza(wlascicielKarty);
-        if (planszaWlasciciela == null) return efektywnaSila; // Błąd, zwróć bazową
+        if (planszaWlasciciela == null) return efektywnaSila;
 
         RzadPlanszy rzadDocelowyFaktyczny = planszaWlasciciela.getRzad(typRzeduDocelowego);
-        if (rzadDocelowyFaktyczny == null) return efektywnaSila; // Błąd
+        if (rzadDocelowyFaktyczny == null) return efektywnaSila;
 
-        // 2. Efekt Pogody na tym rzędzie
         boolean pogodaAktywnaDlaKarty = false;
         if (aktualnyStanRundy != null) {
             for (Karta kartaPogody : aktualnyStanRundy.getAktywneKartyWRzedziePogody()) {
@@ -2272,45 +2069,28 @@ public class SilnikGry {
             }
         }
         if (pogodaAktywnaDlaKarty) {
-            efektywnaSila = 1; // Pogoda redukuje siłę jednostki nie-Bohatera do 1
+            efektywnaSila = 1;
         }
 
-        // 3. Efekt Wysokich Morali od INNYCH jednostek w rzędzie docelowym
-        // Ten bonus jest dodawany PO efekcie pogody
         int bonusMorale = 0;
         for (Karta kInRow : rzadDocelowyFaktyczny.getKartyJednostekWRzedzie()) {
-            // Zakładamy, że 'kartaDoSprawdzenia' nie jest jeszcze w tym rzędzie,
-            // więc nie musimy jej wykluczać z 'kInRow' jeśli chodzi o dawanie morale.
-            // Jeśli 'kartaDoSprawdzenia' sama daje morale, to nie wpływa na jej własną siłę w tym kroku.
             if (kInRow.getUmiejetnosc() != null && kInRow.getUmiejetnosc().equalsIgnoreCase("Wysokie morale") &&
-                    kInRow.getTyp() != TypKartyEnum.BOHATER) { // Zazwyczaj jednostki dają morale
+                    kInRow.getTyp() != TypKartyEnum.BOHATER) {
                 bonusMorale++;
             }
         }
-        if (!pogodaAktywnaDlaKarty) { // Jeśli pogoda ustawiła siłę na 1, morale się do tego nie dodaje w taki sposób.
-            // Morale zwiększa siłę, która jest > 1. Jeśli siła jest 1 przez pogodę, morale nie ma efektu.
-            // Typowa interpretacja: pogoda > morale > róg.
-            // Alternatywnie: morale dodaje do siły 1 (po pogodzie). Na razie załóżmy, że pogoda jest silniejsza.
-            // Aby morale działało na siłę 1 po pogodzie, ten if musiałby być usunięty.
-            // Na razie zostawiam tak, że morale nie działa na jednostki osłabione pogodą do 1.
-            // Dla uproszczenia, jeśli jest pogoda, siła jest 1, a potem róg.
-            // Jeśli NIE MA pogody, wtedy liczymy morale:
+        if (!pogodaAktywnaDlaKarty) {
             efektywnaSila += bonusMorale;
         }
 
-
-        // 4. Efekt Rogu Dowódcy na tym rzędzie (działa na siłę PO pogodzie i morale)
         if (rzadDocelowyFaktyczny.getKartaRoguDowodcy() != null || rzadDocelowyFaktyczny.isWzmocnieniePrzezDowodceAktywne()) {
             efektywnaSila *= 2;
         }
 
-        // Umiejętność Więź nie jest tutaj bezpośrednio obliczana dla 'kartaDoSprawdzenia',
-        // ponieważ jej aktywacja zależałaby od tego, czy inne pasujące karty już są w rzędzie docelowym.
-        // Dla tej umiejętności skupiamy się na optymalizacji pod kątem pogody i rogu.
-
         return efektywnaSila;
     }
 
+    //Przetwarza pierwszy etap zdolności Eredina (ID 414), potwierdzając dwie karty z ręki wybrane do odrzucenia i inicjując drugi etap - wybór karty z talii.
     public void potwierdzWyborKartDoOdrzuceniaEredin414(List<Karta> wybraneKartyDoOdrzucenia) {
         if (!oczekiwanieNaWyborKartDoOdrzuceniaEredin414 || graczAktywujacyEredina414 == null) {
             System.err.println("SILNIK: Nieprawidłowy stan do potwierdzenia odrzucenia kart dla Eredina 414.");
@@ -2321,13 +2101,12 @@ public class SilnikGry {
             System.err.println("SILNIK: Eredin 414 - Należy wybrać dokładnie 2 karty do odrzucenia.");
             if (this.kontrolerPlanszy != null) {
                 this.kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Wybierz dokładnie 2 karty do odrzucenia.", true);
-                // Pozwól graczowi poprawić wybór, ponownie pokazując panel
                 this.kontrolerPlanszy.pokazPanelWyboruKartDoOdrzuceniaEredin414(new ArrayList<>(graczAktywujacyEredina414.getReka()));
             }
-            return; // Nie anuluj zdolności, daj szansę na ponowny wybór
+            return;
         }
 
-        this.kartyWybraneDoOdrzuceniaEredin414.clear(); // Wyczyść na wszelki wypadek
+        this.kartyWybraneDoOdrzuceniaEredin414.clear();
         this.kartyWybraneDoOdrzuceniaEredin414.addAll(wybraneKartyDoOdrzucenia);
         this.oczekiwanieNaWyborKartDoOdrzuceniaEredin414 = false;
         this.oczekiwanieNaWyborKartyZTaliiPrzezEredin414 = true;
@@ -2339,7 +2118,6 @@ public class SilnikGry {
             if (this.kontrolerPlanszy != null) {
                 this.kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Talia jest pusta! Nie można dobrać karty.", true);
             }
-            // Karty zostały wybrane do odrzucenia, więc muszą zostać odrzucone.
             for (Karta kartaDoOdrzucenia : this.kartyWybraneDoOdrzuceniaEredin414) {
                 if(graczAktywujacyEredina414.getReka().remove(kartaDoOdrzucenia)){
                     graczAktywujacyEredina414.getOdrzucone().add(kartaDoOdrzucenia);
@@ -2357,6 +2135,7 @@ public class SilnikGry {
         }
     }
 
+    //Przetwarza akcję wyboru karty z cmentarza dla zdolności Eredina (ID 415), przenosząc wybraną kartę na rękę gracza.
     public void wykonajWyborKartyZCmentarzaEredin415(Karta wybranaKartaZCmentarza) {
         if (!oczekiwanieNaWyborKartyZCmentarzaPrzezEredina415 || graczAktywujacyEredina415 == null || wybranaKartaZCmentarza == null) {
             System.err.println("SILNIK: Nieprawidłowy stan do wykonania wyboru karty z cmentarza dla Eredina 415.");
@@ -2376,7 +2155,6 @@ public class SilnikGry {
             }
         } else {
             System.err.println("SILNIK: Eredin 415 - Nie udało się usunąć karty '" + wybranaKartaZCmentarza.getNazwa() + "' z cmentarza.");
-            // Jeśli nie udało się usunąć, zdolność i tak jest zużywana, ale bez efektu dobrania
             if (this.kontrolerPlanszy != null) {
                 this.kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Błąd przy pobieraniu karty z cmentarza.", true);
             }
@@ -2385,13 +2163,13 @@ public class SilnikGry {
         aktywnyGracz.setZdolnoscDowodcyUzyta(true);
         resetStanuEredina415();
 
-        // Finalizacja tury
-        if (this.kontrolerPlanszy != null) { // Odśwież rękę gracza
+        if (this.kontrolerPlanszy != null) {
             this.kontrolerPlanszy.odswiezCalakolwiekPlansze();
         }
-        koniecTuryPoAktywnejZdolnosci(aktywnyGracz, true); // true = zdolność miała efekt
+        koniecTuryPoAktywnejZdolnosci(aktywnyGracz, true);
     }
 
+    //Anuluje użycie zdolności Eredina (ID 414). Zdolność zostaje zużyta, a tura przechodzi do przeciwnika.
     public void anulujZdolnoscEredina415(boolean zPowoduBledu) {
         if (graczAktywujacyEredina415 == null && !oczekiwanieNaWyborKartyZCmentarzaPrzezEredina415) {
             resetStanuEredina415();
@@ -2399,7 +2177,7 @@ public class SilnikGry {
         }
 
         Gracz aktywnyGracz = graczAktywujacyEredina415;
-        if (aktywnyGracz == null) aktywnyGracz = graczAktualnejTury; // Fallback
+        if (aktywnyGracz == null) aktywnyGracz = graczAktualnejTury;
         if(aktywnyGracz == null) {
             System.err.println("SILNIK: Nie można anulować zdolności Eredina 415, brak informacji o graczu.");
             resetStanuEredina415();
@@ -2410,7 +2188,7 @@ public class SilnikGry {
         System.out.println("SILNIK: Anulowano zdolność Eredina 415 dla gracza " + aktywnyGracz.getProfilUzytkownika().getNazwaUzytkownika() +
                 (zPowoduBledu ? " z powodu błędu." : "."));
 
-        aktywnyGracz.setZdolnoscDowodcyUzyta(true); // Zdolność jest zużywana
+        aktywnyGracz.setZdolnoscDowodcyUzyta(true);
         resetStanuEredina415();
 
         if (this.kontrolerPlanszy != null) {
@@ -2419,28 +2197,23 @@ public class SilnikGry {
             this.kontrolerPlanszy.wyswietlKomunikatNaPlanszy(komunikat +
                     (zPowoduBledu ? ": wystąpił błąd." : ": wybór anulowany."), false);
         }
-        koniecTuryPoAktywnejZdolnosci(aktywnyGracz, false); // false = zdolność nie miała pełnego efektu
+        koniecTuryPoAktywnejZdolnosci(aktywnyGracz, false);
     }
 
+    //Przeszukuje planszę gracza w poszukiwaniu prawidłowych celów dla karty "Manekin do ćwiczeń" (jednostki niebędące bohaterami).
     private List<Karta> znajdzPoprawneCeleDlaManekina(Gracz gracz) {
         List<Karta> cele = new ArrayList<>();
         if (gracz == null || gracz.getPlanszaGry() == null) {
             return cele;
         }
-        // Manekin zamienia jednostki na WŁASNEJ planszy gracza
-        PlanszaGracza planszaGracza = getPlanszaGracza(gracz); // Użyj istniejącej metody getPlanszaGracza
+        PlanszaGracza planszaGracza = getPlanszaGracza(gracz);
         if (planszaGracza == null) return cele;
 
         for (TypRzeduEnum typRzedu : new TypRzeduEnum[]{TypRzeduEnum.PIECHOTA, TypRzeduEnum.STRZELECKIE, TypRzeduEnum.OBLEZENIE}) {
             RzadPlanszy rzad = planszaGracza.getRzad(typRzedu);
             if (rzad != null) {
                 for (Karta k : rzad.getKartyJednostekWRzedzie()) {
-                    // Manekin nie może zamienić Bohatera ani innego Manekina (jeśli karta manekina ma specyficzne ID)
-                    // Załóżmy, że Manekin nie może podmienić samego siebie, jeśli np. jakimś cudem byłaby to ta sama instancja.
-                    // Głównie chodzi o to, by nie podmieniać Bohaterów.
                     if (k.getTyp() != TypKartyEnum.BOHATER) {
-                        // Dodatkowe sprawdzenie, czy karta 'k' to nie jest przypadkiem sam Manekin (jeśli Manekiny są unikalne lub mają ID)
-                        // Jeśli Manekin do Ćwiczeń ma stałe ID, np. MANEKIN_ID, można dodać: && k.getId() != MANEKIN_ID
                         cele.add(k);
                     }
                 }
@@ -2449,6 +2222,7 @@ public class SilnikGry {
         return cele;
     }
 
+    //Przetwarza drugi etap zdolności Eredina (ID 414). Odrzuca wcześniej wybrane karty na cmentarz i dodaje do ręki kartę wybraną z talii.
     public void wykonajWyborKartyZTalliEredin414(Karta wybranaKartaZTalii) {
         if (!oczekiwanieNaWyborKartyZTaliiPrzezEredin414 || graczAktywujacyEredina414 == null || wybranaKartaZTalii == null || kartyWybraneDoOdrzuceniaEredin414 == null || kartyWybraneDoOdrzuceniaEredin414.size() != 2) {
             System.err.println("SILNIK: Nieprawidłowy stan do wykonania wyboru karty z talii dla Eredina 414.");
@@ -2490,15 +2264,14 @@ public class SilnikGry {
 
     public void anulujZdolnoscEredina414(boolean zPowoduBledu) {
         if (graczAktywujacyEredina414 == null && !oczekiwanieNaWyborKartDoOdrzuceniaEredin414 && !oczekiwanieNaWyborKartyZTaliiPrzezEredin414) {
-            // Zdolność nie została nawet zainicjowana, lub stan został już zresetowany
-            resetStanuEredina414(); // Na wszelki wypadek
+            resetStanuEredina414();
             return;
         }
 
-        Gracz aktywnyGracz = graczAktywujacyEredina414; // Może być null, jeśli anulowanie zanim gracz został ustawiony
-        if (aktywnyGracz == null) { // Jeśli anulujemy zanim graczAktywujacyEredina414 został ustawiony
-            aktywnyGracz = graczAktualnejTury; // Użyj gracza aktualnej tury jako fallback
-            if(aktywnyGracz == null) { // Ostateczny fallback
+        Gracz aktywnyGracz = graczAktywujacyEredina414;
+        if (aktywnyGracz == null) {
+            aktywnyGracz = graczAktualnejTury;
+            if(aktywnyGracz == null) {
                 System.err.println("SILNIK: Nie można anulować zdolności Eredina 414, brak informacji o graczu.");
                 resetStanuEredina414();
                 return;
@@ -2537,12 +2310,12 @@ public class SilnikGry {
         }
     }
 
+    //Przetwarza wybór karty pogody w ramach zdolności dowódcy Eredina, zagrywając wybraną kartę z talii na planszę.
     public void wykonajWyborPogodyPrzezEredina(Karta wybranaKartaPogody) {
         if (!oczekiwanieNaWyborKartyPogodyPrzezEredina || graczAktywujacyEredina336 == null || wybranaKartaPogody == null) {
             System.err.println("SILNIK: Nieprawidłowy stan do wykonania wyboru pogody przez Eredina.");
-            // Jeśli coś poszło nie tak, a zdolność była w trakcie aktywacji, zużyj ją i zakończ turę
             if (graczAktywujacyEredina336 != null) graczAktywujacyEredina336.setZdolnoscDowodcyUzyta(true);
-            anulujWyborPogodyPrzezEredina(true); // true oznacza, że anulowanie jest z powodu błędu
+            anulujWyborPogodyPrzezEredina(true);
             return;
         }
 
@@ -2552,28 +2325,22 @@ public class SilnikGry {
             return;
         }
 
-        Gracz graczKtoryUzywalZdolnosci = graczAktywujacyEredina336; // Zapamiętaj przed resetem
+        Gracz graczKtoryUzywalZdolnosci = graczAktywujacyEredina336;
         System.out.println("SILNIK: Eredin (" + graczKtoryUzywalZdolnosci.getProfilUzytkownika().getNazwaUzytkownika() +
                 ") wybrał kartę pogody: " + wybranaKartaPogody.getNazwa());
 
-        // 1. Usuń kartę z talii
         boolean usunietoZTalli = graczKtoryUzywalZdolnosci.getTaliaDoGry().remove(wybranaKartaPogody);
         if (!usunietoZTalli) {
             System.err.println("SILNIK: Błąd krytyczny - nie udało się usunąć wybranej karty pogody (" + wybranaKartaPogody.getNazwa() + ") z talii gracza " + graczKtoryUzywalZdolnosci.getProfilUzytkownika().getNazwaUzytkownika());
-            // Mimo błędu, spróbujmy kontynuować, ale zdolność będzie zużyta
         }
 
-        // 2. Zagraj kartę pogody
         aktualnyStanRundy.dodajKartePogody(wybranaKartaPogody);
-        // Karty pogody nie idą na cmentarz od razu, chyba że to "Czyste niebo"
-        // (obsługiwane wewnątrz dodajKartePogody)
 
         graczKtoryUzywalZdolnosci.setZdolnoscDowodcyUzyta(true);
         System.out.println("SILNIK: Zdolność Eredina (336) użyta. Karta " + wybranaKartaPogody.getNazwa() + " zagrana.");
 
         resetStanuWyboruPogodyEredina();
 
-        // Finalizacja UI i tury
         przeliczWszystkiePunktyNaPlanszy();
         if (kontrolerPlanszy != null) {
             kontrolerPlanszy.odswiezCalakolwiekPlansze();
@@ -2594,20 +2361,21 @@ public class SilnikGry {
         }
     }
 
+    //Anuluje proces wyboru karty pogody dla zdolności Eredina. Zdolność zostaje zużyta, a tura przechodzi do przeciwnika.
     public void anulujWyborPogodyPrzezEredina(boolean zPowoduBledu) {
         if (!oczekiwanieNaWyborKartyPogodyPrzezEredina || graczAktywujacyEredina336 == null) {
             resetStanuWyboruPogodyEredina();
             return;
         }
 
-        Gracz graczKtoryUzywalZdolnosci = graczAktywujacyEredina336; // Zapamiętaj przed resetem
+        Gracz graczKtoryUzywalZdolnosci = graczAktywujacyEredina336;
         System.out.println("SILNIK: Anulowano wybór karty pogody dla Eredina (" + graczKtoryUzywalZdolnosci.getProfilUzytkownika().getNazwaUzytkownika() + ")" + (zPowoduBledu ? " z powodu błędu." : "."));
 
-        graczKtoryUzywalZdolnosci.setZdolnoscDowodcyUzyta(true); // Zdolność zużyta
+        graczKtoryUzywalZdolnosci.setZdolnoscDowodcyUzyta(true);
         resetStanuWyboruPogodyEredina();
 
         if (kontrolerPlanszy != null) {
-            kontrolerPlanszy.odswiezCalakolwiekPlansze(); // Odśwież, aby pokazać zużytą zdolność
+            kontrolerPlanszy.odswiezCalakolwiekPlansze();
             kontrolerPlanszy.wyswietlKomunikatNaPlanszy(graczKtoryUzywalZdolnosci.getProfilUzytkownika().getNazwaUzytkownika() + " użył zdolności: " + graczKtoryUzywalZdolnosci.getKartaDowodcy().getNazwa() + (zPowoduBledu ? " (Błąd)" : " (Wybór anulowany)."), false);
         }
 
@@ -2625,22 +2393,23 @@ public class SilnikGry {
         }
     }
 
+    //Metoda pomocnicza resetująca stan związany z użyciem zdolności Eredina (wybór pogody).
     private void resetStanuWyboruPogodyEredina() {
         this.oczekiwanieNaWyborKartyPogodyPrzezEredina = false;
         this.graczAktywujacyEredina336 = null;
         this.dostepneKartyPogodyDlaEredina = null;
     }
 
+    //Metoda pomocnicza realizująca efekt typu "Pożoga" dla konkretnego rzędu. Niszczy najsilniejszą lub najsilniejsze jednostki (nie-bohaterów) w danym rzędzie.
     private boolean zniszczNajsilniejszeJednostkiNaRzedzie(Gracz graczCel, TypRzeduEnum typRzeduCelu, String zrodloEfektu, Karta pominKarte) {
         if (graczCel == null || graczCel.getPlanszaGry() == null) {
             System.err.println("SILNIK: (" + zrodloEfektu + ") - Brak gracza celu lub jego planszy.");
-            return false; // Nic nie zniszczono
+            return false;
         }
         RzadPlanszy rzadCelu = graczCel.getPlanszaGry().getRzad(typRzeduCelu);
 
         if (rzadCelu == null || rzadCelu.getKartyJednostekWRzedzie().isEmpty()) {
             System.out.println("SILNIK: (" + zrodloEfektu + ") - Rząd " + typRzeduCelu.getNazwaWyswietlana() + " gracza " + graczCel.getProfilUzytkownika().getNazwaUzytkownika() + " jest pusty.");
-            // Komunikat dla gracza, jeśli to nie Foltest (Foltest ma swoje komunikaty)
             if (this.kontrolerPlanszy != null && zrodloEfektu != null && !zrodloEfektu.toLowerCase().contains("foltest")) {
                 this.kontrolerPlanszy.wyswietlKomunikatNaPlanszy(zrodloEfektu + ": Rząd " + typRzeduCelu.getNazwaWyswietlana() + " przeciwnika jest pusty.", false);
             }
@@ -2664,12 +2433,12 @@ public class SilnikGry {
 
         int maxSila = 0;
         for (Karta k : jednostkiNieBohaterowieNaRzedzie) {
-            if (k.getPunktySily() > maxSila) { // Działa na bazowej sile
+            if (k.getPunktySily() > maxSila) {
                 maxSila = k.getPunktySily();
             }
         }
 
-        if (maxSila == 0) { // Jeśli wszystkie kwalifikujące się jednostki mają 0 siły bazowej
+        if (maxSila == 0) {
             System.out.println("SILNIK: (" + zrodloEfektu + ") - Brak jednostek z siłą > 0 w rzędzie " + typRzeduCelu.getNazwaWyswietlana() + " gracza " + graczCel.getProfilUzytkownika().getNazwaUzytkownika());
             if (this.kontrolerPlanszy != null && zrodloEfektu != null && !zrodloEfektu.toLowerCase().contains("foltest")) {
                 this.kontrolerPlanszy.wyswietlKomunikatNaPlanszy(zrodloEfektu + ": Brak wartościowych celów w rzędzie " + typRzeduCelu.getNazwaWyswietlana() + " przeciwnika.", false);
@@ -2687,38 +2456,36 @@ public class SilnikGry {
         if (!kartyDoZniszczenia.isEmpty()) {
             StringBuilder zniszczoneNazwy = new StringBuilder();
             for (Karta k : kartyDoZniszczenia) {
-                if (rzadCelu.usunKarteJednostki(k) != null) { // Sprawdź, czy faktycznie usunięto
+                if (rzadCelu.usunKarteJednostki(k) != null) {
                     graczCel.getOdrzucone().add(k);
                     zniszczoneNazwy.append(k.getNazwa()).append(" (").append(maxSila).append(" pkt), ");
                 }
             }
             if (zniszczoneNazwy.length() > 2) {
-                zniszczoneNazwy.setLength(zniszczoneNazwy.length() - 2); // Usuń ostatni przecinek i spację
+                zniszczoneNazwy.setLength(zniszczoneNazwy.length() - 2);
                 System.out.println("SILNIK: " + zrodloEfektu + " niszczy w rzędzie " + typRzeduCelu.getNazwaWyswietlana() + " gracza " + graczCel.getProfilUzytkownika().getNazwaUzytkownika() + " karty: " + zniszczoneNazwy.toString());
                 if (this.kontrolerPlanszy != null) {
                     this.kontrolerPlanszy.wyswietlKomunikatNaPlanszy(zrodloEfektu + " zniszczył: " + zniszczoneNazwy.toString() + "!", false);
                 }
-                return true; // Coś zostało zniszczone
+                return true;
             } else {
                 System.out.println("SILNIK: (" + zrodloEfektu + ") - Nie udało się zniszczyć żadnej z wytypowanych kart (np. błąd usuwania).");
-                return false; // Nic nie zostało zniszczone
+                return false;
             }
         } else {
-            // Ten warunek nie powinien być osiągnięty, jeśli maxSila > 0 i jednostkiNieBohaterowieNaRzedzie nie była pusta
+
             System.out.println("SILNIK: (" + zrodloEfektu + ") - Nie znaleziono kart do zniszczenia (oczekiwano, że będą).");
             return false;
         }
     }
-    private void zastosujEfektLosowegoWskrzeszeniaPrzezNjezdzce(Gracz graczKtoremuWskrzeszamy) {
-        // Ta metoda jest wywoływana, gdy Emhyr "Najeźdźca Północy" jest aktywny
-        // i umiejętność "Zmartwychwstanie" została zagrana przez graczKtoremuWskrzeszamy.
-        // Zastępuje ona standardowy wybór karty z cmentarza.
 
+    //Aktywuje pasywną zdolność dowódcy Emhyra "Najeźdźca Północy". Po zagraniu Medyka, ta metoda losowo wskrzesza jednostkę z cmentarza gracza.
+    private void zastosujEfektLosowegoWskrzeszeniaPrzezNjezdzce(Gracz graczKtoremuWskrzeszamy) {
         System.out.println("SILNIK: Emhyr 'Najeźdźca Północy' - efekt losowego wskrzeszenia dla gracza: " + graczKtoremuWskrzeszamy.getProfilUzytkownika().getNazwaUzytkownika());
 
         List<Karta> cmentarzGracza = graczKtoremuWskrzeszamy.getOdrzucone();
         List<Karta> mozliweKartyDoLosowegoWskrzeszenia = cmentarzGracza.stream()
-                .filter(k -> k.getTyp() == TypKartyEnum.JEDNOSTKA) // Tylko jednostki (nie Bohater, nie Specjalna)
+                .filter(k -> k.getTyp() == TypKartyEnum.JEDNOSTKA)
                 .collect(Collectors.toList());
 
         if (mozliweKartyDoLosowegoWskrzeszenia.isEmpty()) {
@@ -2726,18 +2493,15 @@ public class SilnikGry {
             if (kontrolerPlanszy != null) {
                 kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Emhyr (Najeźdźca): Brak jednostek na cmentarzu do wskrzeszenia.", false);
             }
-            // Mimo braku losowej karty, karta Medyka została zagrana, więc tura powinna być sfinalizowana.
-            // Finalizacja tury nastąpi w metodzie wołającej (zagrajKarte -> finalizujTurePoWskrzeszeniu)
             return;
         }
 
         Collections.shuffle(mozliweKartyDoLosowegoWskrzeszenia);
         Karta wylosowanaKarta = mozliweKartyDoLosowegoWskrzeszenia.get(0);
 
-        cmentarzGracza.remove(wylosowanaKarta); // Usuń z cmentarza
+        cmentarzGracza.remove(wylosowanaKarta);
         System.out.println("SILNIK: Emhyr 'Najeźdźca Północy' losowo wskrzesza: " + wylosowanaKarta.getNazwa() + " dla gracza " + graczKtoremuWskrzeszamy.getProfilUzytkownika().getNazwaUzytkownika());
 
-        // Logika umieszczania wylosowanej karty (skopiowana i dostosowana z poprzedniej wersji `sprawdzIZastosujEfektEmhyraNjezdzcy`)
         boolean czySzpieg = wylosowanaKarta.getUmiejetnosc() != null && wylosowanaKarta.getUmiejetnosc().equalsIgnoreCase("Szpiegostwo");
         boolean czyZrecznosc = wylosowanaKarta.getUmiejetnosc() != null && wylosowanaKarta.getUmiejetnosc().equalsIgnoreCase("Zręczność");
         boolean czyDowolne = wylosowanaKarta.getPozycja() != null && wylosowanaKarta.getPozycja().toLowerCase().contains("dowolne");
@@ -2786,7 +2550,7 @@ public class SilnikGry {
             if (czySzpieg) {
                 dociagnijKartyDoRekiPoZagrywce(graczKtoremuWskrzeszamy, 2);
             }
-            aktywujUmiejetnosciPoZagrywce(graczNaCzyjejPlanszyLadujeAutomatycznieWskrzeszona, wylosowanaKarta, rzadDocelowyNaPlanszy, true); // true => po wskrzeszeniu
+            aktywujUmiejetnosciPoZagrywce(graczNaCzyjejPlanszyLadujeAutomatycznieWskrzeszona, wylosowanaKarta, rzadDocelowyNaPlanszy, true);
             if (kontrolerPlanszy != null) {
                 kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Emhyr (Najeźdźca) wskrzesił: " + wylosowanaKarta.getNazwa() + "!", false);
             }
@@ -2797,19 +2561,18 @@ public class SilnikGry {
                 kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Emhyr (Najeźdźca): Błąd przy umieszczaniu losowej jednostki.", true);
             }
         }
-        // Ta metoda sama w sobie nie finalizuje tury, robi to metoda, która ją wywołała.
     }
+
+    //Przetwarza akcję wyboru karty z cmentarza przeciwnika w ramach zdolności dowódcy Emhyra "Pan Południa".
     public void wykonajWyborEmhyraPanaPoludnia(Karta wybranaKarta) {
         if (!oczekiwanieNaWyborKartyDlaEmhyra || graczAktywujacyEmhyra == null || przeciwnikDlaEmhyra == null || wybranaKarta == null) {
             System.err.println("SILNIK: Nieprawidłowy stan do wykonania wyboru dla Emhyra 'Pan Południa'.");
-            // Jeśli stan jest nieprawidłowy, a graczAktywujacyEmhyra jest znany, to mimo wszystko jego zdolność została "zużyta"
             if (graczAktywujacyEmhyra != null) {
-                graczAktywujacyEmhyra.setZdolnoscDowodcyUzyta(true); // Oznacz jako użytą, nawet jeśli błąd
+                graczAktywujacyEmhyra.setZdolnoscDowodcyUzyta(true);
             }
             resetStanuWyboruEmhyra();
             if (graczAktywujacyEmhyra != null && kontrolerPlanszy != null) {
                 kontrolerPlanszy.odswiezCalakolwiekPlansze();
-                // Tura powinna przejść dalej, nawet jeśli wystąpił błąd z wyborem
                 oczekiwanieNaPotwierdzenieTury = true;
                 Gracz przeciwnikPoEmhyrze = (graczAktywujacyEmhyra == this.gracz1) ? this.gracz2 : this.gracz1;
                 setGraczOczekujacyNaPotwierdzenie(przeciwnikPoEmhyrze);
@@ -2833,7 +2596,7 @@ public class SilnikGry {
                 kontrolerPlanszy.wyswietlKomunikatNaPlanszy("Błąd: Nie można było wziąć wybranej karty.", true);
             }
         }
-        graczAktywujacyEmhyra.setZdolnoscDowodcyUzyta(true); // Oznacz jako użytą
+        graczAktywujacyEmhyra.setZdolnoscDowodcyUzyta(true);
         Gracz graczKtoryUzywalZdolnosci = graczAktywujacyEmhyra;
         resetStanuWyboruEmhyra();
 
@@ -2843,7 +2606,6 @@ public class SilnikGry {
             kontrolerPlanszy.wyswietlKomunikatNaPlanszy(graczKtoryUzywalZdolnosci.getProfilUzytkownika().getNazwaUzytkownika() + " użył zdolności: " + graczKtoryUzywalZdolnosci.getKartaDowodcy().getNazwa() + "!", false);
         }
 
-        // ZAKOŃCZ TURĘ
         oczekiwanieNaPotwierdzenieTury = true;
         Gracz przeciwnikPoEmhyrze = (graczKtoryUzywalZdolnosci == this.gracz1) ? this.gracz2 : this.gracz1;
         setGraczOczekujacyNaPotwierdzenie(przeciwnikPoEmhyrze);
@@ -2851,6 +2613,8 @@ public class SilnikGry {
             kontrolerPlanszy.rozpocznijSekwencjeZmianyTury();
         }
     }
+
+    //Anuluje proces wyboru karty dla zdolności Emhyra. Zdolność dowódcy zostaje zużyta, a tura przechodzi do przeciwnika.
     public void anulujWyborDlaEmhyra() {
         if (!oczekiwanieNaWyborKartyDlaEmhyra || graczAktywujacyEmhyra == null) {
             resetStanuWyboruEmhyra();
@@ -2858,7 +2622,7 @@ public class SilnikGry {
         }
         System.out.println("SILNIK: Anulowano wybór karty dla Emhyra (" + graczAktywujacyEmhyra.getProfilUzytkownika().getNazwaUzytkownika() + ").");
 
-        graczAktywujacyEmhyra.setZdolnoscDowodcyUzyta(true); // Zdolność zużyta mimo anulowania wyboru
+        graczAktywujacyEmhyra.setZdolnoscDowodcyUzyta(true);
         Gracz graczKtoryUzywalZdolnosci = graczAktywujacyEmhyra;
         resetStanuWyboruEmhyra();
 
@@ -2875,6 +2639,8 @@ public class SilnikGry {
             kontrolerPlanszy.rozpocznijSekwencjeZmianyTury();
         }
     }
+
+    //Dociąga kartę dla gracza w wyniku aktywacji zdolności specjalnej (np. frakcji Królestw Północy).
     private void dociagnijKarteZeZdolnosci(Gracz gracz, int ilosc, String zrodloZdolnosci) {
         if (gracz == null || gracz.getProfilUzytkownika() == null) {
             System.err.println("Błąd w dociagnijKarteZeZdolnosci: gracz lub jego profil jest null.");
@@ -2894,7 +2660,6 @@ public class SilnikGry {
 
         int dociagnietoFaktycznie = 0;
         for (int i = 0; i < ilosc; i++) {
-            // Brak limitu ręki
             if (!talia.isEmpty()) {
                 Karta dociagnietaKarta = talia.remove(0);
                 reka.add(dociagnietaKarta);
@@ -2915,37 +2680,33 @@ public class SilnikGry {
                     " dociągnął " + dociagnietoFaktycznie + " kart(y). Rozmiar ręki: " + reka.size() +
                     ". W talii pozostało: " + talia.size());
             if (kontrolerPlanszy != null && dociagnietoFaktycznie == ilosc) {
-                // Ogólny komunikat o sukcesie dociągnięcia może być tutaj, lub w miejscu wywołania
             }
         }
     }
 
-
-
+    //Ustawia, który gracz jest obecnie oczekiwany na potwierdzenie swojej tury.
     public void setGraczOczekujacyNaPotwierdzenie(Gracz gracz) {
         this.graczOczekujacyNaPotwierdzenie = gracz;
         System.out.println("[SILNIK] Ustawiono gracza oczekującego na potwierdzenie na: " + (gracz != null ? gracz.getProfilUzytkownika().getNazwaUzytkownika() : "null"));
     }
 
+    //Metoda pomocnicza, która sprawdza, czy gracz nie ma już kart w ręce. Jeśli ręka jest pusta, automatycznie pasuje za tego gracza.
     private boolean checkAndPerformAutoPassIfHandEmpty(Gracz gracz) {
         if (gracz.getReka().isEmpty() && !gracz.isCzySpasowalWRundzie()) {
             System.out.println("SILNIK: Gracz " + gracz.getProfilUzytkownika().getNazwaUzytkownika() +
                     " zagrał ostatnią kartę i nie ma więcej kart w ręce. Automatyczne pasowanie.");
-            gracz.setCzySpasowalWRundzie(true); // Ustaw flagę pasowania dla gracza
+            gracz.setCzySpasowalWRundzie(true);
 
-            // Poinformuj kontroler, aby wyświetlił panel pasowania.
-            // Kontroler po zniknięciu panelu wywoła kontynuujPoWyswietleniuInfoOPasie(),
-            // która obsłuży logikę końca rundy lub zmiany tury.
             if (kontrolerPlanszy != null) {
                 kontrolerPlanszy.pokazPanelInfoPas(gracz);
             }
-            return true; // Auto-pass został zainicjowany
+            return true;
         }
-        return false; // Gracz nadal ma karty lub już spasował, brak auto-passu
+        return false;
     }
 
+    //Inicjuje fazę wymiany kart (Mulligan) na początku gry. Rozpoczyna proces od Gracza 1.
     private void rozpocznijFazeMulligan() {
-        // Zacznij od Gracza 1
         oczekiwanieNaMulliganGracza1 = true;
         oczekiwanieNaMulliganGracza2 = false;
         if (kontrolerPlanszy != null) {
@@ -2953,6 +2714,7 @@ public class SilnikGry {
         }
     }
 
+    //Przeprowadza wymianę kart na początku gry. Zwraca wybrane karty do talii, tasuje ją i dociąga nowe karty na ich miejsce.
     public void wykonajMulligan(Gracz gracz, List<Karta> kartyDoWymiany) {
         if ((gracz == gracz1 && !oczekiwanieNaMulliganGracza1) || (gracz == gracz2 && !oczekiwanieNaMulliganGracza2)) {
             System.err.println("BŁĄD: Otrzymano żądanie Mulligan dla gracza " + gracz.getProfilUzytkownika().getNazwaUzytkownika() + " w złym momencie.");
@@ -2962,16 +2724,13 @@ public class SilnikGry {
         if (kartyDoWymiany != null && !kartyDoWymiany.isEmpty()) {
             System.out.println("SILNIK: Gracz " + gracz.getProfilUzytkownika().getNazwaUzytkownika() + " wymienia " + kartyDoWymiany.size() + " kart.");
 
-            // Zwróć wybrane karty do talii
             for (Karta karta : kartyDoWymiany) {
                 gracz.getReka().remove(karta);
                 gracz.getTaliaDoGry().add(karta);
             }
 
-            // Przetasuj talię
             Collections.shuffle(gracz.getTaliaDoGry());
 
-            // Dobierz tyle samo nowych kart
             int iloscDoDociagniecia = kartyDoWymiany.size();
             for (int i = 0; i < iloscDoDociagniecia; i++) {
                 if (!gracz.getTaliaDoGry().isEmpty()) {
@@ -2982,31 +2741,22 @@ public class SilnikGry {
             System.out.println("SILNIK: Gracz " + gracz.getProfilUzytkownika().getNazwaUzytkownika() + " nie wymienił żadnej karty.");
         }
 
-        // Zaktualizuj widok po wymianie (ważne!)
         if (kontrolerPlanszy != null) {
             kontrolerPlanszy.odswiezCalakolwiekPlansze();
         }
 
-        // Przejdź do następnego etapu
         if (gracz == gracz1) {
-            // Gracz 1 skończył, teraz kolej Gracza 2
             oczekiwanieNaMulliganGracza1 = false;
             oczekiwanieNaMulliganGracza2 = true;
-
-            // W trybie hot-seat warto pokazać panel zmiany tury
             if(kontrolerPlanszy != null) {
-                // Możesz użyć istniejącego panelu zmiany tury, aby ukryć planszę
-                kontrolerPlanszy.pokazPanelPrzejeciaTury(gracz2); // Ten panel ma przycisk "Potwierdź", ale handler tego przycisku musimy dostosować...
-                // Prostsze rozwiązanie na teraz: po prostu pokaż panel dla gracza 2.
-                // Logika Hot-Seat wymaga ukrycia ekranu. Na razie załóżmy, że gracze są uczciwi.
+                kontrolerPlanszy.pokazPanelPrzejeciaTury(gracz2);
                 kontrolerPlanszy.pokazPanelMulligan(gracz2);
             }
 
         } else if (gracz == gracz2) {
-            // Gracz 2 skończył, faza mulligan zakończona. Rozpocznij grę.
             oczekiwanieNaMulliganGracza2 = false;
             System.out.println("SILNIK: Faza Mulligan zakończona. Rozpoczynanie pierwszej rundy.");
-            rozpocznijNowaRunde(); // To rozpocznie właściwą grę (rzut monetą itp. jeśli tam jest)
+            rozpocznijNowaRunde();
         }
     }
 
@@ -3022,16 +2772,17 @@ public class SilnikGry {
         }
     }
 
-    // Getter potrzebny dla kontrolera
+    //Zwraca gracza, który aktualnie jest w trakcie fazy Mulligan.
     public Gracz getGraczDlaMulligan() {
         if (oczekiwanieNaMulliganGracza1) return gracz1;
         if (oczekiwanieNaMulliganGracza2) return gracz2;
         return null;
     }
+
+    //Finalizuje turę po animacji dobierania kart (np. po zagraniu Szpiega). Ta metoda jest wywoływana przez KontrolerPlanszyGry po zakończeniu animacji.
     public void finalizujTurePoDobieraniu(Gracz gracz, List<Karta> kartyDobierane) {
         System.out.println("[SILNIK] Finalizowanie tury po animacji dobrania " + kartyDobierane.size() + " kart.");
 
-        // Teraz faktycznie przenieś karty w modelu
         for (Karta karta : kartyDobierane) {
             if (gracz.getTaliaDoGry().remove(karta)) {
                 gracz.getReka().add(karta);
@@ -3043,7 +2794,6 @@ public class SilnikGry {
             kontrolerPlanszy.odswiezCalakolwiekPlansze();
         }
 
-        // Standardowa logika zakończenia tury (skopiowana z końca metody zagrajKarte)
         if (checkAndPerformAutoPassIfHandEmpty(gracz)) {
             return;
         }

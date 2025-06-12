@@ -3,12 +3,12 @@ import pixelgwint.widok.KontrolerWpiszNazweGracza2;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node; // Ważny import
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane; // Ważny import
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import pixelgwint.logika.WczytywaczKart;
@@ -27,8 +27,8 @@ import java.util.Map;
 import pixelgwint.logika.MenedzerMuzyki;
 import pixelgwint.widok.KontrolerUstawien;
 import pixelgwint.widok.KontrolerEkranuIntro;
-import javafx.animation.FadeTransition; // NOWY IMPORT
-import javafx.util.Duration; // NOWY IMPORT
+import javafx.animation.FadeTransition;
+import javafx.util.Duration;
 
 public class PixelGwintAplikacja extends Application {
     private Stage primaryStage;
@@ -60,7 +60,6 @@ public class PixelGwintAplikacja extends Application {
         this.menedzerMuzyki = new MenedzerMuzyki();
         mainLayout = new StackPane();
 
-        // Utwórz scenę raz. Rozmiar nie jest tu krytyczny, bo zaraz ustawimy pełny ekran.
         Scene scene = new Scene(mainLayout);
         primaryStage.setScene(scene);
 
@@ -69,7 +68,7 @@ public class PixelGwintAplikacja extends Application {
             if (iconStream != null) {
                 primaryStage.getIcons().add(new Image(iconStream));
                 System.out.println("[APP] Pomyślnie ustawiono ikonę aplikacji z /grafiki/logo.png");
-                iconStream.close(); // Zamknij strumień po użyciu
+                iconStream.close();
             } else {
                 System.err.println("[APP BŁĄD] Nie można znaleźć pliku ikony: /grafiki/logo.png. Upewnij się, że plik istnieje w src/main/resources/grafiki/");
             }
@@ -78,27 +77,17 @@ public class PixelGwintAplikacja extends Application {
             e.printStackTrace();
         }
 
-
-        // Opcjonalnie: usuń podpowiedź o ESC (możesz zostawić, jeśli chcesz, aby użytkownik wiedział)
         primaryStage.setFullScreenExitHint("");
-        // Jeśli chcesz całkowicie zablokować wychodzenie z pełnego ekranu przez ESC:
-        // primaryStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
-        // Ale użytkownik wspominał, że używa ESC, więc prawdopodobnie nie chcesz tego blokować.
 
         primaryStage.maximizedProperty().addListener((obs, wasMaximized, isNowMaximized) -> {
             if (isNowMaximized) {
-                // Jeśli użytkownik zmaksymalizował okno (które wcześniej wyszło z trybu pełnoekranowego),
-                // chcemy przywrócić "prawdziwy" tryb pełnoekranowy.
                 System.out.println("[APP] Okno zostało zmaksymalizowane, wymuszanie trybu pełnoekranowego.");
                 primaryStage.setFullScreen(true);
             }
         });
-
-        // Listener na zmianę stanu zminimalizowania/przywrócenia okna
         primaryStage.iconifiedProperty().addListener((obs, wasIconified, isNowIconified) -> {
-            if (!isNowIconified) { // Okno zostało przywrócone (odminimalizowane)
+            if (!isNowIconified) {
                 System.out.println("[APP] Okno zostało przywrócone z minimalizacji.");
-                // Jeśli po przywróceniu nie jest w trybie pełnoekranowym (np. było zminimalizowane z trybu okienkowego po ESC)
                 if (!primaryStage.isFullScreen()) {
                     System.out.println("[APP] Przywrócone okno nie jest pełnoekranowe, ustawianie trybu pełnoekranowego.");
                     primaryStage.setFullScreen(true);
@@ -107,13 +96,11 @@ public class PixelGwintAplikacja extends Application {
         });
 
 
-        pokazEkranLadowania(); // Załaduj pierwszy widok
-
-        primaryStage.setFullScreen(true); // <<== USTAW TRYB PEŁNOEKRANOWY RAZ TUTAJ
+        pokazEkranLadowania();
+        primaryStage.setFullScreen(true);
         primaryStage.show();
     }
 
-    // Metoda pomocnicza do zmiany widoku w mainLayout
     private void setView(Node viewNode, String title) {
         mainLayout.getChildren().clear();
         mainLayout.getChildren().add(viewNode);
@@ -137,7 +124,6 @@ public class PixelGwintAplikacja extends Application {
         primaryStage.setTitle("PixelGwint - " + title);
     }
     public void rozpocznijPrzejscieDoLogowania() {
-        // <<< DODAJ LINIE DIAGNOSTYCZNE >>>
         System.out.println("[DIAGNOSTYKA APLIKACJI] Metoda 'rozpocznijPrzejscieDoLogowania' ZOSTAŁA WYWOŁANA.");
 
         try {
@@ -160,7 +146,6 @@ public class PixelGwintAplikacja extends Application {
             AnchorPane rootLayout = loader.load();
             KontrolerEkranuLadowania controller = loader.getController();
             controller.setApp(this);
-            // Dla pierwszego ekranu nie używamy animacji, tylko czyścimy i dodajemy
             mainLayout.getChildren().clear();
             mainLayout.getChildren().add(rootLayout);
             primaryStage.setTitle("PixelGwint - Wczytywanie...");
@@ -270,7 +255,7 @@ public class PixelGwintAplikacja extends Application {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(PixelGwintAplikacja.class.getResource("/pixelgwint/widok/ekran-wyboru-frakcji-dla-talii.fxml"));
-            VBox viewContent = loader.load(); // Zakładając, że root to VBox
+            VBox viewContent = loader.load();
 
             KontrolerWyboruFrakcjiDlaTalii controller = loader.getController();
             controller.setApp(this);
@@ -338,23 +323,19 @@ public class PixelGwintAplikacja extends Application {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(PixelGwintAplikacja.class.getResource("/pixelgwint/widok/ekran-planszy-gry.fxml"));
-            AnchorPane viewContent = loader.load(); // Zakładając, że plansza gry to AnchorPane
+            AnchorPane viewContent = loader.load();
 
             KontrolerPlanszyGry controller = loader.getController();
             controller.setApp(this);
             controller.inicjalizujGre(gracz1, gracz2, null);
 
             setView(viewContent, "Rozgrywka");
-            // Dla planszy gry, jeśli ma stały rozmiar, można go tu ustawić,
-            // ale tryb pełnoekranowy zwykle to nadpisuje.
-            // mainLayout.setPrefSize(1920, 1080); // Jeśli chcesz konkretny rozmiar dla StackPane
         } catch (IOException e) {
             System.err.println("Nie udało się załadować planszy gry:");
             e.printStackTrace();
         }
     }
 
-    // Reszta metod (gettery, settery, main, etc.) pozostaje bez zmian
     public void setWybranaTaliaGracza1(TaliaUzytkownika talia) {
         this.wybranaTaliaGracza1 = talia;
     }
@@ -443,15 +424,9 @@ public class PixelGwintAplikacja extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(PixelGwintAplikacja.class.getResource("/pixelgwint/widok/ekran-intro.fxml"));
             StackPane viewContent = loader.load();
-
             KontrolerEkranuIntro controller = loader.getController();
             controller.setApp(this);
-
-            // <<< KLUCZOWA ZMIANA: Wywołujemy animację dopiero teraz >>>
-            // Mamy teraz pewność, że kontroler jest w pełni gotowy i ma dostęp do aplikacji.
             controller.uruchomIntro();
-
-            // Używamy setView z przejściem, aby ekran intro pojawił się płynnie
             setView(viewContent, "PixelGwint");
         } catch (IOException e) {
             System.err.println("Nie udało się załadować ekranu intro, przechodzenie awaryjnie do logowania.");
